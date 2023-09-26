@@ -1,0 +1,42 @@
+> 1.0.0:
+	* Lançamento inicial.
+
+> 1.0.1:
+	* Idioma dos comandos mudado pra pt-br.
+	* Adicionado verificador de username. (hehe)
+
+> 1.1.0:
+	* Adicionado suporte a IA através da API do Kobold.
+
+> 1.2.0:
+	* Adicionado suporte a geração de imagens pelo Stable Diffusion.
+
+> 1.3.0:
+	* A bot agora usa seu próprio executável do FFMPEG.
+	* Adicionada função de histórico de músicas tocadas.
+
+> 1.3.1:
+	* O histórico de músicas tocadas agora é um arquivo permanente localizado na pasta cache.
+
+> 1.3.2:
+	* O verificador de username agora pode ser ativado ou desativado pelo 'config.json'.
+
+> 1.4.0:
+	* A extensão 'music' agora realiza o processamento da duração e criador da música.
+	* A extensão 'music' agora mostra os primeiros 4 resultados de uma query do youtube
+	  e deixa o usuário escolher através de botões numéricos.
+
+> 1.4.1:
+	* Parâmetros desnecessários 'start_from' e 'resultado' removidos do comando /tocar.
+	* '/avisos mostrar' agora responde corretamente caso o usuário não tenha avisos.
+	* Registros duplicados removidos da database.
+
+> 1.4.2:
+	* A bot alterna seu status entre online e dnd caso ela esteja ou não tocando música.
+	* A bot verifica se está em um ambiente Windows ou Linux, e checa a disponibilidade
+	  do ffmpeg de acordo.
+
+> 1.4.3:
+	* """Re-estruturada""" do código pra deixar as coisas mais organizadas e legíveis.
+	* Vários comandos da extensão 'moderation' tiveram suas hierarquias corrigidas.
+	* A bot agora sempre sincroniza os comandos globalmente com o discord.
