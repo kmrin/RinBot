@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -11,7 +11,6 @@ from io import BytesIO
 from transformers import BlipForConditionalGeneration, BlipProcessor
 from program.checks import *
 
-# Bloco de comandos 'ImageCaption'
 class ImageCaption(commands.Cog, name='image_caption'):
     def __init__(self, bot):
         self.bot = bot

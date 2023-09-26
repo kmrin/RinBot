@@ -1,12 +1,12 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
 import logging
 
-# Formatador para o logger
+# Logger formatter
 class LoggingFormatter(logging.Formatter):
     black = "\x1b[30m"
     red = "\x1b[31m"

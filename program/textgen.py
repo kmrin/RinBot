@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -11,7 +11,7 @@ from langchain.llms.base import LLM
 from langchain.pydantic_v1 import Field
 from langchain.schema.output import GenerationChunk
 
-# Definir logger
+# Define logger
 logger = logging.getLogger(__name__)
 
 class TextGen(LLM):
@@ -22,8 +22,8 @@ class TextGen(LLM):
     temperature: Optional[float] = 1.3
     top_p: Optional[float] = 0.1
     typical_p: Optional[float] = 1
-    epsilon_cutoff: Optional[float] = 0  # Em unidades 1e-4
-    eta_cutoff: Optional[float] = 0      # Em unidades 1e-4
+    epsilon_cutoff: Optional[float] = 0  # In 1e-4 units
+    eta_cutoff: Optional[float] = 0      # In 1e-4 units
     repetition_penalty: Optional[float] = 1.18
     top_k: Optional[float] = 40
     min_length: Optional[int] = 0
@@ -101,7 +101,7 @@ class TextGen(LLM):
             url = f"{self.model_url}/api/v1/generate"
             params = self._get_parameters(stop)
             params["stopping_strings"] = params.pop(
-                "stop")  # TODO: Renomear 'stop' pra 'stopping_strings'
+                "stop")
             request = params.copy()
             request["prompt"] = prompt
             response = requests.post(url, json=request)
@@ -125,7 +125,7 @@ class TextGen(LLM):
                 "The `websocket-client` package is required for streaming.")
         params = {**self._get_parameters(stop), **kwargs}
         params["stopping_strings"] = params.pop(
-            "stop")  # TODO: Renomear 'stop' pra 'stopping_strings'
+            "stop")
         url = f"{self.model_url}/api/v1/stream"
         request = params.copy()
         request["prompt"] = prompt

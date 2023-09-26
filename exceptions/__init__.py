@@ -1,33 +1,33 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
 from discord.ext import commands
 
-# Exceções que são levantadas por checks de identidade
+# Exceptions that are raised when things go oopsie
 
-# Usuário presente na blacklist
+# User is in blacklist
 class UserBlacklisted(commands.CheckFailure):
-    def __init__(self, message="Usuário na blacklist!"):
+    def __init__(self, message="User in blacklist!"):
         self.message = message
         super().__init__(self.message)
 
-# Usuário não é da classe 'owners'
+# User is not an owner
 class UserNotOwner(commands.CheckFailure):
-    def __init__(self, message="Usuário não está na classe `owners` da RinBot!"):
+    def __init__(self, message="User not in `owners` class!"):
         self.message = message
         super().__init__(self.message)
 
-# Usuário não é da classe 'admin'
+# User is not an admin
 class UserNotAdmin(commands.CheckFailure):
-    def __init__(self, message="Usuário não está na classe `admins` da RinBot!"):
+    def __init__(self, message="User not in `admins` class!"):
         self.message = message
         super().__init__(self.message)
 
-# Comando inválido por mensagem direta
+# Invalid DM command (unused, but here just in case it get's used again, we never know)
 class NoDms(commands.CheckFailure):
-    def __init__(self, message="Esse comando não funciona nas minhas DMs amorzin <3"):
+    def __init__(self, message="This command doesn't work in my DMs love OwO"):
         self.message = message
         super().__init__(self.message)

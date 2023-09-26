@@ -3,6 +3,7 @@
 RinBot is a discord bot fully developed in Python using libraries such as `discord.py`.
 
 She was private code a while back, but I decided to publish at least a "alternative" version of her on github, to work as a starting point for future bots, or for you to just tinker with it.
+
 ## Code overview
 
 - Programmed with both Windows and Linux in mind.
@@ -89,6 +90,8 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 - Next, copy the ID of a empty / new discord text chat from your server, and paste it on the `CHANNEL_ID` value. This will make the bot behave like a "chatGPT", but on your discord server!
 - To use StableDiffusion, make sure to open the webui with the `-api` flag, or else the bot won't be able to use it
 - If StableDiffusion doesn't work, check the `url` variable inside `ai/stablediffusion.py` in line 15 and change it accordingly
+
+### NOTE: `stablediffusion.py` is configured to use "EasyNegativesV2" by default, if you don't have it, get it, insert your own default negative prompt on the code
 
 ## Ok, cool! How do I host my own instance of RinBot?
 #### It's easy:

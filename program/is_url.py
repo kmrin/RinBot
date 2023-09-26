@@ -1,12 +1,12 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
 import urllib.parse
 
-# Verifica se uma string é uma URL válida ou não
+# Checks if a string is a valid URL
 def is_url(str):
     try:
         result = urllib.parse.urlparse(str)

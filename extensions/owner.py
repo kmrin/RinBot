@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -13,120 +13,120 @@ from program.checks import *
 
 extensions_list = []
 
-# Bloco de comandos 'owner'
+# 'Owner' command block
 class Owner(commands.Cog, name='owner'):
     def __init__(self, bot):
         self.bot = bot
     
-    # Manipula as extensões da bot
+    # Manipulates bot extensions
     @commands.hybrid_command(
-        name='extensão',
-        description='Manipula as extensões individuais da RinBot')
-    @app_commands.describe(ação='A ação a ser feita')
-    @app_commands.describe(extensão='A extensão a ser manipulada')
+        name='extension',
+        description='Manipulates bot extensions')
+    @app_commands.describe(action='The action to be taken')
+    @app_commands.describe(extension='The extension about to be manipulates')
     @app_commands.choices(
-        ação=[
-            Choice(name='carregar', value=0),
-            Choice(name='descarregar', value=1),
-            Choice(name='recarregar', value=2)])
+        action=[
+            Choice(name='load', value=0),
+            Choice(name='unload', value=1),
+            Choice(name='reload', value=2)])
     @app_commands.choices(
-        extensão=extensions_list)
+        extension=extensions_list)
     @not_blacklisted()
     @is_owner()
-    async def extension(self, ctx: Context, ação: Choice[int], extensão: Choice[str] = None) -> None:
-        # Carrega extensões
-        if ação.value == 0 and extensão is not None:
+    async def extension(self, ctx: Context, action: Choice[int], extension: Choice[str] = None) -> None:
+        # Loads extensions
+        if action.value == 0 and extension is not None:
             try:
-                await self.bot.load_extension(f"extensions.{extensão.value}")
+                await self.bot.load_extension(f"extensions.{extension.value}")
             except Exception:
                 embed = discord.Embed(
-                    description=f"Não consegui carregar a extensão `{extensão.value}`.",
+                    description=f"Could not load `{extension.value}`.",
                     color=0xE02B2B)
                 await ctx.send(embed=embed)
                 return
             embed = discord.Embed(
-                description=f"Extensão `{extensão.value}` carregada com sucesso.",
+                description=f"extension `{extension.value}` loaded.",
                 color=0x9C84EF)
             await ctx.send(embed=embed)
         
-        # Descarrega extensões
-        elif ação.value == 1 and extensão is not None:
-            if extensão.value == 'owner':
+        # Unloads extensions
+        elif action.value == 1 and extension is not None:
+            if extension.value == 'owner':
                 embed = discord.Embed(
-                    description="A extensão `owner` não pode ser desligada, invés disso, resete-a.",
+                    description="The `owner` cannot be unloaded, reload it instead.",
                     color=0xE02B2B)
                 ctx.send(embed=embed)
                 return
             try:
-                await self.bot.unload_extension(f"extensions.{extensão.value}")
+                await self.bot.unload_extension(f"extensions.{extension.value}")
             except Exception:
                 embed = discord.Embed(
-                    description=f"Não consegui descarregar a extensão `{extensão.value}`.",
+                    description=f"Could not unload `{extension.value}`.",
                     color=0xE02B2B)
                 await ctx.send(embed=embed)
                 return
             embed = discord.Embed(
-                description=f"Extensão `{extensão.value}` descarregada com sucesso.",
+                description=f"extension `{extension.value}` unloaded.",
                 color=0x9C84EF)
             await ctx.send(embed=embed)
         
-        # Recarrega extensões
-        elif ação.value == 2 and extensão is not None:
+        # Reloads extensions
+        elif action.value == 2 and extension is not None:
             try:
-                await self.bot.reload_extension(f"extensions.{extensão.value}")
+                await self.bot.reload_extension(f"extensions.{extension.value}")
             except Exception:
                 embed = discord.Embed(
-                    description=f"Não consegui recarregar a extensão `{extensão.value}`.",
+                    description=f"Não consegui recarregar a extension `{extension.value}`.",
                     color=0xE02B2B)
                 await ctx.send(embed=embed)
                 return
             embed = discord.Embed(
-                description=f"Extensão `{extensão.value}` recarregada com sucesso.",
+                description=f"extension `{extension.value}` reloaded.",
                 color=0x9C84EF)
             await ctx.send(embed=embed)
         
-        # Ação / extensão inválida
+        # Invalid action / extension
         else:
             embed = discord.Embed(
-                title="Erro",
-                description=f"Ação inválida ou extensão inválida",
+                title="Error",
+                description=f"Invalid action or extension name",
                 color=0xE02B2B,)
             await ctx.send(embed=embed)
     
-    # Reseta a bot iniciando uma outra instância e matando a atual
+    # Resets the bot starting a new instance and killing this one
     @commands.hybrid_command(
         name='reset',
-        description='Reseta a RinBot')
+        description='Resets RinBot')
     @not_blacklisted()
     @is_owner()
     async def reset(self, ctx: Context) -> None:
         embed = discord.Embed(
-            title='Resetando...',
+            title='Reseting...',
             color=0xE02B2B)
         await ctx.send(embed=embed)
         rin_path = f"{os.path.realpath(os.path.dirname(__file__))}/../init.py"
         try:
             subprocess.Popen(['python', rin_path, 'reset'])
-            print(f"Resetando.")
+            print(f"Reseting.")
         except Exception as e:
-            print(f"[ERRO] Reset: {e}")
+            print(f"[ERRO] - Reset: {e}")
         await self.bot.close()
     
-    # Deliga a bot
+    # Shuts RinBot down
     @commands.hybrid_command(
-        name='desligar',
-        description='Tchau!')
+        name='shutdown',
+        description='Bye!')
     @not_blacklisted()
     @is_owner()
     async def shutdown(self, ctx: Context) -> None:
         embed = discord.Embed(
-            description="Desligando. Tchauzinho! :wave:", color=0x9C84EF)
+            description="Shutting down! ByeBye :wave:", color=0x9C84EF)
         await ctx.send(embed=embed)
         await self.bot.close()
 
 # SETUP
 async def setup(bot):
-    # Listar as extensões atuais
+    # Lists current extensions
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}"):
         if file.endswith(".py"):
             extension = file[:-3]

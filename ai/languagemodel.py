@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -13,7 +13,7 @@ from discord.ext import commands
 
 load_dotenv()
 
-CHAT_HISTORY_LINE_LIMIT = int(os.getenv("CHAT_HISTORY_LINE_LIMIT"))  # Limite de histórico
+CHAT_HISTORY_LINE_LIMIT = int(os.getenv("CHAT_HISTORY_LINE_LIMIT"))  # History limit
 
 # Stop sequences
 STOP_SEQUENCES = os.getenv("STOP_SEQUENCES")
@@ -24,12 +24,12 @@ except AttributeError:
     print("STOP_SEQUENCES não definidas no .env")
     pass
 
-# Gerador de embeds (evita código repetido, embeds são um saco)
+# Embed generator
 def embedder(msg):
     embed = discord.Embed(description=f"{msg}", color=0x9C84EF)
     return embed
 
-# Magia negra
+# Black magic
 class Chatbot:
     def __init__(self, bot):
         self.bot = bot
@@ -156,7 +156,6 @@ class Chatbot:
         memory.add_input_only(formatted_message)
         return None
 
-# Bloco de comandos 'Chatbot'
 class Chatbot(commands.Cog, name="chatbot"):
     def __init__(self, bot):
         self.bot = bot
@@ -165,7 +164,7 @@ class Chatbot(commands.Cog, name="chatbot"):
         if not os.path.exists(self.chatlog_dir):
             os.makedirs(self.chatlog_dir)
 
-    # Comanndo de conversa (serve para conversar em outros canais além do canal de IA pré-definido)
+    # Chat command (it's to chat with the AI outside of the predefined AI channel)
     @commands.command(name="chat")
     async def chat_command(self, message, message_content) -> None:
         if message.guild:

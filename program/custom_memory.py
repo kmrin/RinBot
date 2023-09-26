@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -8,14 +8,13 @@ from typing import Any, Dict, List
 from langchain.memory.chat_memory import BaseChatMemory
 from langchain.schema import BaseMessage, HumanMessage, AIMessage, SystemMessage, ChatMessage
 
-# Recebe uma mensagem base e converte em strings, representando uma conversa entre 'Humano' e 'IA'
+# Receives a base message then converts everything into individual strings representing two sides, 'Human' and 'AI'
 def get_buffer_string(
     messages: List[BaseMessage], human_prefix: str = "Human", ai_prefix: str = "AI"
 ) -> str:
     string_messages = []
     
-    # Itera sob a lista de mensagens e adiciona elas na lista de strings
-    # adicionando um prefixo
+    # Iterates through a message list and adds them to the new strings list with a prefix
     for m in messages:
         if isinstance(m, HumanMessage):
             role = human_prefix
@@ -33,11 +32,11 @@ def get_buffer_string(
             string_messages.append(f"{role}: {m.content}")
     return "\n".join(string_messages)
 
-# Cria uma janela de buffer personalizada para o chatbot
+# Creates a buffer window for the chatbot
 class CustomBufferWindowMemory(BaseChatMemory):
-    ai_prefix: str = "AI"        # Prefixo da IA
-    memory_key: str = "history"  # Chave para guardar o histórico na memória
-    k: int = 5                   # Tamanho do buffer
+    ai_prefix: str = "AI"        # AI prefix (what appears on the messages)
+    memory_key: str = "history"  # Key to store the history in memory
+    k: int = 5                   # Buffer size
 
     @property
     def buffer(self) -> List[BaseMessage]:
@@ -47,7 +46,7 @@ class CustomBufferWindowMemory(BaseChatMemory):
     def memory_variables(self) -> List[str]:
         return [self.memory_key]
 
-    # Adiciona uma entrada humana na memória
+    # Adds a human input to memory
     def add_input_only(self, input_str: str) -> None:
         self.chat_memory.messages.append(HumanMessage(content=input_str))
 

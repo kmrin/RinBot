@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -11,77 +11,76 @@ from discord import app_commands
 from program.translator import translate_to
 from program.checks import *
 
-# Bloco de comandos 'general'
+# 'general' command block
 class General(commands.Cog, name='general'):
     def __init__(self, bot):
         self.bot = bot
     
-    # Traduz uma string de uma lingua pra outra
+    # Translates a string from one language to another
     @commands.hybrid_command(
-        name='traduzir',
-        description='Traduz algo pra outra língua (por padrão traduz EN > PT-BR)',)
-    @app_commands.describe(texto='O texto a ser traduzido')
-    @app_commands.describe(de='A linguagem de entrada (EN por padrão)')
-    @app_commands.describe(para='A língua de saída (PT-BR por padrão)')
+        name='translate',
+        description='Translates something (EN -> PT-BR by default)',)
+    @app_commands.describe(text='The text to be translated')
+    @app_commands.describe(from_lang='The input language (EN by default)')
+    @app_commands.describe(to_lang='The output language (PT-BR by default)')
     @not_blacklisted()
-    async def translate_string(self, ctx: Context, texto: str = None, de: str = 'en', para: str = 'pt-br') -> None:
+    async def translate_string(self, ctx: Context, text: str = None, from_lang: str = 'en', to_lang: str = 'pt-br') -> None:
         await ctx.defer()
-        text = translate_to(texto, de, para)
+        text = translate_to(text, from_lang, to_lang)
         embed = discord.Embed(
             description=f'{text}', 
             color=0xe3a01b)
         await ctx.send(embed=embed)
     
-    # Mostra informações sobre a bot através de um Embed
+    # Show info about the bot in a embed
     @commands.hybrid_command(
-        name='inforin',
-        description='Mostra informações sobre mim')
+        name='rininfo',
+        description='Shows info about me UwU')
     @not_blacklisted()
     async def rininfo(self, ctx: Context) -> None:
         embed = discord.Embed(
-            title='Info. da RinBot',
+            title='RinBot Info',
             color=0xe3a01b)
         embed.set_thumbnail(url=self.bot.user.avatar.url)
-        embed.add_field(name='Criada em:', value='10/08/23', inline=True)
-        embed.add_field(name='Versão:', value='1.4.3', inline=True)
-        embed.add_field(name='Programadora:', value='km.rin :flag_br:', inline=True)
-        embed.add_field(name='Ver. do Python:', value=f"{platform.python_version()}", inline=True)
-        embed.set_footer(text=f"Requisitado por: {ctx.author}", icon_url=f'{ctx.author.avatar.url}')
+        embed.add_field(name='Created in:', value='10/08/23', inline=True)
+        embed.add_field(name='Version:', value='1.4.3-GitHub', inline=True)
+        embed.add_field(name='Programmer:', value='km.rin :flag_br:', inline=True)
+        embed.add_field(name='Python Version:', value=f"{platform.python_version()}", inline=True)
+        embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=f'{ctx.author.avatar.url}')
         await ctx.send(embed=embed)
     
-    # Mostra informações do servidor em que a bot está através de um Embed
+    # Shows info about the server the bot is in through an embed
     @commands.hybrid_command(
-        name='infoservidor',
-        description='Mostra informações sobre o servidor')
+        name='serverinfo',
+        description='Shows info about the current server')
     @not_blacklisted()
     async def serverinfo(self, ctx: Context) -> None:
         roles = [role.name for role in ctx.guild.roles]
         if len(roles) > 50:
             roles = roles[:50]
-            roles.append(f" >>>> Mostrando [50/{len(roles)}] cargos.")
+            roles.append(f" >>>> Showing [50/{len(roles)}] roles.")
         roles = ", ".join(roles)
         embed = discord.Embed(
-            title="**Nome do servidor:**", description=f"{ctx.guild}", color=0x9C84EF)
+            title="**Server Name:**", description=f"{ctx.guild}", color=0x9C84EF)
         if ctx.guild.icon is not None:
             embed.set_thumbnail(url=ctx.guild.icon.url)
         embed.add_field(name="ID", value=ctx.guild.id)
-        embed.add_field(name="N. de membros", value=ctx.guild.member_count)
+        embed.add_field(name="Member Count", value=ctx.guild.member_count)
         embed.add_field(
-            name="Canais de Texto/Voz", value=f"{len(ctx.guild.channels)}"
-        )
-        embed.add_field(name=f"Cargos ({len(ctx.guild.roles)})", value=roles)
-        embed.set_footer(text=f"Criado em: {ctx.guild.created_at.strftime('%d/%m/%Y')}")
+            name="Text/Voice Channels", value=f"{len(ctx.guild.channels)}")
+        embed.add_field(name=f"Roles ({len(ctx.guild.roles)})", value=roles)
+        embed.set_footer(text=f"Created in: {ctx.guild.created_at.strftime('%d/%m/%Y')}")
         await ctx.send(embed=embed)
     
-    # Ping-Pong (não, não é o jogo)
+    # Ping-Pong (no, not the game)
     @commands.hybrid_command(
         name="ping",
-        description="Verifica se eu to viva.",)
+        description="Checks if I'm alive.",)
     @not_blacklisted()
     async def ping(self, ctx: Context) -> None:
         embed = discord.Embed(
             title="🏓 Pong!",
-            description=f"Latência: {round(self.bot.latency * 1000)}ms.",
+            description=f"Latency: {round(self.bot.latency * 1000)}ms.",
             color=0x9C84EF,)
         await ctx.send(embed=embed)
 

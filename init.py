@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -13,30 +13,30 @@ from dotenv import load_dotenv
 from pathlib import Path
 from PIL import Image
 
-# Carregar arquivo de configuração base
+# Load base config file
 if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.json"):
-    sys.exit("[init.py]-[ERRO]: 'config.json' não encontrado.")
+    sys.exit("[init.py]-[Error]: 'config.json' not found.")
 else:
     with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
         config = json.load(file)
 
-# Verificar presença do ffmpeg
+# Check presence of ffmpeg
 if platform.system() == 'Windows':
     if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/ffmpeg.exe"):
-        sys.exit("[init.py]-[ERRO]: 'ffmpeg.exe' não encontrado.")
+        sys.exit("[init.py]-[Error]: 'ffmpeg.exe' not found.")
 elif platform.system() == 'Linux':
     try:
-        # Tentar executar o ffmpeg do path caso estiver no linux
+        # Try to execute ffmpeg if on linux
         result = subprocess.run(['ffmpeg', '-version'], 
                                 stdout=subprocess.PIPE, 
                                 stderr=subprocess.PIPE, 
                                 text=True)
         if result.returncode != 0:
-            sys.exit("[init.py]-[ERRO]: 'ffmpeg' não encontrado no sistema, por-favor instale-o, caso esteja instalado, verifique se está no PATH")
+            sys.exit("[init.py]-[Error]: 'ffmpeg' not found on this system, please install it, or if it is installed, check if it is available in PATH.")
     except FileNotFoundError:
-        sys.exit("[init.py]-[ERRO]: 'ffmpeg' não encontrado no sistema, por-favor instale-o, caso esteja instalado, verifique se está no PATH")
+        sys.exit("[init.py]-[Error]: 'ffmpeg' not found on this system, please install it, or if it is installed, check if it is available in PATH.")
 
-# Intenções da bot (muitas hehe c:)
+# Bot intentions (many)
 intents = discord.Intents.all()
 intents.dm_messages = True
 intents.dm_reactions = True
@@ -68,13 +68,13 @@ bot = Bot(
 bot.logger = logger
 bot.config = config
 
-# Variáveis
+# Vars
 freshstart = True
 
-# Vai usar inteligência artificial mona?
+# Will I use AI?
 use_ai = config['use_ai']
 if use_ai:
-    # Carregar variáveis de ambiente de IA
+    # Load AI environment variables
     load_dotenv()
     DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
     ENDPOINT = str(os.getenv("ENDPOINT"))
@@ -85,7 +85,7 @@ if use_ai:
     else:
         MAX_NEW_TOKENS = 300
 
-    # Configurações específicas de IA
+    # Specific AI settings
     bot.endpoint = str(ENDPOINT)
     if len(bot.endpoint.split("/api")) > 0:
         bot.endpoint = bot.endpoint.split("/api")[0]
@@ -102,7 +102,7 @@ if use_ai:
     bot.endpoint_type = "Kobold"
     bot.llm = KoboldApiLLM(endpoint=bot.endpoint, max_length=MAX_NEW_TOKENS)
 
-    # Salva personalidades de IA
+    # Saves AI characters
     def upload_character(json_file, img, tavern=False):
         json_file = json_file if type(json_file) == str else json_file.decode("utf-8")
         data = json.loads(json_file)
@@ -121,7 +121,7 @@ if use_ai:
         bot.logger.info(f'New character saved to "{characters_folder}/{outfile_name}.json".')
         return outfile_name
 
-    # Salva personalidades de IA (taverna)
+    # Saves AI characters (tavern)
     def upload_tavern_character(img, name1, name2):
         _img = Image.open(io.BytesIO(img))
         _img.getexif()
@@ -181,9 +181,9 @@ if use_ai:
         char_name = data['char_name']
         char_filename = os.path.join(characters_folder, data['char_filename'])
         shutil.copyfile(char_filename, "ai/chardata.json")
-# Nem me pergunta como esse treco ai em cima funciona, nem eu sei mais
+# Don't even ask me how this works ^
 
-# Iniciar base de dados SQL
+# Start SQL database
 async def init_db():
     async with aiosqlite.connect(
         f"{os.path.realpath(os.path.dirname(__file__))}/database/database.db"
@@ -193,20 +193,20 @@ async def init_db():
         ) as file:
             await db.executescript(file.read())
 
-# Ao ficar pronta
+# When ready
 @bot.event
 async def on_ready() -> None:
-    # Informação de logger inicial
-    bot.logger.info("--------------------------------")
-    bot.logger.info(" >   RinBot v1.4.3 (RELEASE)")
-    bot.logger.info("--------------------------------")
-    bot.logger.info(f" > Logado como {bot.user.name}")
-    bot.logger.info(f" > Versão da API: {discord.__version__}")
-    bot.logger.info(f" > Versão do Python: {platform.python_version()}")
-    bot.logger.info(f" > Rodando em: {platform.system()}-{platform.release()} ({os.name})")
-    bot.logger.info("--------------------------------")
+    # Initial logger info (splash)
+    bot.logger.info("--------------------------------------")
+    bot.logger.info(" >   RinBot v1.4.3 (GitHub release)   ")
+    bot.logger.info("--------------------------------------")
+    bot.logger.info(f" > Logged as {bot.user.name}")
+    bot.logger.info(f" > API Version: {discord.__version__}")
+    bot.logger.info(f" > Python Version: {platform.python_version()}")
+    bot.logger.info(f" > Running on: {platform.system()}-{platform.release()} ({os.name})")
+    bot.logger.info("--------------------------------------")
     
-    # Carregar extensões de IA caso for usar
+    # Load AI extensions
     if use_ai:
         bot.logger.info('Usando IA...')
         for items in bot.guild_ids:
@@ -215,36 +215,36 @@ async def on_ready() -> None:
                 guild = channel.guild
                 if isinstance(channel, discord.TextChannel):
                     channel_name = channel.name
-                    bot.logger.info(f'Canal de IA: {guild.name} | {channel_name}')
+                    bot.logger.info(f'AI Text channel: {guild.name} | {channel_name}')
                 else:
-                    bot.logger.error(f'Canal de IA {bot.channel_id} não é um canal de texto.')
+                    bot.logger.error(f'AI Text channel {bot.channel_id} is not a valid text channel, check your ID or channel settings.')
             except AttributeError:
                 bot.logger.error(
-                    'Não foi possível verificar o canal para a IA. Verifique se a ID está correta.')
+                    "Couldn't validate AI text channel, verify the ID, channel settings, and if I have the necessary permissions.")
     
-    # Presença 'disponível' padrão
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game("Disponível! ✅"))
+    # 'Available' presence as default
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game("Available! ✅"))
         
-    # Sincronizar comandos com o discord
-    bot.logger.info("Sincronizando comandos globalmente")
+    # Sync commands with discord
+    bot.logger.info("Synching commands globally")
     await bot.tree.sync()
 
-# Salvar ID das novas guildas ao entrar
+# Save new guild ID's when joining
 @bot.event
 async def on_guild_join(guild):
     config['joined_on'].append(guild.id)
     with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
         json.dump(config, file, indent=4)
-    bot.logger.info(f'Entrei na guilda de ID: {guild.id}')
+    bot.logger.info(f'Joined guild ID: {guild.id}')
 
-# Processar comandos fora dos slashes (fora de uso no momento mas ta aqui por estar)
+# Process non-slash commands (not-in-use at the moment)
 @bot.event
 async def on_message(message: discord.Message) -> None:
     if message.author == bot.user or message.author.bot:
         return
     await bot.process_commands(message)
 
-# Mostrar comandos completados no log
+# Show executed commands on the log
 @bot.event
 async def on_command_completion(context: Context) -> None:
     full_command_name = context.command.qualified_name
@@ -257,7 +257,7 @@ async def on_command_completion(context: Context) -> None:
         bot.logger.info(
             f"Comando {executed_command} executado por {context.author} (ID: {context.author.id}) nas DMs.")
 
-# O que fazer quando ocorrer um erro de comando
+# What to do when commands go no-no
 @bot.event
 async def on_command_error(context: Context, error) -> None:
     if isinstance(error, commands.CommandOnCooldown):
@@ -265,63 +265,63 @@ async def on_command_error(context: Context, error) -> None:
         hours, minutes = divmod(minutes, 60)
         hours = hours % 24
         embed = discord.Embed(
-            description=f"**Por-favor calma! >-< ** - Você pode usar esse comando de novo em {f'{round(hours)} horas' if round(hours) > 0 else ''} {f'{round(minutes)} minutos' if round(minutes) > 0 else ''} {f'{round(seconds)} segundos' if round(seconds) > 0 else ''}.",
+            description=f"**Please wait! >-< ** - You can use this command again in {f'{round(hours)} hours' if round(hours) > 0 else ''} {f'{round(minutes)} minutes' if round(minutes) > 0 else ''} {f'{round(seconds)} seconds' if round(seconds) > 0 else ''}.",
             color=0xE02B2B,)
         await context.send(embed=embed)
     elif isinstance(error, exceptions.UserBlacklisted):
         embed = discord.Embed(
-            description="Você está bloqueado(a) de usar a RinBot!", color=0xE02B2B)
+            description="You are blocked from using RinBot!", color=0xE02B2B)
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tentou executar um comando na guilda {context.guild.name} (ID: {context.guild.id}), mas está bloqueado de usar a RinBot.")
+                f"{context.author} (ID: {context.author.id}) tried running a command on guild {context.guild.name} (ID: {context.guild.id}), but they're blocked from using RinBot.")
         else:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tentou executar um comando nas minhas DMs, mas está bloqueado de me usar.")
+                f"{context.author} (ID: {context.author.id}) tried running a command on my DMs, but they're blocked from using RinBot.")
     elif isinstance(error, exceptions.UserNotOwner):
         embed = discord.Embed(
-            description="Você não está na classe `owners` da RinBot, SUS!", color=0xE02B2B)
+            description="You are not on the RinBot `owners` class, kinda SUS!", color=0xE02B2B)
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tentou executar um comando de classe `owner` {context.guild.name} (ID: {context.guild.id}), mas o usuário não faz parte da classe.")
+                f"{context.author} (ID: {context.author.id}) tried running a command of class `owner` {context.guild.name} (ID: {context.guild.id}), but they're not a part of this class")
         else:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tentou executar um comando de classe `owner` nas minhas DMs, mas o usuário não faz parte da classe.")
+                f"{context.author} (ID: {context.author.id}) tried running a command of class `owner` on my DMs, but they're not a part of this class")
     elif isinstance(error, exceptions.UserNotAdmin):
         embed = discord.Embed(
-            description="Você não está na classe `admins` da RinBot, SUS!", color=0xE02B2B)
+            description="You are not on the RinBot `admins` class, kinda SUS!", color=0xE02B2B)
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tentou executar um comando de classe `admin` {context.guild.name} (ID: {context.guild.id}), mas o usuário não faz parte da classe.")
+                f"{context.author} (ID: {context.author.id}) tried running a command of class `admin` {context.guild.name} (ID: {context.guild.id}), but they're not a part of this class")
         else:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tentou executar um comando de classe `admin` nas minhas DMs, mas o usuário não faz parte da classe.")
+                f"{context.author} (ID: {context.author.id}) tried running a command of class `admin` on my DMs, but they're not a part of this class")
     elif isinstance(error, commands.MissingPermissions):
         embed = discord.Embed(
-            description="Você não tem as permissões `"
+            description="You don't have `"
             + ", ".join(error.missing_permissions)
-            + "` necessárias para executar esse comando!",
+            + "` permissions, which are necessary to run this command!",
             color=0xE02B2B,)
         await context.send(embed=embed)
     elif isinstance(error, commands.BotMissingPermissions):
         embed = discord.Embed(
-            description="Eu não tenho as permissões `"
+            description="I don't have `"
             + ", ".join(error.missing_permissions)
-            + "` necessárias para esse comando!",
+            + "` permissions, which are necessary to run this command!",
             color=0xE02B2B,)
         await context.send(embed=embed)
     elif isinstance(error, commands.MissingRequiredArgument):
         embed = discord.Embed(
-            title="Erro!",
+            title="Error!",
             description=str(error).capitalize(),
             color=0xE02B2B,)
         await context.send(embed=embed)
     else:
         raise error
 
-# Carrega as extensões da bot
+# Loads extensions (command cogs)
 async def load_extensions() -> None:
     global use_ai
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/extensions"):
@@ -329,10 +329,10 @@ async def load_extensions() -> None:
             extension = file[:-3]
             try:
                 await bot.load_extension(f"extensions.{extension}")
-                bot.logger.info(f"Extensão carregada '{extension}'")
+                bot.logger.info(f"Extension loaded '{extension}'")
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"
-                bot.logger.error(f"Falha ao carregar extensão {extension}\n{exception}")
+                bot.logger.error(f"Error while loading extension {extension}\n{exception}")
     if use_ai:
         for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/ai"):
             if file.endswith(".py"):
@@ -341,17 +341,17 @@ async def load_extensions() -> None:
                     await bot.load_extension(f"ai.{extension}")
                     if extension == 'languagemodel':
                         bot.endpoint_connected = True
-                    bot.logger.info(f"Extensão de IA '{extension}' carregada.")
+                    bot.logger.info(f"AI extension '{extension}' loaded.")
                 except Exception as e:
                     if extension == 'languagemodel':
                         bot.endpoint_connected = False
                     exception = f"{type(e).__name__}: {e}"
-                    bot.logger.error(f"Erro na extensão de IA '{extension}': \n{exception}")
+                    bot.logger.error(f"Error on AI extension '{extension}': \n{exception}")
 
-# Aguardar 5 segundos caso estiver vindo de um reset
+# Wait 5 seconds when coming from a reset
 try:
     if sys.argv[1] == 'reset':
-        print('Vindo de um reset, aguardando fechamento da instância anterior')
+        print('Coming from a reset, waiting for previous instance to finish...')
         time.sleep(5)
 except:
     pass

@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -13,7 +13,7 @@ from program import db_manager
 # Typevar
 T = TypeVar("T")
 
-# Verifica se um usuário está na classe 'owner'
+# Checks if a user is in the 'owner' class
 def is_owner() -> Callable[[T], T]:
     async def predicate(context: commands.Context) -> bool:
         with open(
@@ -25,7 +25,7 @@ def is_owner() -> Callable[[T], T]:
         return True
     return commands.check(predicate)
 
-# Verifica se um usuário está na classe 'admins'
+# Checks if a user is in the 'admins' class
 def is_admin() -> Callable[[T], T]:
     async def predicate(context: commands.Context) -> bool:
         if not await db_manager.is_admin(context.author.id):
@@ -33,7 +33,7 @@ def is_admin() -> Callable[[T], T]:
         return True
     return commands.check(predicate)
 
-# Verifica se um usuário não está na lista negra
+# Checks if a user is not blacklisted
 def not_blacklisted() -> Callable[[T], T]:
     async def predicate(context: commands.Context) -> bool:
         if await db_manager.is_blacklisted(context.author.id):

@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -11,15 +11,14 @@ from program.translator import translate_to
 
 load_dotenv()
 
-# Definir linguagem (sempre use 'en' pfv, nem sei pq botei isso aq mas ta ai)
+# AI language (please always use 'en' I have no idea why I put this here but it's here anyway)
 AI_LANG = os.getenv("AI_LANGUAGE")
 
-# Bloco de comandos 'Listener'
 class Listener(commands.Cog, name='Listener'):
     def __init__(self, bot):
         self.bot = bot
     
-    # Verifica se a mensagem enviada possuí uma imagem / GIF
+    # Checks if the message has a image / gif attached to it
     async def has_image_attachment(self, message):
         url_pattern = re.compile(r'http[s]?://[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)', re.IGNORECASE)
         tenor_pattern = re.compile(r'https://tenor.com/view/[\w-]+')
@@ -33,7 +32,7 @@ class Listener(commands.Cog, name='Listener'):
         else:
             return False
     
-    # Ouvidão que ouve tudo ooOOOoooOoOooo
+    # Listener that listens to everything oOoooOOOOoo
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author == self.bot.user or message.content.startswith((".", "/")):
@@ -48,7 +47,7 @@ class Listener(commands.Cog, name='Listener'):
                     if not AI_LANG == 'en':
                         response = translate_to(response, 'en', AI_LANG)
                     async with message.channel.typing():
-                        await asyncio.sleep(1)  # Simular "digitando..."
+                        await asyncio.sleep(1)  # Simulate "typing... (we need to make it real boys)"
                         await message.reply(response)
             else:
                 response = await self.bot.get_cog("chatbot").chat_command(message, message.clean_content)
@@ -56,7 +55,7 @@ class Listener(commands.Cog, name='Listener'):
                     if not AI_LANG == 'en':
                         response = translate_to(response, 'en', AI_LANG)
                     async with message.channel.typing():
-                        await asyncio.sleep(1)  # Simular "digitando..."
+                        await asyncio.sleep(1)  # Simulate "typing... (we need to make it real boys)"
                         if random.random() < 0.8:
                             await message.channel.send(response)
                         else:

@@ -1,6 +1,6 @@
 """
-RinBot v1.4.3
-feita por rin
+RinBot v1.4.3 (GitHub release)
+made by rin
 """
 
 # Imports
@@ -11,25 +11,25 @@ from discord import app_commands
 from PIL import Image, PngImagePlugin
 from program.checks import *
 
-file_path = 'ai/temp/output.png'  # Saída padrão do cache da imagem gerada
-url = "http://127.0.0.1:7860"     # URL do servidor rodando o stablediffusion
+file_path = 'ai/temp/output.png'  # Default cache image path
+url = "http://127.0.0.1:7860"     # The address of the server running stable diffusion
 
 class StableDiffusion(commands.Cog, name='stablediffusion'):
     def __init__(self, bot):
         self.bot = bot
 
-    # Comando para gerar uma imagem com o stablediffusion
-    @commands.hybrid_command(name='gerarimagem', description='Gera uma imagem com o Stable Diffusion')
-    @app_commands.describe(prompt='O prompt da imagem, (best quality, masterpiece já são adicionados automaticamente)')
+    # Command to generate an image with stable diffusion
+    @commands.hybrid_command(name='generateimage', description='Generates an image with Stable Diffusion')
+    @app_commands.describe(prompt='The image prompt, (best quality, masterpiece are automatically included)')
     @not_blacklisted()
-    async def gerarimagem(self, ctx: Context, prompt: str = None) -> None:
-        await ctx.defer()  # Defer pq demora pra caceta
+    async def generateimage(self, ctx: Context, prompt: str = None) -> None:
+        await ctx.defer()  # Defer because this takes a lot of time
         try:
             response = requests.get(url)
             if response.status_code == 200:
                 payload = {
                     "prompt": f"masterpiece, best quality, {prompt}",
-                    "negative_prompt": "EasyNegativeV2",  # Inversão Textual ENv2
+                    "negative_prompt": "EasyNegativeV2",  # ENv2 textual inversion (make sure you have it)
                     "seed": -1, 
                     "steps": 28, 
                     "cfg_scale": 12,
@@ -37,42 +37,42 @@ class StableDiffusion(commands.Cog, name='stablediffusion'):
                     "height": 512, 
                     "sampler_index": "Euler"}
                 
-                # Receber resposta do servidor
+                # Receive response from server
                 response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=payload)
                 r = response.json()
                 
                 for i in r['images']:
-                    # Reconstruir imagem
+                    # Rebuilt image
                     image = Image.open(io.BytesIO(base64.b64decode(i.split(",",1)[0])))
                     png_payload = {"image": "data:image/png;base64," + i}
                     response2 = requests.post(url=f'{url}/sdapi/v1/png-info', json=png_payload)
                     pnginfo = PngImagePlugin.PngInfo()
                     pnginfo.add_text("parameters", response2.json().get("info"))
                     
-                    # Salvar imagem
+                    # Save image
                     image.save(file_path, pnginfo=pnginfo)
                     
-                    # Abrir imagem e enviar no chat
+                    # Open image and send in chat
                     with open(file_path, 'rb') as f:
                         image = discord.File(f)
                         await ctx.send(file=image)
                     
-                    # Deletar a imagem pra evitar uso de armazenamento excessivo
+                    # Delete the cached image file to save on storage
                     if os.path.exists(file_path):
                         os.remove(file_path)
             else:
                 embed = discord.Embed(
-                    description=f" ❌ Erro {response.status_code}.",
+                    description=f" ❌ Error {response.status_code}.",
                     color=0xD81313)
                 await ctx.send(embed=embed)
         except requests.ConnectionError:
             embed = discord.Embed(
-                description=f" ❌ Erro, o Stable Diffusion não está rodando.",
+                description=f" ❌ Error, Stable Diffusion is not running, or my connection to the server was blocked / is not configured correctly.",
                 color=0xD81313)
             await ctx.send(embed=embed)
         except Exception as e:
             embed = discord.Embed(
-                description=f" ❌ Erro: {e}.",
+                description=f" ❌ Error: {e}.",
                 color=0xD81313)
             await ctx.send(embed=embed)
 
