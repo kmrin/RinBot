@@ -91,7 +91,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 - To use StableDiffusion, make sure to open the webui with the `-api` flag, or else the bot won't be able to use it
 - If StableDiffusion doesn't work, check the `url` variable inside `ai/stablediffusion.py` in line 15 and change it accordingly
 
-### NOTE: `stablediffusion.py` is configured to use "EasyNegativesV2" by default, if you don't have it, get it, insert your own default negative prompt on the code
+### NOTE: `stablediffusion.py` is configured to use "EasyNegativesV2" by default, if you don't have it, get it, or insert your own default negative prompt on the code
 
 ## Ok, cool! How do I host my own instance of RinBot?
 #### It's easy:
