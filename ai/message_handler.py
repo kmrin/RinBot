@@ -1,5 +1,5 @@
 """
-RinBot v1.4.3 (GitHub release)
+RinBot v1.5.0 (GitHub release)
 made by rin
 """
 
@@ -7,7 +7,7 @@ made by rin
 import asyncio, random, re, os
 from discord.ext import commands
 from dotenv import load_dotenv
-from program.translator import translate_to
+from program.helpers import translate_to
 
 load_dotenv()
 

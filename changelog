@@ -1,2 +1,10 @@
 > 1.4.3:
-	* Initial GitHub alternative version release.
+	* Initial GitHub alternate version release.
+
+> 1.5.0:
+	* Fixed a bug where if a user without a profile picture used the /play command, the command would crash with a "AttributeError".
+	* Small utilitary funcions are now grouped together in a single file, 'helpers.py' inside the 'program' folder.
+	* Main classes related to the 'music' extension have been separated and moved into the 'music' folder inside the 'program' folder.
+	* Song histories are now located at 'program/music/cache'.
+	* 'music' extension remade.
+	* RinBot is now capable of playing songs on multiple servers simultaniously!

@@ -1,5 +1,5 @@
 """
-RinBot v1.4.3 (GitHub release)
+RinBot v1.5.0 (GitHub release)
 made by rin
 """
 
@@ -8,7 +8,7 @@ import random, aiohttp, discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
-from program.translator import translate_to
+from program.helpers import translate_to
 from program.checks import *
 
 # Heads or Tails interface

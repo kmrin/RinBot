@@ -1,11 +1,11 @@
 """
-RinBot v1.4.3 (GitHub release)
+RinBot v1.5.0 (GitHub release)
 made by rin
 """
 
 # Imports
 import io, subprocess, shutil, asyncio, json, base64, os, platform, sys, aiosqlite, exceptions, discord, time, random
-from discord.ext import commands, tasks
+from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from program.logger import logger
 from langchain.llms import KoboldApiLLM
@@ -198,7 +198,7 @@ async def init_db():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(" >   RinBot v1.4.3 (GitHub release)   ")
+    bot.logger.info(" >   RinBot v1.5.0 (GitHub release)   ")
     bot.logger.info("--------------------------------------")
     bot.logger.info(f" > Logged as {bot.user.name}")
     bot.logger.info(f" > API Version: {discord.__version__}")
