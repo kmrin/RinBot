@@ -1,5 +1,5 @@
 """
-RinBot v1.5.0 (GitHub release)
+RinBot v1.5.1 (GitHub release)
 made by rin
 """
 
@@ -198,7 +198,7 @@ async def init_db():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(" >   RinBot v1.5.0 (GitHub release)   ")
+    bot.logger.info(" >   RinBot v1.5.1 (GitHub release)   ")
     bot.logger.info("--------------------------------------")
     bot.logger.info(f" > Logged as {bot.user.name}")
     bot.logger.info(f" > API Version: {discord.__version__}")

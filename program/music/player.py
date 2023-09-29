@@ -1,5 +1,5 @@
 """
-RinBot v1.5.0 (GitHub release)
+RinBot v1.5.1 (GitHub release)
 made by rin
 """
 
@@ -46,7 +46,7 @@ class Player():
         
         # Load server specific history file
         try:
-            with open(f'cache/song_history-{self.guild_id}.json', 'r', encoding='utf-8') as f:
+            with open(f'program/music/cache/song_history-{self.guild_id}.json', 'r', encoding='utf-8') as f:
                 self.song_history = json.load(f)
         except FileNotFoundError:
             self.song_history = []
@@ -114,9 +114,9 @@ class Player():
         
         # If the user chooses a song from history
         if history_item != 0:
-            song = await self.pickFromHistory(history_item - 1)
+            song = await self.pickFromHistory(history_item)
         if isinstance(song, discord.Embed):
-            await self.ctx.send(embed=embed)
+            await self.ctx.send(embed=song)
             return
         
         # If the URL is a playlist
@@ -163,10 +163,6 @@ class Player():
                 except AttributeError:
                     embed.set_footer(text=f"Requested by: {self.ctx.author}")
                 await self.ctx.send(embed=embed)
-        
-        # Wait while the bot is playing
-        while self.client.is_playing() or self.is_paused:
-            await asyncio.sleep(1)
     
     # Checks if there are songs in queue, plays them, then disconnects when done
     async def play(self):

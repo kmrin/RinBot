@@ -1,10 +1,10 @@
 """
-RinBot v1.5.0 (GitHub release)
+RinBot v1.5.1 (GitHub release)
 made by rin
 """
 
 # Imports
-import discord
+import discord, asyncio
 from discord import app_commands
 from discord.app_commands.models import Choice
 from discord.ext import commands
@@ -70,6 +70,13 @@ class Music(commands.Cog, name='music'):
         
         # Start media processing
         await current_player.addToQueue(song, history_item=history)
+
+        # Wait while the bot is playing
+        while current_player.client.is_playing() or current_player.is_paused:
+            await asyncio.sleep(1)
+        
+        # Delete player object after playback ends
+        del players[ctx.guild.id]
 
     # Manipulates the queue
     @commands.hybrid_command(name='queue', description='Shows or manipulates the song queue')
@@ -190,7 +197,7 @@ class Music(commands.Cog, name='music'):
             
             # Show history
             if clear == 0:
-                message = current_player.showHistory(False if url == 0 else True)
+                message = await current_player.showHistory(False if url == 0 else True)
                 if not message:
                     embed = discord.Embed(
                         description = " ❌ The history is empty",
@@ -204,7 +211,7 @@ class Music(commands.Cog, name='music'):
             
             # Clear history
             elif clear.value == 1:
-                current_player.clearHistory()
+                await current_player.clearHistory()
                 embed = discord.Embed(
                     description=" ✅  History cleared!",
                     color=0x25D917)

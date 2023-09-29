@@ -8,3 +8,11 @@
 	* Song histories are now located at 'program/music/cache'.
 	* 'music' extension remade.
 	* RinBot is now capable of playing songs on multiple servers simultaniously!
+
+> 1.5.1:
+	* The bot now correctly deletes Player objects after their playback is over.
+	* Fixed a sintax error that made Players unable to read their histories.
+	* Fixed a sintax error that made so that the history selected index was decremented by 2 instead of 1.
+	* Fixed a bug where the history would return an object instead of a message.
+	* Fixed a bug where when choosing a song from history, a "never awaited" error would occurr.
+	* Fixed a sintax error where when a error occurred while selecting a song from history, a "embed" variable would try to be read instead of "song".
