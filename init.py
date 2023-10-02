@@ -3,8 +3,16 @@ RinBot v1.5.1 (GitHub release)
 made by rin
 """
 
+# Make sure cache dirs exist
+import os
+folders = ["program/music/cache", "log"]
+for folder in folders:
+    if not os.path.exists(f"{os.path.realpath(os.path.dirname(__file__))}/{folder}"):
+        os.makedirs(f"{os.path.realpath(os.path.dirname(__file__))}/{folder}")
+        print(f"[init.py]-[Info]: Created directory '{folder}'")
+
 # Imports
-import io, subprocess, shutil, asyncio, json, base64, os, platform, sys, aiosqlite, exceptions, discord, time, random
+import io, subprocess, shutil, asyncio, json, base64, platform, sys, aiosqlite, exceptions, discord, time
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from program.logger import logger

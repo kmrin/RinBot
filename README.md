@@ -95,7 +95,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 
 ## Ok, cool! How do I host my own instance of RinBot?
 #### It's easy:
-- Download this repository
+- Download the latest release or clone this repository
 - Download and install python
 - Open a command line inside RinBot's directory and run `pip install -r requirements.txt`
 - Open the `config.json` file and insert your discord bot token
