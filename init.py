@@ -230,8 +230,10 @@ async def on_ready() -> None:
                 bot.logger.error(
                     "Couldn't validate AI text channel, verify the ID, channel settings, and if I have the necessary permissions.")
     
-    # 'Available' presence as default
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game("Available! ✅"))
+    # Default status
+    await bot.change_presence(
+        activity=discord.Activity(
+            type=discord.ActivityType.listening, name='to your commands :3'))
         
     # Sync commands with discord
     bot.logger.info("Synching commands globally")
