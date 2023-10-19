@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -14,6 +14,16 @@ def is_url(str):
         return all([result.scheme, result.netloc])
     except:
         return False
+
+# Translates a string to a boolean value
+def strtobool(val):
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError("Invalid value %r" % (val,))
 
 # Translates a string from one language to another
 def translate_to(text, from_lang, to_lang):

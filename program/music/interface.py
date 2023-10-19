@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -61,3 +61,31 @@ class SearchSelector(discord.ui.View):
     async def four(self, interaction: discord.Interaction, button: discord.ui.button):
         self.player.query_selected = 4
         await interaction.response.defer()
+
+# Page switcher for long playlists (more than 20 songs)
+class PlaylistPageSwitcher(discord.ui.View):
+    def __init__(self, ctx:Context, bot:Bot, embed:discord.Embed, chunks:list, current_chunk=0):
+        super().__init__(timeout=None)
+        self.ctx = ctx
+        self.bot = bot
+        self.embed = embed
+        self.chunks = chunks
+        self.current_chunk = current_chunk
+        self.max_chunk = len(chunks) - 1
+        self.id = 'PlaylistPageSwitcher'
+        self.is_persistent = True
+    
+    @discord.ui.button(label=' ⏪  Previous page', style=discord.ButtonStyle.green, custom_id='prev')
+    async def prev(self, interaction: discord.Interaction, button: discord.ui.button):
+        await interaction.response.defer()
+        if not self.current_chunk == 0:
+            self.current_chunk -= 1
+        self.embed.description = '\n'.join(self.chunks[self.current_chunk])
+        await interaction.edit_original_response(embed=self.embed)
+    @discord.ui.button(label="Next page  ⏩ ", style=discord.ButtonStyle.green, custom_id='next')
+    async def next(self, interaction: discord.Interaction, button: discord.ui.button):
+        await interaction.response.defer()
+        if not self.current_chunk == self.max_chunk:
+            self.current_chunk += 1
+        self.embed.description = '\n'.join(self.chunks[self.current_chunk])
+        await interaction.edit_original_response(embed=self.embed)

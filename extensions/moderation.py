@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -207,7 +207,7 @@ class Moderation(commands.Cog, name='moderation'):
     
     # Deletes a number of messages from a text channel
     @commands.hybrid_command(
-        name='sensor',
+        name='censor',
         description='Deletes a number of messages from this text channel')
     
     # Check if the bot has necessary permissions
@@ -219,7 +219,7 @@ class Moderation(commands.Cog, name='moderation'):
     @is_admin()
     async def sensor(self, ctx: Context, amount: int) -> None:
         embed = discord.Embed(
-            description=f"WE'RE BEING SENSORED! {ctx.author} decided to clear {amount} messages!",
+            description=f"WE'RE BEING CENSORED! {ctx.author} decided to clear {amount} messages!",
             color=0x9C84EF)
         await ctx.send(embed=embed)
         await ctx.channel.purge(limit=amount + 1)

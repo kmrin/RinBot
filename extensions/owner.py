@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -123,6 +123,58 @@ class Owner(commands.Cog, name='owner'):
             description="Shutting down! ByeBye :wave:", color=0x9C84EF)
         await ctx.send(embed=embed)
         await self.bot.close()
+
+    # Manipulates the users in the 'owners' class
+    @commands.hybrid_command(
+        name="owners",
+        description="Manipulates the owners class")
+    @app_commands.describe(action="The action to be taken")
+    @app_commands.describe(user="The user to be manipulated")
+    @app_commands.choices(
+        action=[
+            Choice(name='add', value=0),
+            Choice(name='remove', value=1)])
+    @not_blacklisted()
+    @is_owner()
+    async def owners(self, ctx: Context, action: Choice[int], user: discord.User = None) -> None:
+        
+        # Adds someone to the owners class
+        if action.value == 0 and user is not None:
+            user_id = user.id
+            if await db_manager.is_owner(user_id):
+                embed = discord.Embed(
+                    description=f"**{user.name}** is already an owner.",
+                    color=0xE02B2B,)
+                await ctx.send(embed=embed)
+                return
+            await db_manager.add_user_to_owners(user_id)
+            embed = discord.Embed(
+                description=f"**{user.name}** was successfuly added to the owners class.",
+                color=0x9C84EF)
+            await ctx.send(embed=embed)
+        
+        # Removes someone from the owners class
+        elif action.value == 1 and user is not None:
+            user_id = user.id
+            if not await db_manager.is_owner(user_id):
+                embed = discord.Embed(
+                    description=f"**{user.name}** is not on the owners class.",
+                    color=0xE02B2B,)
+                await ctx.send(embed=embed)
+                return
+            await db_manager.remove_user_from_owners(user_id)
+            embed = discord.Embed(
+                description=f"**{user.name}** was successfuly removed from the owners class.",
+                color=0x9C84EF)
+            await ctx.send(embed=embed)
+        
+        # Invalid action / invalid user
+        else:
+            embed = discord.Embed(
+                title="Error",
+                description=f"Invalid action or user.",
+                color=0xE02B2B,)
+            await ctx.send(embed=embed)
 
 # SETUP
 async def setup(bot):

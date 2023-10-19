@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -16,11 +16,7 @@ T = TypeVar("T")
 # Checks if a user is in the 'owner' class
 def is_owner() -> Callable[[T], T]:
     async def predicate(context: commands.Context) -> bool:
-        with open(
-            f"{os.path.realpath(os.path.dirname(__file__))}/../config.json"
-        ) as file:
-            data = json.load(file)
-        if str(context.author.id) not in data["owners"]:
+        if not await db_manager.is_owner(context.author.id):
             raise UserNotOwner
         return True
     return commands.check(predicate)

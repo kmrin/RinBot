@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -84,7 +84,7 @@ class Player():
                 await self.cancelPlaylist(fromdc=True)
     
     # Does the necessary treatment of the requested song, adds it to queue, and begins playing
-    async def addToQueue(self, song, pl_item=False, history_item=0):
+    async def addToQueue(self, song, pl_item=False, history_item=0, playlist_id=0):
         
         # If it ain't a URL, do a search query
         if not is_url(song):
@@ -95,12 +95,12 @@ class Player():
                 return
             
             # Show results to user
-            query_list = [f'{i+1}. [{v["duration"]}] - {v["title"]}' for i, v
+            query_list = [f'**{i+1}.** `[{v["duration"]}]` - {v["title"]}' for i, v
                           in enumerate(song_query)]
             message = '\n'.join(query_list)
             embed = discord.Embed(
                 title=f' 🌐  Search results for `"{song}"`:',
-                description=f"```{message}```",
+                description=f"{message}",
                 color=0x25d917)
             view = SearchSelector(self.ctx, self.bot, self)
             await self.ctx.send(embed=embed, view=view)
@@ -136,6 +136,9 @@ class Player():
             
             # Process playlist song
             song = processYoutubeLink(self.playlist_data['entries'][self.playlist_index]['url'])
+        elif "playlist?" in song and playlist_id != 0:
+            temp_pl_data = processYoutubePlaylist(song)
+            song = processYoutubeLink(temp_pl_data['entries'][playlist_id - 1]['url'])
         else:
             song = processYoutubeLink(song)
         if isinstance(song, discord.Embed):
@@ -261,10 +264,10 @@ class Player():
     # Shows history
     async def showHistory(self, url=False):
         if not url:
-            history_data = [f'{index + 1}. [{item["duration"]}] - {item["title"]}' for index, item
+            history_data = [f'**{index + 1}.** `[{item["duration"]}]` - {item["title"]}' for index, item
                             in enumerate(self.song_history)]
         else:
-            history_data = [f'{index + 1}. {item["url"]}' for index, item
+            history_data = [f'**{index + 1}.** {item["url"]}' for index, item
                             in enumerate(self.song_history)]
         message = '\n'.join(history_data)
         return message

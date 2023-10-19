@@ -16,3 +16,16 @@
 	* Fixed a bug where the history would return an object instead of a message.
 	* Fixed a bug where when choosing a song from history, a "never awaited" error would occurr.
 	* Fixed a sintax error where when a error occurred while selecting a song from history, a "embed" variable would try to be read instead of "song".
+
+> 1.6.0:
+	* The bot now has a system to add / remove / clear a list of their favourite individual playlists and play them.
+	* Fixed a few failures related to embed footers breaking if a user doesn't have a pfp.
+	* 'config.json' eliminated in favor of '.env'.
+	* Lists 'joined_on', 'owners' and 'guild_ids' moved to the database.
+	* Added a "initial setup" due to the elimination of the .json file.
+	* Added command "showplaylist" that shows all songs from inside a given playlist.
+	* Added command "owners" to manipulate the owners class.
+	* Users can now play or add a single playlist song to queue using the new "/play" command option "playlist_id".
+	* Function 'formatTime' modified to accept invalid songs (private and deleted).
+	* StableDiffusion now uses a manual negative prompt, making it easier for ya'll.
+	* Fancier embeds :3

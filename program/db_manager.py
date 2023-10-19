@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -85,6 +85,82 @@ async def remove_user_from_admins(user_id: int) -> int:
         async with rows as cursor:
             result = await cursor.fetchone()
             return result[0] if result is not None else 0
+
+# Adds a user to the owners class
+async def add_user_to_owners(user_id: int) -> int:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("INSERT INTO owners(user_id) VALUES (?)", (user_id,))
+        await db.commit()
+        rows = await db.execute("SELECT COUNT(*) FROM owners")
+        async with rows as cursor:
+            result = await cursor.fetchone()
+            return result[0] if result is not None else 0
+
+# Removes a user from the owners class
+async def remove_user_from_owners(user_id: int) -> int:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("DELETE FROM owners WHERE user_id=?", (user_id,))
+        await db.commit()
+        rows = await db.execute("SELECT COUNT (*) FROM owners")
+        async with rows as cursor:
+            result = await cursor.fetchone()
+            return result[0] if result is not None else 0
+
+# Returns the list of owners
+async def get_owners() -> list:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT user_id FROM owners"
+        ) as cursor:
+            result = await cursor.fetchall()
+            return result
+
+# Checks if the user is a owner
+async def is_owner(user_id:int) -> bool:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT * FROM owners WHERE user_id=?", (user_id,)
+        ) as cursor:
+            result = await cursor.fetchone()
+            return result is not None
+
+# Adds a guild ID to the database
+async def add_guild_id(guild_id: int) -> int:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("INSERT INTO guild_id(guild_id) VALUES (?)", (guild_id,))
+        await db.commit()
+        rows = await db.execute("SELECT COUNT(*) FROM guild_ids")
+        async with rows as cursor:
+            result = await cursor.fetchone()
+            return result[0] if result is not None else 0
+
+# Returns the guild IDs from the database
+async def get_guild_ids() -> list:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT guild_id FROM guild_ids"
+        ) as cursor:
+            result = await cursor.fetchall()
+            return result
+
+# Adds the IDs of joined servers to the database
+async def add_joined_on(joined_on: str) -> str:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("INSERT INTO joined_on(joined_on) VALUES (?)", (joined_on,))
+        await db.commit()
+        rows = await db.execute("SELECT COUNT(*) FROM joined_on")
+        async with rows as cursor:
+            result = await cursor.fetchone()
+            return result[0] if result is not None else 0
+
+# Returns the IDs of all joined servers from the database
+async def get_joined_ids() -> list:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT joined_on FROM joined_on"
+        ) as cursor:
+            result = await cursor.fetchall()
+            return result
 
 # Adds a warning to a user
 async def add_warn(user_id: int, server_id: int, moderator_id: int, reason: str) -> int:

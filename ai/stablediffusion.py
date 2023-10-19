@@ -1,5 +1,5 @@
 """
-RinBot v1.5.1 (GitHub release)
+RinBot v1.6.0 (GitHub release)
 made by rin
 """
 
@@ -10,9 +10,15 @@ from discord.ext.commands import Context
 from discord import app_commands
 from PIL import Image, PngImagePlugin
 from program.checks import *
+from dotenv import load_dotenv
 
-file_path = 'ai/temp/output.png'  # Default cache image path
-url = "http://127.0.0.1:7860"     # The address of the server running stable diffusion
+# Carregar variáveis de ambiente
+load_dotenv()
+file_path = os.getenv('STABLE_DIFFUSION_CACHE_DIR') # Default cache image output
+url = os.getenv('STABLE_DIFFUSION_ENDPOINT')        # URL of the server running stablediffusion
+
+# Negative prompt (what you don't want in your image)
+negative_prompt = "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name"
 
 class StableDiffusion(commands.Cog, name='stablediffusion'):
     def __init__(self, bot):
@@ -29,7 +35,7 @@ class StableDiffusion(commands.Cog, name='stablediffusion'):
             if response.status_code == 200:
                 payload = {
                     "prompt": f"masterpiece, best quality, {prompt}",
-                    "negative_prompt": "EasyNegativeV2",  # ENv2 textual inversion (make sure you have it)
+                    "negative_prompt": negative_prompt,
                     "seed": -1, 
                     "steps": 28, 
                     "cfg_scale": 12,
