@@ -22,15 +22,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 
 It looks complicated, but it's easy to understand. RinBot has a "class" system composed of 3 classes, those are: **"Owners", "Admins", "Blacklisted"**.
 
-The **"owners"** class are the ones to have absolute full control of the entire bot. They can reset it, shut it down, manipulate extensions, add/remove users from the admin class, and of course, they can use any commands. Unlike admins and blacklisted, the users inside the owners class are not defined inside the SQL database, but on the `config.json` file located on the root folder of the bot, on the `owners` list. To add a user to the owners class, simply grab their discord user ID *(you can google that if you don't know how to do it)* and insert it on the list, as a string.
-
-#### For example:
-
-```json
-  "owners": [
-      "1234567890",
-      "0987654321"
-   ]
+The **"owners"** class are the ones to have absolute full control of the entire bot. They can reset it, shut it down, manipulate extensions, add/remove users from the admin class, and of course, they can use any commands. As soon as you run the `init.py` file, and it creates a fresh database, you will be prompted to add your discord ID to be the set as the owner of the bot.
 ```
 
 The **"admins"** class is meant for administrators / moderators of the server the bot is on. It provides access to commands of the "moderation" command cog, where they can blacklist users, manipulate warnings and use the `/sensor` command. To add / remove users from this class, a user in the "owners" class needs to use the `/admins` command. The data for the admins class is stored on the bot's SQL database.
@@ -61,6 +53,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/extension`| Manipulates (loads / unloads / reloads) command cogs (extensions) |
 | `/reset` | Starts a new instance of the bot by executing the `init.py` script using the subprocess library, and then killing the original instance |
 | `/shutdown` | Shuts the bot down. |
+| `/owners` | Manipulates (adds / removes) users from the owners class |
 
 #### Fun Cog
 | Command | Description |
@@ -77,6 +70,8 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/history` | Allows you to view or manipulate the song history (stores the last 50 played songs) |
 | `/cancelplaylist` | Stops the current playlist from continuing |
 | `/showcontrols` | Shows the multimedia control buttons (useful if the original ones are too far up on the text channel, that's why I made it :p) |
+| `/showplaylist` | Shows a list of songs from a given playlist |
+| `/playlists` | Manipulates (adds / removes / clears) your individual list of favourite playlists |
 
 #### StableDiffusion Cog
 | Command | Description |
@@ -91,13 +86,9 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 - To use StableDiffusion, make sure to open the webui with the `-api` flag, or else the bot won't be able to use it
 - If StableDiffusion doesn't work, check the `url` variable inside `ai/stablediffusion.py` in line 15 and change it accordingly
 
-### NOTE: `stablediffusion.py` is configured to use "EasyNegativesV2" by default, if you don't have it, get it, or insert your own default negative prompt on the code
-
 ## Ok, cool! How do I host my own instance of RinBot?
 #### It's easy:
 - Download the latest release or clone this repository
 - Download and install python
 - Open a command line inside RinBot's directory and run `pip install -r requirements.txt`
-- Open the `config.json` file and insert your discord bot token
-- On the same file, add your discord user ID to the `owners` list as shown above in this readme
 - Run the `init.py` file
