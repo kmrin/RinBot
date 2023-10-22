@@ -13,20 +13,29 @@ for folder in folders:
 
 # Imports
 import io, subprocess, shutil, asyncio, json, base64, platform, sys, aiosqlite, exceptions, discord, time
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 from program.logger import logger
+from program import db_manager
 from langchain.llms import KoboldApiLLM
 from dotenv import load_dotenv
 from pathlib import Path
 from PIL import Image
+from program.helpers import strtobool
 
-# Load base config file
-if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.json"):
-    sys.exit("[init.py]-[Error]: 'config.json' not found.")
-else:
-    with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
-        config = json.load(file)
+# Load env
+load_dotenv()
+DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+YOUR_BALLS_WILL_EXPLODE_TARGET = os.getenv('YOUR_BALLS_WILL_EXPLODE_TARGET')
+USE_AI = strtobool(os.getenv('USE_AI'))
+AI_CHAR = os.getenv('AI_CHAR')
+ENDPOINT = os.getenv('ENDPOINT')
+CHANNEL_ID = os.getenv('CHANNEL_ID')
+CHAT_HISTORY_LINE_LIMIT = os.getenv('CHAT_HISTORY_LINE_LIMIT')
+STOP_SEQUENCES = os.getenv('STOP_SEQUENCES')
+MAX_NEW_TOKENS = os.getenv('MAX_NEW_TOKENS')
+AI_LANGUAGE = os.getenv('AI_LANGUAGE')
+BOT_PREFIX = os.getenv('BOT_PREFIX')
 
 # Check presence of ffmpeg
 if platform.system() == 'Windows':
@@ -70,18 +79,16 @@ intents.bans = True
 
 # Bot
 bot = Bot(
-    command_prefix=commands.when_mentioned_or(config["prefix"]),
+    command_prefix=commands.when_mentioned_or(BOT_PREFIX),
     intents=intents,
     help_command=None,)
 bot.logger = logger
-bot.config = config
 
 # Vars
 freshstart = True
 
 # Will I use AI?
-use_ai = config['use_ai']
-if use_ai:
+if USE_AI:
     # Load AI environment variables
     load_dotenv()
     DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
@@ -103,7 +110,7 @@ if use_ai:
     bot.num_lines_to_keep = int(CHAT_HISTORY_LINE_LIMIT)
     bot.guild_ids = [int(x) for x in CHANNEL_ID.split(",")]
     bot.debug = True
-    bot.char_name = config['ai_char']
+    bot.char_name = AI_CHAR
     characters_folder = "ai/Characters"
     cards_folder = "ai/Cards"
     characters = {}
@@ -185,7 +192,7 @@ if use_ai:
         with open('ai/chardata.json', encoding='utf-8') as read_file:
             character_data = json.load(read_file)
     else:
-        data = characters[config['ai_char']]
+        data = characters[AI_CHAR]
         char_name = data['char_name']
         char_filename = os.path.join(characters_folder, data['char_filename'])
         shutil.copyfile(char_filename, "ai/chardata.json")
@@ -201,6 +208,24 @@ async def init_db():
         ) as file:
             await db.executescript(file.read())
 
+# Checks if the bot has someone on the 'owners' class
+async def checkOwners():
+    owners = await db_manager.get_owners()
+    if len(owners) == 0:
+        owner_valid = False
+        bot.logger.warning('Fresh database, first start detected, Welcome!')
+        bot.logger.info('Please copy and paste your discord user ID so we can add you as a bot owner.')
+        while not owner_valid:
+            fresh_owner_id:str = input('Your ID: ')
+            owner_valid = fresh_owner_id.isnumeric()
+            if owner_valid:
+                await db_manager.add_user_to_owners(fresh_owner_id)
+                bot.logger.info("Thanks! You've been added to the 'owners' class, have fun! :D")
+            else:
+                bot.logger.error('Invalid ID. Make sure it only contains numbers.')
+    else:
+        bot.logger.info('Owners class filled, proceeding.')
+
 # When ready
 @bot.event
 async def on_ready() -> None:
@@ -215,7 +240,7 @@ async def on_ready() -> None:
     bot.logger.info("--------------------------------------")
     
     # Load AI extensions
-    if use_ai:
+    if USE_AI:
         bot.logger.info('Usando IA...')
         for items in bot.guild_ids:
             try:
@@ -242,12 +267,11 @@ async def on_ready() -> None:
 # Save new guild ID's when joining
 @bot.event
 async def on_guild_join(guild):
-    config['joined_on'].append(guild.id)
-    with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
-        json.dump(config, file, indent=4)
+    asyncio.run(db_manager.add_guild_id(int(guild.id)))
+    asyncio.run(db_manager.add_joined_on(str(guild.id)))
     bot.logger.info(f'Joined guild ID: {guild.id}')
 
-# Process non-slash commands (not-in-use at the moment)
+# Processes standard message commands (not-in-use at the moment)
 @bot.event
 async def on_message(message: discord.Message) -> None:
     if message.author == bot.user or message.author.bot:
@@ -333,7 +357,7 @@ async def on_command_error(context: Context, error) -> None:
 
 # Loads extensions (command cogs)
 async def load_extensions() -> None:
-    global use_ai
+    global USE_AI
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/extensions"):
         if file.endswith(".py"):
             extension = file[:-3]
@@ -343,7 +367,7 @@ async def load_extensions() -> None:
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"
                 bot.logger.error(f"Error while loading extension {extension}\n{exception}")
-    if use_ai:
+    if USE_AI:
         for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/ai"):
             if file.endswith(".py"):
                 extension = file[:-3]
@@ -368,5 +392,6 @@ except:
 
 # RUN
 asyncio.run(init_db())
+asyncio.run(checkOwners())
 asyncio.run(load_extensions())
-bot.run(config["token"])
+bot.run(DISCORD_BOT_TOKEN)
