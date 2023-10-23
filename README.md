@@ -14,7 +14,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 - User blacklisting to prevent undesired users to use the bot.
 - "Warning" system, which will be integrated with the blacklist in the future.
 - SQL database to store class information.
-- Server moderation tools such as the command `/sensor` that clears a certain amount of messages in a text chat.
+- Server moderation tools such as the command `/censor` that clears a certain amount of messages in a text chat.
 - YouTube music playback with search queries and support for playlists.
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
 
@@ -41,7 +41,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 #### Moderation Cog
 | Command | Description |
 | - | - |
-| `/sensor`| Deletes a specified number of messages from the text channel it was typed in |
+| `/censor`| Deletes a specified number of messages from the text channel it was typed in |
 | `/admins` | Manipulates (adds / removes) users from the admins class |
 | `/blacklist` | Manipulates (adds / removes / shows) users from the blacklisted class |
 | `/warning` | Manipulates (adds / removes / shows) user warnings |
