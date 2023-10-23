@@ -27,12 +27,9 @@ class SongQueue:
 
     # Shows the current songs on the queue
     def show(self, url=False):
-        if not url:
-            queue_data = [f'{i + 1}. [{s["duration"]}] - {s["title"]}' for i, s 
-                          in enumerate(self.playqueue)]
-        else:
-            queue_data = [f'{i + 1}. [{s["url"]}]' for i, s 
-                          in enumerate(self.playqueue)]
+        queue_data = [f'**{i + 1}.** `[{s["duration"]}]` - {s["title"]}'
+                        if not url else f'**{i + 1}.** [{s["url"]}]'
+                        for i, s in enumerate(self.playqueue)]
         message = '\n'.join(queue_data)
         return message
 

@@ -263,12 +263,9 @@ class Player():
     
     # Shows history
     async def showHistory(self, url=False):
-        if not url:
-            history_data = [f'**{index + 1}.** `[{item["duration"]}]` - {item["title"]}' for index, item
-                            in enumerate(self.song_history)]
-        else:
-            history_data = [f'**{index + 1}.** {item["url"]}' for index, item
-                            in enumerate(self.song_history)]
+        history_data = [f'**{index + 1}.** `[{item["duration"]}]` - {item["title"]}'
+                        if not url else f'**{index + 1}.** {item["url"]}'
+                        for index, item in enumerate(self.song_history)]
         message = '\n'.join(history_data)
         return message
     

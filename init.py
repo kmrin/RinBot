@@ -267,8 +267,8 @@ async def on_ready() -> None:
 # Save new guild ID's when joining
 @bot.event
 async def on_guild_join(guild):
-    asyncio.run(db_manager.add_guild_id(int(guild.id)))
-    asyncio.run(db_manager.add_joined_on(str(guild.id)))
+    await db_manager.add_guild_id(int(guild.id))
+    await db_manager.add_joined_on(str(guild.id))
     bot.logger.info(f'Joined guild ID: {guild.id}')
 
 # Processes standard message commands (not-in-use at the moment)

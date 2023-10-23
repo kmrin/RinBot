@@ -24,12 +24,9 @@ def readHistories():
 # Return a history
 def showHistory(id, url=False):
     readHistories()
-    if not url:
-        history_data = [f'{index + 1}. [{item["duration"]}] - {item["title"]}' for index, item
-                        in enumerate(histories[id])]
-    else:
-        history_data = [f'{index + 1}. {item["url"]}' for index, item
-                        in enumerate(histories[id])]
+    history_data = [f'**{index + 1}.** `[{item["duration"]}]` - {item["title"]}'
+                    if not url else f'**{index + 1}.** {item["url"]}'
+                    for index, item in enumerate(histories[id])]
     message = '\n'.join(history_data)
     return message
 

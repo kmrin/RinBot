@@ -98,9 +98,9 @@ class Fun(commands.Cog, name='fun'):
     @commands.hybrid_command(
         name='fact',
         description='Shows a random fact')
-    @app_commands.describe(idioma='Translate the fact to a specific language')
+    @app_commands.describe(language='Translate the fact to a specific language')
     @not_blacklisted()
-    async def randomfact(self, ctx: Context, idioma='en') -> None:
+    async def randomfact(self, ctx: Context, language='en') -> None:
         await ctx.defer()
         async with aiohttp.ClientSession() as session:
             async with session.get(
@@ -109,8 +109,8 @@ class Fun(commands.Cog, name='fun'):
                 if request.status == 200:
                     data = await request.json()
                     text = data["text"]
-                    if not idioma == 'en':
-                        text = translate_to(data["text"], from_lang='en', to_lang=idioma)
+                    if not language == 'en':
+                        text = translate_to(data["text"], from_lang='en', to_lang=language)
                     embed = discord.Embed(description=text, color=0xD75BF4)
                 else:
                     embed = discord.Embed(

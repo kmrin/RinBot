@@ -127,7 +127,7 @@ async def is_owner(user_id:int) -> bool:
 # Adds a guild ID to the database
 async def add_guild_id(guild_id: int) -> int:
     async with aiosqlite.connect(DATABASE_PATH) as db:
-        await db.execute("INSERT INTO guild_id(guild_id) VALUES (?)", (guild_id,))
+        await db.execute("INSERT INTO guild_ids(guild_id) VALUES (?)", (guild_id,))
         await db.commit()
         rows = await db.execute("SELECT COUNT(*) FROM guild_ids")
         async with rows as cursor:

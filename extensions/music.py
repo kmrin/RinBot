@@ -134,7 +134,7 @@ class Music(commands.Cog, name='music'):
                 else:
                     embed = discord.Embed(
                     title=" 📋  Current queue:",
-                    description=f"```{message}```",
+                    description=f"{message}",
                     color=0x25D917)
                 await ctx.send(embed=embed)
             
@@ -204,7 +204,7 @@ class Music(commands.Cog, name='music'):
                 else:
                     embed = discord.Embed(
                         title=" 🕒  History:",
-                        description=f"```{message}```",
+                        description=f"{message}",
                         color=0x25D917)
                 await ctx.send(embed=embed)
             
@@ -230,7 +230,7 @@ class Music(commands.Cog, name='music'):
                 else:
                     embed = discord.Embed(
                         title=" 🕒  History:",
-                        description=f"```{message}```",
+                        description=f"{message}",
                         color=0x25D917)
                 await ctx.send(embed=embed)
             
