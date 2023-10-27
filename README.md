@@ -90,4 +90,5 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 - Download the latest release or clone this repository
 - Download and install python
 - Open a command line inside RinBot's directory and run `pip install -r requirements.txt`
+- Add your discord bot token to the `.env` file
 - Run the `init.py` file
