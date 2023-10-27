@@ -79,11 +79,10 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 
 ## AI (Kobold and StableDiffusion)
 #### To integrate RinBot with your running instance of Kobold / StableDiffusion or both, follow these steps:
-- Open `config.json` and set the `use_ai` variable to `true` (this will make the bot load the necessary ai extensions located inside the `ai` folder)
-- Open `.env` and place your discord bot token, next, change the `ENDPOINT` value to whatever URL:PORT you're using to access Kobold, the one already present is the default and should probably work if you're running the language model localy
+- Open `.env` and set the `use_ai` variable to `True` (this will make the bot load the necessary ai extensions located inside the `ai` folder)
+- Still inside `.env`, change the `ENDPOINT` value to whatever URL:PORT you're using to access Kobold, the one already present is the default and should probably work if you're running the language model localy, same thing goes for stablediffusion, through the `STABLE_DIFFUSION_ENDPOINT` value.
 - Next, copy the ID of a empty / new discord text chat from your server, and paste it on the `CHANNEL_ID` value. This will make the bot behave like a "chatGPT", but on your discord server!
 - To use StableDiffusion, make sure to open the webui with the `-api` flag, or else the bot won't be able to use it
-- If StableDiffusion doesn't work, check the `url` variable inside `ai/stablediffusion.py` in line 15 and change it accordingly
 
 ## Ok, cool! How do I host my own instance of RinBot?
 #### It's easy:
