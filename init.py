@@ -232,7 +232,7 @@ async def checkOwners():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(" >   RinBot v1.6.0 (GitHub release)   ")
+    bot.logger.info(" >   RinBot v1.7.0 (GitHub release)   ")
     bot.logger.info("--------------------------------------")
     bot.logger.info(f" > Logged as {bot.user.name}")
     bot.logger.info(f" > API Version: {discord.__version__}")
