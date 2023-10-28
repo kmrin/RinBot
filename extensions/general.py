@@ -45,6 +45,7 @@ class General(commands.Cog, name='general'):
         embed.add_field(name='Created in:', value='10/08/23', inline=True)
         embed.add_field(name='Version:', value='1.6.0-GitHub', inline=True)
         embed.add_field(name='Programmer:', value='km.rin :flag_br:', inline=True)
+        embed.add_field(name='Collaborator:', value='Nyarkll :flag_br:', inline=True)
         embed.add_field(name='Python Version:', value=f"{platform.python_version()}", inline=True)
         embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=f'{ctx.author.avatar.url}')
         await ctx.send(embed=embed)
