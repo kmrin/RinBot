@@ -1,5 +1,5 @@
 """
-RinBot v1.6.0 (GitHub release)
+RinBot v1.7.0 (GitHub release)
 made by rin
 """
 
@@ -36,6 +36,7 @@ STOP_SEQUENCES = os.getenv('STOP_SEQUENCES')
 MAX_NEW_TOKENS = os.getenv('MAX_NEW_TOKENS')
 AI_LANGUAGE = os.getenv('AI_LANGUAGE')
 BOT_PREFIX = os.getenv('BOT_PREFIX')
+WELCOME_CHANNEL_ID = os.getenv('WELCOME_CHANNEL_ID')
 
 # Check presence of ffmpeg
 if platform.system() == 'Windows':
@@ -263,6 +264,22 @@ async def on_ready() -> None:
     # Sync commands with discord
     bot.logger.info("Synching commands globally")
     await bot.tree.sync()
+
+# Member welcome
+@bot.event
+async def on_member_join(member:discord.Member):
+    if WELCOME_CHANNEL_ID.isnumeric():
+        channel = bot.get_channel(int(WELCOME_CHANNEL_ID))
+        if channel:
+            embed = discord.Embed(
+                title=' :star:  Alguém chegou!',
+                description=f'Bem-vindo(a) à {member.guild.name}, {member.mention}!',
+                color=0xf5be0a)
+            try:
+                embed.set_thumbnail(url=member.avatar.url)
+            except AttributeError:
+                pass
+            await channel.send(embed=embed)
 
 # Save new guild ID's when joining
 @bot.event

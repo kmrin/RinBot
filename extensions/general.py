@@ -1,5 +1,5 @@
 """
-RinBot v1.6.0 (GitHub release)
+RinBot v1.7.0 (GitHub release)
 made by rin
 """
 
@@ -43,7 +43,7 @@ class General(commands.Cog, name='general'):
             color=0xe3a01b)
         embed.set_thumbnail(url=self.bot.user.avatar.url)
         embed.add_field(name='Created in:', value='10/08/23', inline=True)
-        embed.add_field(name='Version:', value='1.6.0-GitHub', inline=True)
+        embed.add_field(name='Version:', value='1.7.0-GitHub', inline=True)
         embed.add_field(name='Programmer:', value='km.rin :flag_br:', inline=True)
         embed.add_field(name='Collaborator:', value='Nyarkll :flag_br:', inline=True)
         embed.add_field(name='Python Version:', value=f"{platform.python_version()}", inline=True)

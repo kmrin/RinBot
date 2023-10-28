@@ -29,3 +29,9 @@
 	* Function 'formatTime' modified to accept invalid songs (private and deleted).
 	* StableDiffusion now uses a manual negative prompt, making it easier for ya'll.
 	* Fancier embeds :3
+
+> 1.7.0:
+	* Added moderation commands: "/nickname", "/kick" and "/ban"
+	* The audio playback bitrate can now be set under ".env" (128kbps by default)
+	* Users that hit 6 warnings will be automatically kicked from the server, you can modify this limit by changing it's value under ".env" > "WARNING_BAN_LIMIT", or disable this behaviour entirely by changing the value to "False".
+	* RinBot now welcomes users who join your server through a specific text channel with a given ID defined under ".env" > "WELCOME_CHANNEL_ID", this is disabled by default.

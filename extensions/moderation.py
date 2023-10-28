@@ -1,21 +1,26 @@
 """
-RinBot v1.6.0 (GitHub release)
+RinBot v1.7.0 (GitHub release)
 made by rin
 """
 
 # Imports
-import discord
+import discord, os
 from discord import app_commands
 from discord.app_commands.models import Choice
 from discord.ext import commands
-from discord.ext.commands import Context
+from discord.ext.commands import Bot, Context
 from program.checks import *
 from program import db_manager
+from dotenv import load_dotenv
+
+# Carregar configurações
+load_dotenv()
+WARNING_BAN_LIMIT = os.getenv('WARNING_BAN_LIMIT')
 
 # 'moderation' command cog
 class Moderation(commands.Cog, name='moderation'):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot:Bot = bot
     
     # Manupulates the admins class
     @commands.hybrid_command(
@@ -186,6 +191,14 @@ class Moderation(commands.Cog, name='moderation'):
             except:
                 await ctx.send(
                     f"{member.mention}, You were warned by **{ctx.author}**!\nReason: {warn}")
+            warnings_list = await db_manager.get_warnings(user.id, ctx.guild.id)
+            if WARNING_BAN_LIMIT.isnumeric():
+                if len(warnings_list) >= int(WARNING_BAN_LIMIT):
+                    await member.kick(reason=f'Limite de avisos atingido: {WARNING_BAN_LIMIT}.')
+                    embed = discord.Embed(
+                        description=f"{user.global_name} kickado(a) do servidor por excesso de avisos.",
+                        color=0x25D917)
+                    await ctx.send(embed=embed)
         
         # Removes a warning from a user
         elif action.value == 2 and user is not None and warn_id is not None:
@@ -213,7 +226,6 @@ class Moderation(commands.Cog, name='moderation'):
     # Check if the bot has necessary permissions
     @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    
     @app_commands.describe(amount="The number of messages to be deleted.")
     @not_blacklisted()
     @is_admin()
@@ -231,6 +243,106 @@ class Moderation(commands.Cog, name='moderation'):
             description=f"You cleared **{amount}** messages from **{ctx.channel.name}** in **{ctx.guild.name}**!",
             color=0x9C84EF)
         await ctx.author.send(embed=embed)
+
+    # Changes a member's nickname
+    @commands.hybrid_command(
+        name='nickname',
+        description="Changes someone's nickname on the server")
+    @app_commands.describe(user='The user')
+    @app_commands.describe(nick='The new nickname')
+    @not_blacklisted()
+    @is_admin()
+    async def nickname(self, ctx:Context, user:discord.Member=None, nick:str=None) -> None:
+        if not nick or not user:
+            embed = discord.Embed(
+                description = " ❌ Check your arguments.",
+                color=0xd91313)
+            await ctx.send(embed=embed)
+        else:
+            try:
+                await user.edit(nick=nick)
+                embed = discord.Embed(
+                    description=f" ✅  {user.mention}'s new nickname: {nick}",
+                    color=0x25D917)
+                await ctx.send(embed=embed)
+            except discord.Forbidden:
+                embed = discord.Embed(
+                    description = " ❌ No permissions.",
+                    color=0xd91313)
+                await ctx.send(embed=embed)
+            except discord.HTTPException:
+                embed = discord.Embed(
+                    description = " ❌ HTTP API Error :(",
+                    color=0xd91313)
+                await ctx.send(embed=embed)
+
+    # Kicks someone from the server
+    @commands.hybrid_command(
+        name='kick',
+        description='Kicks someone from the server')
+    @app_commands.describe(user='The user')
+    @app_commands.describe(reason='Should I explain?')
+    @not_blacklisted()
+    @is_admin()
+    async def kick(self, ctx:Context, user:discord.Member=None, reason:str=None) -> None:
+        if not user:
+            embed = discord.Embed(
+                description = " ❌ Check your arguments.",
+                color=0xd91313)
+            await ctx.send(embed=embed)
+        else:
+            try:
+                await user.kick(reason='Not specified' if not reason else reason)
+                embed = discord.Embed(
+                    description=f"{user.global_name} was kicked."
+                                if not reason else
+                                f"{user.global_name} was kicked, reason: {reason}",
+                    color=0x25D917)
+                await ctx.send(embed=embed)
+            except discord.Forbidden:
+                embed = discord.Embed(
+                    description = " ❌ No permissions.",
+                    color=0xd91313)
+                await ctx.send(embed=embed)
+            except discord.HTTPException:
+                embed = discord.Embed(
+                    description = " ❌ HTTP API Error :(",
+                    color=0xd91313)
+                await ctx.send(embed=embed)
+
+    # Bans someone from the server
+    @commands.hybrid_command(
+        name='ban',
+        description='Bans someone from the server')
+    @app_commands.describe(user='The user to be banned')
+    @app_commands.describe(reason='Should I explain?')
+    @not_blacklisted()
+    @is_admin()
+    async def ban(self, ctx:Context, user:discord.Member=None, reason:str=None) -> None:
+        if not user:
+            embed = discord.Embed(
+                description = " ❌ Check your arguments.",
+                color=0xd91313)
+            await ctx.send(embed=embed)
+        else:
+            try:
+                await user.ban(reason='Not specified.' if not reason else reason)
+                embed = discord.Embed(
+                    description=f"{user.global_name} was banned."
+                                if not reason else
+                                f"{user.global_name} was banned, reason: {reason}",
+                    color=0x25D917)
+                await ctx.send(embed=embed)
+            except discord.Forbidden:
+                embed = discord.Embed(
+                    description = " ❌ No permissions.",
+                    color=0xd91313)
+                await ctx.send(embed=embed)
+            except discord.HTTPException:
+                embed = discord.Embed(
+                    description = " ❌ HTTP API Error :(",
+                    color=0xd91313)
+                await ctx.send(embed=embed)
 
 # SETUP
 async def setup(bot):

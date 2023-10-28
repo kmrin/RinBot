@@ -1,11 +1,16 @@
 """
-RinBot v1.6.0 (GitHub release)
+RinBot v1.7.0 (GitHub release)
 made by rin
 """
 
 # Imports
-import yt_dlp, platform, discord, urllib.parse, re
+import yt_dlp, platform, discord, urllib.parse, re, os
 from program.helpers import removeListDuplicates, formatTime
+from dotenv import load_dotenv
+
+# Load bitrate settings
+load_dotenv()
+bitrate = os.getenv('AUDIO_BITRATE')
 
 # Youtube-DL and FFMPEG settings
 ydl_opts = {
@@ -15,7 +20,7 @@ ydl_opts = {
     'nocheckcertificate': True,
     'ignoreerrors': True}
 ffmpeg_opts = {
-    'options': '-vn -b:a 128k',  # 128kbps bitrate
+    'options': f'-vn -b:a {bitrate}k',
     'executable':
         
         # Use included ffmpeg executable if on windows
