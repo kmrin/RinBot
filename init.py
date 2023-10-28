@@ -272,8 +272,8 @@ async def on_member_join(member:discord.Member):
         channel = bot.get_channel(int(WELCOME_CHANNEL_ID))
         if channel:
             embed = discord.Embed(
-                title=' :star:  Alguém chegou!',
-                description=f'Bem-vindo(a) à {member.guild.name}, {member.mention}!',
+                title=' :star:  New member!',
+                description=f'Welcome to {member.guild.name}, {member.mention}!',
                 color=0xf5be0a)
             try:
                 embed.set_thumbnail(url=member.avatar.url)
