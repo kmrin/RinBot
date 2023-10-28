@@ -47,6 +47,9 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/admins` | Manipulates (adds / removes) users from the admins class |
 | `/blacklist` | Manipulates (adds / removes / shows) users from the blacklisted class |
 | `/warning` | Manipulates (adds / removes / shows) user warnings |
+| `/nickname` | Changes the server nickname of a member |
+| `/kick` | Kicks a server member |
+| `/ban` | Bans a server member |
 
 #### Owner Cog
 | Command | Description |
