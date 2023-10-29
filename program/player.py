@@ -1,14 +1,14 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
 # Imports
 import discord, json, asyncio, os, random
 from discord.ext.commands import Bot, Context
-from program.music.interface import SearchSelector, MediaControls
-from program.music.song_queue import SongQueue
-from program.music.youtube import processYoutubeLink, processYoutubePlaylist, processYoutubeSearch
+from program.interface import SearchSelector, MediaControls
+from program.song_queue import SongQueue
+from program.youtube import processYoutubeLink, processYoutubePlaylist, processYoutubeSearch
 from program.helpers import is_url
 
 # Active voice channel tracking
@@ -16,13 +16,13 @@ voice_channels = {}
 
 # Load histories
 histories = {}
-for file in os.listdir('program/music/cache/'):
-    if file.endswith('.json'):
+for file in os.listdir('cache/histories/'):
+    if file.endswith('history.json'):
         try:
-            id = int(file.split('-')[1].split('.')[0])
+            id = int(file.split('-')[0])
         except (ValueError, IndexError):
             continue
-        with open(f'program/music/cache/{file}', 'r', encoding='utf-8') as f:
+        with open(f'cache/histories/{file}', 'r', encoding='utf-8') as f:
             history = json.load(f)
         histories[id] = history
 
@@ -46,7 +46,7 @@ class Player():
         
         # Load server specific history file
         try:
-            with open(f'program/music/cache/song_history-{self.guild_id}.json', 'r', encoding='utf-8') as f:
+            with open(f'cache/histories/{self.guild_id}-history.json', 'r', encoding='utf-8') as f:
                 self.song_history = json.load(f)
         except FileNotFoundError:
             self.song_history = []
@@ -291,16 +291,16 @@ class Player():
     # Updates the history cache with fresh data
     async def updateHistoryCache(self):
         try:
-            with open(f'program/music/cache/song_history-{self.guild_id}.json', 'w', encoding='utf-8') as f:
+            with open(f'cache/histories/{self.guild_id}-history.json', 'w', encoding='utf-8') as f:
                 json.dump(self.song_history, f, indent=4)
         except Exception as e:
             self.bot.logger.error(f'Erro ao atualizar o cache {self.guild_id}: {e}')
-        for file in os.listdir('program/music/cache/'):
-            if file.endswith('.json'):
+        for file in os.listdir('cache/histories/'):
+            if file.endswith('history.json'):
                 try:
-                    id = int(file.split('-')[1].split('.')[0])
+                    id = int(file.split('-')[0])
                 except (ValueError, IndexError):
                     continue
-                with open(f'program/music/cache/{file}', 'r', encoding='utf-8') as f:
+                with open(f'cache/histories/{file}', 'r', encoding='utf-8') as f:
                     history = json.load(f)
                 histories[id] = history

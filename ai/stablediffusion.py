@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -14,8 +14,10 @@ from dotenv import load_dotenv
 
 # Carregar variáveis de ambiente
 load_dotenv()
-file_path = os.getenv('STABLE_DIFFUSION_CACHE_DIR') # Default cache image output
-url = os.getenv('STABLE_DIFFUSION_ENDPOINT')        # URL of the server running stablediffusion
+url = os.getenv('AI_ENDPOINT_STABLEDIFFUSION')  # URL of the server running stablediffusion
+
+# Cached image path
+file_path = 'cache/stablediffusion/output.png'
 
 # Negative prompt (what you don't want in your image)
 negative_prompt = "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name"

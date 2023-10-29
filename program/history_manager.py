@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -11,13 +11,13 @@ histories = {}
 
 # Read current histories
 def readHistories():
-    for file in os.listdir('program/music/cache/'):
-        if file.endswith('.json'):
+    for file in os.listdir('cache/histories/'):
+        if file.endswith('history.json'):
             try:
-                id = int(file.split('-')[1].split('.')[0])
+                id = int(file.split('-')[0])
             except (ValueError, IndexError):
                 continue
-            with open(f'program/music/cache/{file}', 'r', encoding='utf-8') as f:
+            with open(f'cache/histories/{file}', 'r', encoding='utf-8') as f:
                 history = json.load(f)
             histories[id] = history
 
@@ -34,7 +34,7 @@ def showHistory(id, url=False):
 def clearHistory(id):
     clear = []
     try:
-        with open(f'program/music/cache/song_history-{id}.json', 'w', encoding='utf-8') as f:
+        with open(f'cache/histories/{id}-history.json', 'w', encoding='utf-8') as f:
             json.dump(clear, f, indent=4)
     except FileNotFoundError:
         pass

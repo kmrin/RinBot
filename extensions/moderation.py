@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 
 # Carregar configurações
 load_dotenv()
-WARNING_BAN_LIMIT = os.getenv('WARNING_BAN_LIMIT')
+WARNING_BAN_LIMIT = os.getenv('MOD_WARNING_BAN_LIMIT')
 
 # 'moderation' command cog
 class Moderation(commands.Cog, name='moderation'):
@@ -196,7 +196,7 @@ class Moderation(commands.Cog, name='moderation'):
                 if len(warnings_list) >= int(WARNING_BAN_LIMIT):
                     await member.kick(reason=f'Limite de avisos atingido: {WARNING_BAN_LIMIT}.')
                     embed = discord.Embed(
-                        description=f"{user.global_name} kickado(a) do servidor por excesso de avisos.",
+                        description=f"{user.name} kickado(a) do servidor por excesso de avisos.",
                         color=0x25D917)
                     await ctx.send(embed=embed)
         
@@ -294,9 +294,9 @@ class Moderation(commands.Cog, name='moderation'):
             try:
                 await user.kick(reason='Not specified' if not reason else reason)
                 embed = discord.Embed(
-                    description=f"{user.global_name} was kicked."
+                    description=f"{user.name} was kicked."
                                 if not reason else
-                                f"{user.global_name} was kicked, reason: {reason}",
+                                f"{user.name} was kicked, reason: {reason}",
                     color=0x25D917)
                 await ctx.send(embed=embed)
             except discord.Forbidden:
@@ -328,9 +328,9 @@ class Moderation(commands.Cog, name='moderation'):
             try:
                 await user.ban(reason='Not specified.' if not reason else reason)
                 embed = discord.Embed(
-                    description=f"{user.global_name} was banned."
+                    description=f"{user.name} was banned."
                                 if not reason else
-                                f"{user.global_name} was banned, reason: {reason}",
+                                f"{user.name} was banned, reason: {reason}",
                     color=0x25D917)
                 await ctx.send(embed=embed)
             except discord.Forbidden:

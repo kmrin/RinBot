@@ -1,7 +1,7 @@
-> 1.4.3:
+- 1.4.3:
 	* Initial GitHub alternate version release.
 
-> 1.5.0:
+- 1.5.0:
 	* Fixed a bug where if a user without a profile picture used the /play command, the command would crash with a "AttributeError".
 	* Small utilitary funcions are now grouped together in a single file, 'helpers.py' inside the 'program' folder.
 	* Main classes related to the 'music' extension have been separated and moved into the 'music' folder inside the 'program' folder.
@@ -9,7 +9,7 @@
 	* 'music' extension remade.
 	* RinBot is now capable of playing songs on multiple servers simultaniously!
 
-> 1.5.1:
+- 1.5.1:
 	* The bot now correctly deletes Player objects after their playback is over.
 	* Fixed a sintax error that made Players unable to read their histories.
 	* Fixed a sintax error that made so that the history selected index was decremented by 2 instead of 1.
@@ -17,7 +17,7 @@
 	* Fixed a bug where when choosing a song from history, a "never awaited" error would occurr.
 	* Fixed a sintax error where when a error occurred while selecting a song from history, a "embed" variable would try to be read instead of "song".
 
-> 1.6.0:
+- 1.6.0:
 	* The bot now has a system to add / remove / clear a list of their favourite individual playlists and play them.
 	* Fixed a few failures related to embed footers breaking if a user doesn't have a pfp.
 	* 'config.json' eliminated in favor of '.env'.
@@ -30,8 +30,19 @@
 	* StableDiffusion now uses a manual negative prompt, making it easier for ya'll.
 	* Fancier embeds :3
 
-> 1.7.0:
+- 1.7.0:
 	* Added moderation commands: "/nickname", "/kick" and "/ban"
 	* The audio playback bitrate can now be set under ".env" (128kbps by default)
-	* Users that hit 6 warnings will be automatically kicked from the server, you can modify this limit by changing it's value under ".env" > "WARNING_BAN_LIMIT", or disable this behaviour entirely by changing the value to "False".
-	* RinBot now welcomes users who join your server through a specific text channel with a given ID defined under ".env" > "WELCOME_CHANNEL_ID", this is disabled by default.
+	* Users that hit 6 warnings will be automatically kicked from the server, you can modify this limit by changing it's value under ".env" - "WARNING_BAN_LIMIT", or disable this behaviour entirely by changing the value to "False".
+	* RinBot now welcomes users who join your server through a specific text channel with a given ID defined under ".env" - "WELCOME_CHANNEL_ID", this is disabled by default.
+
+- 1.7.1:
+	* Re-estructured code to make things simpler and easier.
+	* "rinbot.log" now located at the root folder.
+	* Cache files are now grouped together inside the "cache" folder, separaded by what they're used for.
+	* Created "bin" folder to hold binaries, currently the new home of ffmpeg.
+	* "characters" functionality removed from the Kobold AI integration as it was causing way too much trouble.
+	* "guild_ids" database table removed, unnecessary.
+	* Fixed an issue where moderation commands like "/kick" and "/ban" would return "None" as the username.
+	* Fixed an issue that caused KeyErrors to not be handled correctly.
+	* Fixed a few translation errors.

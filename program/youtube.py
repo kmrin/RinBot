@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 # Load bitrate settings
 load_dotenv()
-bitrate = os.getenv('AUDIO_BITRATE')
+bitrate = os.getenv('MUSIC_AUDIO_BITRATE')
 
 # Youtube-DL and FFMPEG settings
 ydl_opts = {
@@ -24,7 +24,7 @@ ffmpeg_opts = {
     'executable':
         
         # Use included ffmpeg executable if on windows
-        './ffmpeg.exe' if platform.system() == 'Windows' else 'ffmpeg',
+        './bin/ffmpeg.exe' if platform.system() == 'Windows' else 'ffmpeg',
     
     # These options make sure ffmpeg doesn't unalive itself on unstable networks
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'}

@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -123,25 +123,6 @@ async def is_owner(user_id:int) -> bool:
         ) as cursor:
             result = await cursor.fetchone()
             return result is not None
-
-# Adds a guild ID to the database
-async def add_guild_id(guild_id: int) -> int:
-    async with aiosqlite.connect(DATABASE_PATH) as db:
-        await db.execute("INSERT INTO guild_ids(guild_id) VALUES (?)", (guild_id,))
-        await db.commit()
-        rows = await db.execute("SELECT COUNT(*) FROM guild_ids")
-        async with rows as cursor:
-            result = await cursor.fetchone()
-            return result[0] if result is not None else 0
-
-# Returns the guild IDs from the database
-async def get_guild_ids() -> list:
-    async with aiosqlite.connect(DATABASE_PATH) as db:
-        async with db.execute(
-            "SELECT guild_id FROM guild_ids"
-        ) as cursor:
-            result = await cursor.fetchall()
-            return result
 
 # Adds the IDs of joined servers to the database
 async def add_joined_on(joined_on: str) -> str:

@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -9,19 +9,19 @@ from discord import app_commands
 from discord.app_commands.models import Choice
 from discord.ext import commands
 from discord.ext.commands import Context
-from program.music.player import Player
-from program.music.interface import MediaControls, PlaylistPageSwitcher
-from program.music.history_manager import showHistory, clearHistory
-from program.music.favourites_manager import showFavourites, addFavourite, removeFavourite, clearFavourites
+from program.player import Player
+from program.interface import MediaControls, PlaylistPageSwitcher
+from program.history_manager import showHistory, clearHistory
+from program.favorites_manager import showFavorites, addFavorite, removeFavorite, clearFavorites
 from program.helpers import is_url, formatTime
-from program.music.youtube import processYoutubePlaylist
+from program.youtube import processYoutubePlaylist
 from program.checks import *
 
 # Active players tracking
 players = {}
 
-# Active favourite playlists tracking
-favourites = {}
+# Active favorite playlists tracking
+favorites = {}
 
 # 'music' command block
 class Music(commands.Cog, name='music'):
@@ -30,18 +30,18 @@ class Music(commands.Cog, name='music'):
     
     # Main command, starts playing tracks
     @commands.hybrid_command(name='play', description='Plays songs / playlists from youtube')
-    @app_commands.describe(favourite_playlist='If you want to play one of your favourite playlists')
-    @app_commands.describe(song='Song or Playlist link / Search query / Favourite playlist ID')
+    @app_commands.describe(favorite_playlist='If you want to play one of your favorite playlists')
+    @app_commands.describe(song='Song or Playlist link / Search query / Favorite playlist ID')
     @app_commands.describe(playlist_id='Adds only a specific song from a playlist into the queue')
     @app_commands.describe(shuffle='Activates shuffling (optional) (for playlists)')
     @app_commands.describe(history='Plays a song from history (by ID)')
     @app_commands.choices(
         shuffle=[
             Choice(name='Yes', value=1)],
-        favourite_playlist=[
+        favorite_playlist=[
             Choice(name='Yes', value=1)])
     @not_blacklisted()
-    async def play(self, ctx: Context, song:str=None, playlist_id:int=0, shuffle:Choice[int]=0, favourite_playlist:Choice[int]=0, history:int=0) -> None:
+    async def play(self, ctx: Context, song:str=None, playlist_id:int=0, shuffle:Choice[int]=0, favorite_playlist:Choice[int]=0, history:int=0) -> None:
         
         # Defer so discord doesn't go kaboom
         await ctx.defer()
@@ -54,11 +54,11 @@ class Music(commands.Cog, name='music'):
             await ctx.send(embed=embed)
             return
         
-        # In case the user asks for a favourite playlist
-        if song.isnumeric() and favourite_playlist != 0:
-            self.readFavourites()
+        # In case the user asks for a favorite playlist
+        if song.isnumeric() and favorite_playlist != 0:
+            self.readFavorites()
             try:
-                song = favourites[ctx.author.id][int(song)-1]['url']
+                song = favorites[ctx.author.id][int(song)-1]['url']
             except KeyError:
                 embed = discord.Embed(
                     description = " ❌ Inexistant playlist or out of range.",
@@ -174,13 +174,13 @@ class Music(commands.Cog, name='music'):
         
         # Load current histories
         histories = {}
-        for file in os.listdir('program/music/cache/'):
-            if file.endswith('.json'):
+        for file in os.listdir('cache/histories/'):
+            if file.endswith('history.json'):
                 try:
-                    id = int(file.split('-')[1].split('.')[0])
+                    id = int(file.split('-')[0])
                 except (ValueError, IndexError):
                     continue
-                with open(f'program/music/cache/{file}', 'r', encoding='utf-8') as f:
+                with open(f'cache/histories/{file}', 'r', encoding='utf-8') as f:
                     history = json.load(f)
                 histories[id] = history
         
@@ -273,8 +273,8 @@ class Music(commands.Cog, name='music'):
             view = MediaControls(ctx, self.bot, current_player)
             await ctx.send(view=view)
 
-    # Command to manipulate favourite playlists
-    @commands.hybrid_command(name='playlists', description='Shows or manipulates your favourite playlists!')
+    # Command to manipulate favorite playlists
+    @commands.hybrid_command(name='playlists', description='Shows or manipulates your favorite playlists!')
     @app_commands.describe(url='Shows URLs instead of song titles')
     @app_commands.describe(action='The action to be taken (if any)')
     @app_commands.describe(item='The playlist to be manipulated')
@@ -289,22 +289,22 @@ class Music(commands.Cog, name='music'):
         
         # Load current playlists
         playlists = {}
-        for file in os.listdir('program/music/cache'):
-            if file.endswith('fav_playlists.json'):
+        for file in os.listdir('cache/favorites/'):
+            if file.endswith('favorites.json'):
                 try:
                     id = int(file.split('-')[0])
                 except (ValueError, IndexError):
                     continue
-                with open(f'program/music/cache/{file}', 'r', encoding='utf-8') as f:
+                with open(f'cache/favorites/{file}', 'r', encoding='utf-8') as f:
                     playlist_list = json.load(f)
                 playlists[id] = playlist_list
         
-        # Show favourites
+        # Show favorites
         if action == 0:
-            message = showFavourites(ctx.author.id, False if url == 0 else True)
+            message = showFavorites(ctx.author.id, False if url == 0 else True)
             if not message:
                 embed = discord.Embed(
-                        description = " ❌ You don't have favourite playlists.",
+                        description = " ❌ You don't have favorite playlists.",
                         color=0xd91313)
             else:
                 embed = discord.Embed(
@@ -317,14 +317,14 @@ class Music(commands.Cog, name='music'):
                     embed.set_footer(text=f"{ctx.author.global_name}")
             await ctx.send(embed=embed)
         
-        # Add to favourites
+        # Add to favorites
         elif action.value == 1:
             if is_url(item):
                 if 'playlist?' in item:
-                    item = addFavourite(ctx.author.id, item)
+                    item = addFavorite(ctx.author.id, item)
                     if not isinstance(item, discord.Embed):
                         embed = discord.Embed(
-                            description=f" ✅  `{item['title']}` added to your favourite playlists!",
+                            description=f" ✅  `{item['title']}` added to your favorite playlists!",
                             color=0x25D917)
                     else:
                         embed = item
@@ -342,7 +342,7 @@ class Music(commands.Cog, name='music'):
         elif ctx.author.id in playlists and action.value == 2:
             try:
                 item = int(item)
-                embed = removeFavourite(ctx.author.id, item - 1)
+                embed = removeFavorite(ctx.author.id, item - 1)
             except ValueError:
                 embed = discord.Embed(
                     description = " ❌ Value error, please give me numbers (ID).",
@@ -351,9 +351,9 @@ class Music(commands.Cog, name='music'):
                 
         # Limpar favoritos
         elif action.value == 3:
-            clearFavourites(ctx.author.id)
+            clearFavorites(ctx.author.id)
             embed = discord.Embed(
-                description=f" ✅  Your favourite playlists have been cleared!",
+                description=f" ✅  Your favorite playlists have been cleared!",
                 color=0x25D917)
             await ctx.send(embed=embed)
 
@@ -361,24 +361,24 @@ class Music(commands.Cog, name='music'):
     @commands.hybrid_command(name='showplaylist', description='Shows the current playlist or any other')
     @app_commands.describe(url='Specifies the playlist URL to be shown')
     @app_commands.describe(showurl='Shows URLs instead of song titles')
-    @app_commands.describe(favourite='Lists one of your favourite playlists')
+    @app_commands.describe(favorite='Lists one of your favorite playlists')
     @app_commands.choices(showurl=[Choice(name='Yes', value=1)])
-    async def showPlaylist(self, ctx:Context, url:str=None, favourite:int=0, showurl:Choice[int]=0) -> None:
+    async def showPlaylist(self, ctx:Context, url:str=None, favorite:int=0, showurl:Choice[int]=0) -> None:
         
         # Load playlist cache
         playlists = {}
-        for file in os.listdir('program/music/cache/'):
-            if file.endswith('fav_playlists.json'):
+        for file in os.listdir('cache/favorites/'):
+            if file.endswith('favorites.json'):
                 try:
                     id = int(file.split('-')[0])
                 except (ValueError, IndexError):
                     continue
-                with open(f'program/music/cache/{file}', 'r', encoding='utf-8') as f:
+                with open(f'cache/favorites/{file}', 'r', encoding='utf-8') as f:
                     playlist_list = json.load(f)
                 playlists[id] = playlist_list
         
         # If there are no players
-        if ctx.guild.id not in players and not url and favourite == 0:
+        if ctx.guild.id not in players and not url and favorite == 0:
             embed = discord.Embed(
                 description = " ❌ Nenhuma instância ativa.",
                 color=0xd91313)
@@ -386,7 +386,7 @@ class Music(commands.Cog, name='music'):
             return
         
         # If there is one check if there is a playlist active and act accordingly
-        elif ctx.guild.id in players and not url and favourite == 0:
+        elif ctx.guild.id in players and not url and favorite == 0:
             current_player:Player = players[ctx.guild.id]
             if not current_player.in_playlist:
                 embed = discord.Embed(
@@ -413,7 +413,7 @@ class Music(commands.Cog, name='music'):
             embed.description='\n'.join(chunks[0])
         
         # In case a specific URL was given
-        elif url and favourite == 0:
+        elif url and favorite == 0:
             if not is_url(url):
                 embed = discord.Embed(
                     description = " ❌ Invalid URL.",
@@ -439,11 +439,11 @@ class Music(commands.Cog, name='music'):
             embed = discord.Embed(title=f" 🎵  {pl_data['title']}'songs (external URL)")
             embed.description='\n'.join(chunks[0])
         
-        # If a favourite playlist was given
-        elif not url and favourite != 0:
-            self.readFavourites()
+        # If a favorite playlist was given
+        elif not url and favorite != 0:
+            self.readFavorites()
             try:
-                pl_data = processYoutubePlaylist(favourites[ctx.author.id][int(favourite)-1]['url'])
+                pl_data = processYoutubePlaylist(favorites[ctx.author.id][int(favorite)-1]['url'])
             except KeyError:
                 embed = discord.Embed(
                     description = " ❌ Inexistant playlist or out of range.",
@@ -465,24 +465,24 @@ class Music(commands.Cog, name='music'):
             message_lines = message.split('\n')
             chunks = [message_lines[i:i+20] for i in range(
                 0, len(message_lines), 20)]
-            embed = discord.Embed(title=f" 🎵  {pl_data['title']}'songs ({ctx.author.global_name}'s favourite)")
+            embed = discord.Embed(title=f" 🎵  {pl_data['title']}'songs ({ctx.author.global_name}'s favorite)")
             embed.description='\n'.join(chunks[0])
         
         # Return
         view = PlaylistPageSwitcher(ctx, self.bot, embed, chunks)
         await ctx.send(embed=embed, view=view)
 
-    # Read current favourites
-    def readFavourites(self):
-        for file in os.listdir('program/music/cache/'):
-            if file.endswith('fav_playlists.json'):
+    # Read current favorites
+    def readFavorites(self):
+        for file in os.listdir('cache/favorites/'):
+            if file.endswith('favorites.json'):
                 try:
                     id = int(file.split('-')[0])
                 except (ValueError, IndexError):
                     continue
-                with open(f'program/music/cache/{file}', 'r', encoding='utf-8') as f:
-                    favourite = json.load(f)
-                favourites[id] = favourite
+                with open(f'cache/favorites/{file}', 'r', encoding='utf-8') as f:
+                    favorite = json.load(f)
+                favorites[id] = favorite
 
 # SETUP
 async def setup(bot):

@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -41,9 +41,12 @@ class General(commands.Cog, name='general'):
         embed = discord.Embed(
             title='RinBot Info',
             color=0xe3a01b)
-        embed.set_thumbnail(url=self.bot.user.avatar.url)
+        try:
+            embed.set_thumbnail(url=self.bot.user.avatar.url)
+        except AttributeError:
+            pass
         embed.add_field(name='Created in:', value='10/08/23', inline=True)
-        embed.add_field(name='Version:', value='1.7.0-GitHub', inline=True)
+        embed.add_field(name='Version:', value='1.7.1-GitHub', inline=True)
         embed.add_field(name='Programmer:', value='km.rin :flag_br:', inline=True)
         embed.add_field(name='Collaborator:', value='Nyarkll :flag_br:', inline=True)
         embed.add_field(name='Python Version:', value=f"{platform.python_version()}", inline=True)

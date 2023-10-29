@@ -1,5 +1,5 @@
 """
-RinBot v1.7.0 (GitHub release)
+RinBot v1.7.1 (GitHub release)
 made by rin
 """
 
@@ -13,7 +13,8 @@ from discord.ext import commands
 
 load_dotenv()
 
-CHAT_HISTORY_LINE_LIMIT = int(os.getenv("CHAT_HISTORY_LINE_LIMIT"))  # History limit
+CHAT_HISTORY_LINE_LIMIT = int(os.getenv("AI_CHAT_HISTORY_LINE_LIMIT"))  # History limit
+CHAR_NAME = os.getenv("AI_CHAR_NAME")
 
 # Stop sequences
 STOP_SEQUENCES = os.getenv("STOP_SEQUENCES")
@@ -38,27 +39,9 @@ class Chatbot:
         self.llm = self.bot.llm
         self.histories = {}
         self.stop_sequences = {}
-        
-        with open("ai/chardata.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-            self.char_name = data["char_name"]
-            self.char_persona = data["char_persona"]
-
-            self.world_scenario = data["world_scenario"]
-            self.example_dialogue = data["example_dialogue"]
-
         self.convo_filename = None
         self.conversation_history = ""
-        self.top_character_info = self.format_top_character_info()
-
-    def format_top_character_info(self):
-        info_str = f"Character: {self.char_name}\n{self.char_name}'s Persona: {self.char_persona}\n"
-        if self.world_scenario:
-            info_str += f"Scenario: {self.world_scenario}\n"
-        if self.example_dialogue:
-            info_str += f"\nExample Dialogue:\n{self.example_dialogue}\n"
-
-        return info_str
+        self.char_name = CHAR_NAME
 
     async def get_messages_by_channel(self, channel_id):
         channel = self.bot.get_channel(int(channel_id))
@@ -88,8 +71,7 @@ class Chatbot:
         channel_id = str(channel_id)
         if channel_id not in self.histories:
             self.histories[channel_id] = CustomBufferWindowMemory(
-                k=CHAT_HISTORY_LINE_LIMIT, ai_prefix=self.char_name
-            )
+                k=CHAT_HISTORY_LINE_LIMIT, ai_prefix=self.char_name)
             messages = await self.get_messages_by_channel(channel_id)
             messages_to_add = messages[-2::-1]
             messages_to_add_minus_one = messages_to_add[:-1]
@@ -99,7 +81,6 @@ class Chatbot:
                 message = message[2]
                 self.bot.logger.info(f"{name}: {message}")
                 await self.add_history(name, channel_ids, message)
-
         return self.histories[channel_id]
 
     async def get_stop_sequence_for_channel(self, channel_id, name):
@@ -125,38 +106,32 @@ class Chatbot:
         name = message.author.display_name
         memory = await self.get_memory_for_channel(str(channel_id))
         stop_sequence = await self.get_stop_sequence_for_channel(channel_id, name)
-        self.bot.logger.info(f"Stop sequences: {stop_sequence}")
+        self.bot.logger.info(f"[AI]-[INFO]: Stop sequences: {stop_sequence}")
         formatted_message = f"{name}: {message_content}"
         MAIN_TEMPLATE = f"""
-            {self.top_character_info}
             {{history}}
             {{input}}
             {self.char_name}:"""
         PROMPT = PromptTemplate(
-            input_variables=["history", "input"], template=MAIN_TEMPLATE
-        )
+            input_variables=["history", "input"], template=MAIN_TEMPLATE)
         conversation = ConversationChain(
-            prompt=PROMPT,
-            llm=self.llm,
-            verbose=True,
-            memory=memory,)
+            prompt=PROMPT, llm=self.llm, verbose=True, memory=memory,)
         input_dict = {"input": formatted_message, "stop": stop_sequence}
         response_text = conversation(input_dict)
         response = await self.detect_and_replace_out(response_text["response"])
         with open(self.convo_filename, "a", encoding="utf-8") as f:
             f.write(f"{message.author.display_name}: {message_content}\n")
             f.write(f"{self.char_name}: {response_text}\n")
-
         return response
 
     async def add_history(self, name, channel_id, message_content) -> None:
         memory = await self.get_memory_for_channel(str(channel_id))
         formatted_message = f"{name}: {message_content}"
-        self.bot.logger.info(f"Adicionando mensagem à memória: {formatted_message}")
+        self.bot.logger.info(f"[AI]-[INFO]: Adicionando mensagem à memória: {formatted_message}")
         memory.add_input_only(formatted_message)
         return None
 
-class Chatbot(commands.Cog, name="chatbot"):
+class ChatbotCog(commands.Cog, name="chatbot"):
     def __init__(self, bot):
         self.bot = bot
         self.chatlog_dir = bot.chatlog_dir
@@ -165,14 +140,14 @@ class Chatbot(commands.Cog, name="chatbot"):
             os.makedirs(self.chatlog_dir)
 
     # Chat command (it's to chat with the AI outside of the predefined AI channel)
-    @commands.command(name="chat")
-    async def chat_command(self, message, message_content) -> None:
+    @commands.hybrid_command(name="chat")
+    async def chat(self, message, message_content) -> None:
         if message.guild:
             server_name = message.channel.name
         else:
             server_name = message.author.name
         chatlog_filename = os.path.join(
-            self.chatlog_dir, f"{self.chatbot.char_name}_{server_name}_chatlog.log")
+            self.chatlog_dir, f"{server_name}_ai_chatlog.log")
         if (
             message.guild
             and self.chatbot.convo_filename != chatlog_filename
