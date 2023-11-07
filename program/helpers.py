@@ -1,11 +1,21 @@
 """
-RinBot v1.7.1 (GitHub release)
+RinBot v1.8.0 (GitHub release)
 made by rin
 """
 
 # Imports
-import urllib.parse
+import urllib.parse, re
 from translate import Translator
+
+# Converts a HEX #FFFFFF value to a integer 0xFFFFFF value
+def hexToInt(value):
+    value = int(value[1:],16)
+    return value
+
+# Checks if a HEX value is a valid color
+def isHexColor(value):
+    pattern = r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+    return bool(re.match(pattern, value))
 
 # Checks if a string is a valid URL
 def is_url(str):

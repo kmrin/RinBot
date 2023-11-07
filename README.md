@@ -8,6 +8,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 
 - Programmed with both Windows and Linux in mind.
 - AI functionality with StableDiffusion for image generation and Kobold for chatbots built-in and ready to go.
+- Rewarding and engaging economy system
 - Command Cog based structure for easy debugging and 'on-the-fly' coding.
 - Built-in logger with colors and categories.
 - User ID tied command permission class system (explained below).
@@ -18,6 +19,16 @@ She was private code a while back, but I decided to publish at least a "alternat
 - Server moderation tools such as the command `/censor` that clears a certain amount of messages in a text chat.
 - YouTube music playback with search queries and support for playlists.
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
+
+## Economy system
+As of update 1.8, RinBot now has a economy system with oranges as the currency.
+**The way it works is as follows:**
+* Users will receive 500 oranges by default upon entering a server and being registered in the economy database.
+* Users will be rewarded 25 oranges every 50 messages sent. `A anti-spam measure was applied to ensure this feature isn't abused.`
+* Users can transfer oranges between eachother using the `/orange_transfer` command.
+* Users can see the top 10 users with the most oranges using the `/orange_rank` command.
+* Users can use their oranges to buy items from the shop using the `/orange_store` and `/orange_buy` command.
+## NOTE: Currently only roles are supported by the orange store, more item types will be added in the future.
 
 ## User ID permission class system
 
@@ -76,6 +87,15 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/showcontrols` | Shows the multimedia control buttons (useful if the original ones are too far up on the text channel, that's why I made it :p) |
 | `/showplaylist` | Shows a list of songs from a given playlist |
 | `/playlists` | Manipulates (adds / removes / clears) your individual list of favourite playlists |
+
+#### Economy Cog
+| Command | Description |
+| - | - |
+| `/orange_rank` | Shows the top 10 members with the most oranges |
+| `/orange_transfer` | Transfer oranges between users |
+| `/orange_store` | Shows the items on the store |
+| `/orange_new_role` | Adds a role item to be bought from the store |
+| `/orange_buy` | Buys an item from the store (by name) |
 
 #### StableDiffusion Cog
 | Command | Description |

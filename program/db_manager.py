@@ -1,5 +1,5 @@
 """
-RinBot v1.7.1 (GitHub release)
+RinBot v1.8.0 (GitHub release)
 made by rin
 """
 
@@ -197,3 +197,101 @@ async def get_warnings(user_id: int, server_id: int) -> list:
             for row in result:
                 result_list.append(row)
             return result_list
+
+# Adiciona um usuário aos participantes da economia
+async def add_user_to_currency(user_id:int, server_id:int):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT user_id FROM currency WHERE user_id=? AND server_id=?", 
+            (user_id, server_id)
+        ) as cursor:
+            result = await cursor.fetchone()
+            if not result:
+                await db.execute("INSERT INTO currency(user_id,server_id) VALUES (?,?)",
+                                 (user_id,server_id))
+                await db.commit()
+                
+# Retorna quantas laranjas o usuário tem
+async def get_user_currency(user_id, server_id):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT wallet FROM currency WHERE user_id=? AND server_id=?", 
+            (user_id, server_id)
+        ) as cursor:
+            result = await cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                return None
+            
+# Retorna quantas mensagens o usuário já enviou
+async def get_user_message_count(user_id, server_id):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT messages FROM currency WHERE user_id=? AND server_id=?",
+            (user_id, server_id)
+        ) as cursor:
+            result = await cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                return None
+            
+# Atualiza a quantia de mensagens enviada por um usuário e premia caso atinja o limite
+async def update_message_count(user_id, server_id, punish=False):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute(
+            "UPDATE currency SET messages=messages+1 WHERE user_id=? AND server_id=?",
+            (user_id, server_id))
+        await db.commit()
+        current = await get_user_message_count(user_id, server_id)
+        if punish:
+            await db.execute(
+                "UPDATE currency SET messages=0 WHERE user_id=? AND server_id=?",
+                (user_id, server_id))
+            await db.commit()
+        if current == 50:
+            await db.execute(
+                "UPDATE currency SET messages=0 WHERE user_id=? AND server_id=?",
+                (user_id, server_id))
+            await db.commit()
+            await add_currency(user_id, server_id, 25)
+            
+# Adiciona laranjas a um usuário
+async def add_currency(user_id, server_id, amount):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("UPDATE currency SET wallet=wallet+? WHERE user_id=? AND server_id=?",
+                         (amount, user_id, server_id))
+        await db.commit()
+        
+# Remove laranjas de um usuário
+async def remove_currency(user_id, server_id, amount):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        current_amount = await get_user_currency(user_id, server_id)
+        if int(current_amount) < amount:
+            return None
+        else:
+            await db.execute("UPDATE currency SET wallet=wallet-? WHERE user_id=? AND server_id=?",
+                            (amount, user_id, server_id))
+            await db.commit()
+            return True
+        
+# Transfere laranjas de um usuário pra outro
+async def move_currency(from_user, to_user, server_id, amount):
+    from_user_amount = await get_user_currency(from_user, server_id)
+    if int(from_user_amount) < amount:
+        return None
+    else:
+        await remove_currency(from_user, server_id, amount)
+        await add_currency(to_user, server_id, amount)
+        return True
+    
+# Retorna a lista dos usuários com mais laranjas (top 10)
+async def get_leaderboard(server_id):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute(
+            "SELECT user_id, wallet FROM currency WHERE server_id=? ORDER BY wallet DESC LIMIT 10", 
+            (server_id,)
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [(row[0],row[1]) for row in rows]

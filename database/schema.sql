@@ -14,6 +14,13 @@ CREATE TABLE IF NOT EXISTS `joined_on` (
   `joined_on` varchar(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
+CREATE TABLE IF NOT EXISTS `currency` (
+  `user_id` INTEGER NOT NULL,
+  `server_id` varchar(20) NOT NULL,
+  `wallet` INTEGER NOT NULL DEFAULT 500,
+  `messages` INTEGER NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);
+
 CREATE TABLE IF NOT EXISTS `warns` (
   `id` int(11) NOT NULL,
   `user_id` varchar(20) NOT NULL,

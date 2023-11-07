@@ -1,5 +1,5 @@
 """
-RinBot v1.7.1 (GitHub release)
+RinBot v1.8.0 (GitHub release)
 made by rin
 """
 
@@ -12,7 +12,7 @@ for folder in folders:
         print(f"[init.py]-[Info]: Created directory '{folder}'")
 
 # Imports
-import subprocess, asyncio, platform, sys, aiosqlite, exceptions, discord, time, random
+import subprocess, asyncio, platform, sys, aiosqlite, exceptions, discord, time, datetime
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 from program.logger import logger
@@ -67,6 +67,7 @@ intents.voice_states = True
 intents.webhooks = True
 intents.members = True
 intents.message_content = True
+intents.moderation = True
 intents.presences = True
 intents.emojis_and_stickers = True
 intents.messages = True
@@ -83,6 +84,10 @@ bot.logger = logger
 
 # Vars
 freshstart = True
+message_count = {}
+time_window_milliseconds = 5000
+max_msg_per_window = 5
+author_msg_times = {}
 
 # Will I use AI?
 if AI_ENABLED:
@@ -125,6 +130,7 @@ async def check_owners():
             owner_valid = fresh_owner_id.isnumeric()
             if owner_valid:
                 await db_manager.add_user_to_owners(fresh_owner_id)
+                await db_manager.add_user_to_admins(fresh_owner_id)
                 bot.logger.info("Thanks! You've been added to the 'owners' class, have fun! :D")
             else:
                 bot.logger.error('Invalid ID. Make sure it only contains numbers.')
@@ -136,13 +142,19 @@ async def check_owners():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(" >   RinBot v1.7.1 (GitHub release)   ")
+    bot.logger.info(" >   RinBot v1.8.0 (GitHub release)   ")
     bot.logger.info("--------------------------------------")
     bot.logger.info(f" > Logged as {bot.user.name}")
     bot.logger.info(f" > API Version: {discord.__version__}")
     bot.logger.info(f" > Python Version: {platform.python_version()}")
     bot.logger.info(f" > Running on: {platform.system()}-{platform.release()} ({os.name})")
     bot.logger.info("--------------------------------------")
+    
+    # Check if all members are present in the economy database
+    bot.logger.info("Checking economy presence")
+    for guild in bot.guilds:
+        for member in guild.members:
+            await db_manager.add_user_to_currency(member.id, guild.id)
     
     # Load AI extensions
     if AI_ENABLED:
@@ -172,6 +184,9 @@ async def on_ready() -> None:
 # Member welcome
 @bot.event
 async def on_member_join(member:discord.Member):
+    # Add new members to the economy database
+    await db_manager.add_user_to_currency(int(member.id), int(member.guild.id))
+    
     if INIT_WELCOME_CHANNEL_ID.isnumeric():
         channel = bot.get_channel(int(INIT_WELCOME_CHANNEL_ID))
         if channel:
@@ -190,12 +205,35 @@ async def on_member_join(member:discord.Member):
 async def on_guild_join(guild):
     await db_manager.add_joined_on(str(guild.id))
     bot.logger.info(f'Joined guild ID: {guild.id}')
+    
+    # Add all members to the economy database
+    user_ids = [i.id for i in guild.members]
+    for id in user_ids:
+        await db_manager.add_user_to_currency(int(id), int(guild.id))
 
 # Processes standard message commands
 @bot.event
 async def on_message(message: discord.Message) -> None:
     if message.author == bot.user or message.author.bot:
         return
+    
+    # Anti-spam measure
+    global author_msg_times
+    aid = message.author.id
+    ct = datetime.datetime.now().timestamp() * 1000
+    if not author_msg_times.get(aid, False):
+        author_msg_times[aid] = []
+    author_msg_times[aid].append(ct)
+    et = ct - time_window_milliseconds
+    em = [mt for mt in author_msg_times[aid] 
+          if mt < et]
+    for mt in em:
+        author_msg_times[aid].remove(mt)
+    if len(author_msg_times[aid]) > max_msg_per_window:
+        await db_manager.update_message_count(message.author.id, message.guild.id, True)
+    else:
+        await db_manager.update_message_count(message.author.id, message.guild.id)
+    
     await bot.process_commands(message)
 
 # Show executed commands on the log
