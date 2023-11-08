@@ -14,8 +14,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 - User ID tied command permission class system (explained below).
 - User blacklisting to prevent undesired users to use the bot.
 - "Warning" system, which automatically kicks users past a certain amount of warnings.
-- Server moderation tools.
-- SQL database to store class information.
+- SQL database to store important data.
 - Server moderation tools such as the command `/censor` that clears a certain amount of messages in a text chat.
 - YouTube music playback with search queries and support for playlists.
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
