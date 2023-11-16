@@ -102,6 +102,11 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | - | - |
 | `/generateimage`| Generates an image using AI through a StableDiffusion instance ("masterpiece, best quality") are already included on the positive prompt, so you can omit those |
 
+#### Booru Cog
+| Command | Description |
+| - | - |
+| `/booru-random` | Shows a random image from danbooru using the tags and rating given by the user |
+
 #### Rule 34 Cog
 | Command | Description |
 | - | - |
