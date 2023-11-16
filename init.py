@@ -27,6 +27,7 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_PREFIX = os.getenv('BOT_PREFIX')
 INIT_WELCOME_CHANNEL_ID = os.getenv('INIT_WELCOME_CHANNEL_ID')
 RULE_34_ENABLED = strtobool(os.getenv("RULE_34_ENABLED"))
+BOORU_ENABLED = strtobool(os.getenv('BOORU_ENABLED'))
 AI_ENABLED = strtobool(os.getenv('AI_ENABLED'))
 AI_CHAR_NAME = os.getenv('AI_CHAR_NAME')
 AI_ENDPOINT_KOBOLD = os.getenv('AI_ENDPOINT_KOBOLD')
@@ -347,10 +348,21 @@ async def load_extensions() -> None:
                 try:
                     if extension == 'rule34Ex':
                         await bot.load_extension(f"rule34.{extension}")
-                        bot.logger.info(f"Extensão 'Rule34' carregada.")
+                        bot.logger.info(f"Extension 'Rule34' loaded.")
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
-                    bot.logger.error(f"Erro na extensão rule34: \n{exception}")
+                    bot.logger.error(f"Error on extension '{extension}': \n{exception}")
+    if BOORU_ENABLED:
+        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/booru"):
+            if file.endswith(".py"):
+                extension = file[:-3]
+                try:
+                    if extension == 'danbooruEx':
+                        await bot.load_extension(f"booru.{extension}")
+                        bot.logger.info(f"Extension '{extension}' loaded.")
+                except Exception as e:
+                    exception = f"{type(e).__name__}: {e}"
+                    bot.logger.error(f"Error on extension '{extension}': \n{exception}")
     
 # Wait 5 seconds when coming from a reset
 try:
