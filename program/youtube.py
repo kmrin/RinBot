@@ -1,5 +1,5 @@
 """
-RinBot v1.8.0 (GitHub release)
+RinBot v1.9.0 (GitHub release)
 made by rin
 """
 

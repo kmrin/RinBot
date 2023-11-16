@@ -54,3 +54,8 @@
 	* Alongside the economy, added was also an "incentive" to be active on servers, where every 50 messages sent on the server, that particular user is rewarded 25 oranges (the currency), in order to prevent abuse of this system, a anti-spam measure was added.
 	* Helper functions "hexToInt" and "isHexColor" added to "helpers.py".
 	* Added economy command cog with the commands "orange_rank", "orange_transfer", "orange_store", "orange_create_role" and "orange_buy".
+
+- 1.9.0 (The Horny Update):
+	* Fixed Kobold's LLM import error.
+	* Added integration with the Rule34 API, users can now search for random images or gifs by tags using the new `/rule-34-random` command and check the top 10 characters on the "I came" list using the new `/rule-34-icame` command.
+	* Rule34 functionallity is disabled by default, but can be enabled by changing "False" to "True" on the "RULE_34_ENABLED" value inside `.env`.

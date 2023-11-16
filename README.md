@@ -18,6 +18,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 - Server moderation tools such as the command `/censor` that clears a certain amount of messages in a text chat.
 - YouTube music playback with search queries and support for playlists.
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
+- Rule34 integration if you're into that.
 
 ## Economy system
 As of update 1.8, RinBot now has a economy system with oranges as the currency.
@@ -100,6 +101,12 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | Command | Description |
 | - | - |
 | `/generateimage`| Generates an image using AI through a StableDiffusion instance ("masterpiece, best quality") are already included on the positive prompt, so you can omit those |
+
+#### Rule 34 Cog
+| Command | Description |
+| - | - |
+| `/rule34-random` | Shows an image or gif from rule34 with your given tags |
+| `/rule34-icame` | Shows the top 10 characters on rule34's i came list |
 
 ## AI (Kobold and StableDiffusion)
 #### To integrate RinBot with your running instance of Kobold / StableDiffusion or both, follow these steps:

@@ -1,5 +1,5 @@
 """
-RinBot v1.8.0 (GitHub release)
+RinBot v1.9.0 (GitHub release)
 made by rin
 """
 
@@ -17,7 +17,7 @@ from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 from program.logger import logger
 from program import db_manager
-from langchain.llms import KoboldApiLLM
+from langchain.llms.koboldai import KoboldApiLLM
 from dotenv import load_dotenv
 from program.helpers import strtobool
 
@@ -26,6 +26,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_PREFIX = os.getenv('BOT_PREFIX')
 INIT_WELCOME_CHANNEL_ID = os.getenv('INIT_WELCOME_CHANNEL_ID')
+RULE_34_ENABLED = strtobool(os.getenv("RULE_34_ENABLED"))
 AI_ENABLED = strtobool(os.getenv('AI_ENABLED'))
 AI_CHAR_NAME = os.getenv('AI_CHAR_NAME')
 AI_ENDPOINT_KOBOLD = os.getenv('AI_ENDPOINT_KOBOLD')
@@ -142,7 +143,7 @@ async def check_owners():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(" >   RinBot v1.8.0 (GitHub release)   ")
+    bot.logger.info(" >   RinBot v1.9.0 (GitHub release)   ")
     bot.logger.info("--------------------------------------")
     bot.logger.info(f" > Logged as {bot.user.name}")
     bot.logger.info(f" > API Version: {discord.__version__}")
@@ -339,7 +340,18 @@ async def load_extensions() -> None:
                         bot.endpoint_connected = False
                     exception = f"{type(e).__name__}: {e}"
                     bot.logger.error(f"Error on AI extension '{extension}': \n{exception}")
-
+    if RULE_34_ENABLED:
+        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/rule34"):
+            if file.endswith(".py"):
+                extension = file[:-3]
+                try:
+                    if extension == 'rule34Ex':
+                        await bot.load_extension(f"rule34.{extension}")
+                        bot.logger.info(f"Extensão 'Rule34' carregada.")
+                except Exception as e:
+                    exception = f"{type(e).__name__}: {e}"
+                    bot.logger.error(f"Erro na extensão rule34: \n{exception}")
+    
 # Wait 5 seconds when coming from a reset
 try:
     if sys.argv[1] == 'reset':

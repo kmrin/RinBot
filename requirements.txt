@@ -9,3 +9,5 @@ translate
 yt_dlp
 aiohttp
 transformers
+torch
+websocket
