@@ -107,11 +107,15 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | - | - |
 | `/booru-random` | Shows a random image from danbooru using the tags and rating given by the user |
 
+## NOTE: In order to use Danbooru, the user has to configure it properly through the .env file, by changing the "BOORU_ENABLE" flag from False to True, and adding their username and API key.
+
 #### Rule 34 Cog
 | Command | Description |
 | - | - |
 | `/rule34-random` | Shows an image or gif from rule34 with your given tags |
 | `/rule34-icame` | Shows the top 10 characters on rule34's i came list |
+
+## NOTE: Due to the nature of Rule34, it's functionallity is disabled by default, in order to use Rule34, an owner of the bot must change the "RULE_34_ENABLED" flag inside the .env file from False to True
 
 ## AI (Kobold and StableDiffusion)
 #### To integrate RinBot with your running instance of Kobold / StableDiffusion or both, follow these steps:
