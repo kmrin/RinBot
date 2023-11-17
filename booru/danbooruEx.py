@@ -14,11 +14,13 @@ from program.checks import *
 from booru import Danbooru
 from random import randint
 from dotenv import load_dotenv
+from program.helpers import strtobool
 
 # Load env vars
 load_dotenv()
 BOORU_USERNAME=os.getenv("BOORU_USERNAME")
 BOORU_API_KEY=os.getenv("BOORU_API_KEY")
+BOORU_IS_GOLD=strtobool(os.getenv("BOORU_IS_GOLD"))
 
 # 'booru' command block
 class Booru(commands.Cog, name='booru'):
@@ -41,6 +43,19 @@ class Booru(commands.Cog, name='booru'):
         if not rating:
             embed = discord.Embed(
                 description=" ❌  'rating' attribute empty.",
+                color=0xd91313)
+            await ctx.send(embed=embed)
+            return
+        tag_count = tags.split(" ")
+        if len(tag_count) >= 3 and not BOORU_IS_GOLD:
+            embed = discord.Embed(
+                description=" ❌  Due to API limitations, provide only a max. of 2 tags.",
+                color=0xd91313)
+            await ctx.send(embed=embed)
+            return
+        elif len(tag_count) >= 6:
+            embed = discord.Embed(
+                description=" ❌  Due to API limitations, provide only a max. of 6 tags.",
                 color=0xd91313)
             await ctx.send(embed=embed)
             return
