@@ -108,6 +108,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/booru-random` | Shows a random image from danbooru using the tags and rating given by the user |
 
 ## NOTE: In order to use Danbooru, the user has to configure it properly through the .env file, by changing the "BOORU_ENABLE" flag from False to True, and adding their username and API key.
+## NOTE 2: If you have a "Gold" danbooru account, make sure to change the "BOORU_IS_GOLD" flag inside .env from False to True, so you can take advantage of your 6 max tags search.
 
 #### Rule 34 Cog
 | Command | Description |
