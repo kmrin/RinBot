@@ -73,6 +73,11 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 #### Fun Cog
 | Command | Description |
 | - | - |
+| `/cat`| Shows a random picture of a cat |
+| `/dog`| Shows a random picture of a dog |
+| `/ocr`| Reads text from an image attachment and sends back the result |
+| `/meme`| Memes on someone's last message |
+| `/pet`| Pets someone :3 |
 | `/fact`| Shows a random useless fact |
 | `/heads-or-tails` | Plays heads or tails |
 | `/rps` | Plays Rock Paper Scissors |
