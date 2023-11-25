@@ -1,5 +1,5 @@
 from enum import Enum
-from rule34.__vars__ import __base_url__, __api_url__
+from program.rule34.__vars__ import __base_url__, __api_url__
 
 class API_URLS(str, Enum):
     SEARCH = f"{__api_url__}index.php?page=dapi&s=post&q=index&limit={{LIMIT}}&tags={{TAGS}}&json=1" # returns: JSON

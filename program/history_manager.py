@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
 import os, json
 

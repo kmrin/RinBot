@@ -60,3 +60,11 @@
 	* Added integration with the Rule34 API, users can now search for random images or gifs by tags using the new `/rule-34-random` command and check the top 10 characters on the "I came" list using the new `/rule-34-icame` command.
 	* Rule34 functionallity is disabled by default, but can be enabled by changing "False" to "True" on the "RULE_34_ENABLED" value inside `.env`.
 	* Added integration with the Danbooru API, users can now search for random images by tags and rating using the new '/booru-random' command.
+
+- 1.9.1:
+	* Fixed an "AttributeError" that would trigger when using commands in RinBot's DMs.
+	* RinBot's file system has been re-organized to keep things clean.
+	* New commands "/cat" and "/dog" that shows a random image of each respective animal.
+	* New command "/ocr" that reads text from an image and sends back the result.
+	* New command "/meme" that "memes" with someone's last message.
+	* New command "/pet" that gives headpats to someone :3

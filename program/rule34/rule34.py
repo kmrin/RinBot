@@ -4,13 +4,13 @@ import urllib.parse as urlparse
 from bs4 import BeautifulSoup
 from urllib.parse import parse_qs
 
-from rule34.api_urls import API_URLS, __base_url__
-from rule34.__vars__ import __headers__, __version__
-from rule34.post import Post
-from rule34.post_comment import PostComment
-from rule34.icame import ICame
-from rule34.stats import Stat
-from rule34.toptag import TopTag
+from program.rule34.api_urls import API_URLS, __base_url__
+from program.rule34.__vars__ import __headers__, __version__
+from program.rule34.post import Post
+from program.rule34.post_comment import PostComment
+from program.rule34.icame import ICame
+from program.rule34.stats import Stat
+from program.rule34.toptag import TopTag
 
 class Stats:
     def __get_top(self, name):

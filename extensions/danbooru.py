@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
 from __future__ import unicode_literals
 import discord, random, os
@@ -11,7 +6,7 @@ from discord.ext.commands import Context
 from discord import app_commands
 from discord.app_commands.models import Choice
 from program.checks import *
-from booru import Danbooru
+from program.booru import Danbooru
 from random import randint
 from dotenv import load_dotenv
 from program.helpers import strtobool

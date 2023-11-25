@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
 import discord, subprocess, os
 from discord import app_commands
@@ -10,7 +5,16 @@ from discord.app_commands.models import Choice
 from discord.ext import commands
 from discord.ext.commands import Context
 from program.checks import *
+from program.helpers import strtobool
+from dotenv import load_dotenv
 
+# Load env vars
+load_dotenv()
+AI_ENABLED = strtobool(os.getenv('AI_ENABLED'))
+RULE_34_ENABLED = strtobool(os.getenv('RULE_34_ENABLED'))
+BOORU_ENABLED = strtobool(os.getenv("BOORU_ENABLED"))
+
+# Vars
 extensions_list = []
 
 # 'Owner' command block
@@ -178,9 +182,21 @@ class Owner(commands.Cog, name='owner'):
 
 # SETUP
 async def setup(bot):
-    # Lists current extensions
+    ai_ext = ["imagecaption", "languagemodel", "message_handler", "stablediffusion"]
+    booru_ext = ["danbooru"]
+    e621_ext = ["e621"]
+    rule34_ext = ["rule34"]
+    sum = ai_ext + booru_ext + e621_ext + rule34_ext
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}"):
         if file.endswith(".py"):
             extension = file[:-3]
-            extensions_list.append(Choice(name=extension, value=extension))
+            if AI_ENABLED and extension in ai_ext:
+                extensions_list.append(Choice(name=extension, value=extension))
+            elif BOORU_ENABLED and extension in booru_ext:
+                extensions_list.append(Choice(name=extension, value=extension))
+            elif RULE_34_ENABLED and extension in rule34_ext:
+                extensions_list.append(Choice(name=extension, value=extension))
+            is_general = all(extension not in sl for sl in sum)
+            if is_general:
+                extensions_list.append(Choice(name=extension, value=extension))
     await bot.add_cog(Owner(bot))

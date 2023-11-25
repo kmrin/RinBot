@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
 import platform, discord
 from discord.ext import commands
@@ -46,7 +41,7 @@ class General(commands.Cog, name='general'):
         except AttributeError:
             pass
         embed.add_field(name='Created in:', value='10/08/23', inline=True)
-        embed.add_field(name='Version:', value='1.9.0-GitHub', inline=True)
+        embed.add_field(name='Version:', value='1.9.1-GitHub', inline=True)
         embed.add_field(name='Programmer:', value='km.rin :flag_br:', inline=True)
         embed.add_field(name='Collaborator:', value='Nyarkll :flag_br:', inline=True)
         embed.add_field(name='Python Version:', value=f"{platform.python_version()}", inline=True)

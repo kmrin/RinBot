@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
 from typing import Any, Dict, List
 from langchain.memory.chat_memory import BaseChatMemory

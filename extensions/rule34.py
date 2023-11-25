@@ -1,15 +1,10 @@
-"""
-RinBot v1.9.0
-made by rin
-"""
-
 # Imports
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 from discord import app_commands
 from program.checks import *
-from rule34 import rule34Api
+from program.rule34 import rule34Api
 
 # Command cog 'rule34'
 class Rule34(commands.Cog, name='rule34'):

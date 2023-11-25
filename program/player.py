@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
 import discord, json, asyncio, os, random
 from discord.ext.commands import Bot, Context

@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
 import json, logging, requests
 from typing import Any, Dict, Iterator, List, Optional

@@ -1,15 +1,12 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
-import random, aiohttp, discord
+import random, aiohttp, discord, os, io, requests
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 from program.helpers import translate_to
 from program.checks import *
+from program.petpet import make_petpet
+from program.ocr import get_string_from_img
 
 # Heads or Tails interface
 class ButtonChoice(discord.ui.View):
@@ -93,6 +90,135 @@ class RockPaperScissorsView(discord.ui.View):
 class Fun(commands.Cog, name='fun'):
     def __init__(self, bot):
         self.bot = bot
+    
+    # Reads text from an image and returns it
+    @commands.hybrid_command(
+        name='ocr',
+        description='Reads text from a given image and returns it')
+    @not_blacklisted()
+    async def ocr(self, ctx:Context) -> None:
+        try:
+            url = ctx.message.attachments[0].url
+            r = requests.get(url)
+            filename = "cache/ocr/img.png"
+            with open(filename, "wb") as out_file:
+                out_file.write(r.content)
+            ocr = get_string_from_img(filename)
+            try:
+                await ctx.send(ocr)
+                os.remove(filename)
+                os.remove("cache/ocr/removed_noise.png")
+            except:
+                embed = discord.Embed(
+                    description=" ❌  Couldn't find the text ಥ_ಥ",
+                    color=0xd91313)
+                await ctx.send(embed=embed)
+        except:
+            embed = discord.Embed(
+                description=" ❌  Couldn't open image or you didn't send me one.",
+                color=0xd91313)
+            await ctx.send(embed=embed)
+    
+    # Meme
+    @commands.hybrid_command(
+        name='meme',
+        description="Memes someone's last message in chat")
+    @app_commands.describe(user='The person to be memed')
+    @not_blacklisted()
+    async def meme(self, ctx:Context, user:discord.User=None) -> None:
+        if not user:
+            embed = discord.Embed(
+                description=" ❌  I can't meme the void bruv.",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
+        messages = []
+        async for message in ctx.channel.history(limit=100):
+            messages.append(message)
+        user_message: discord.Message = next(
+            (msg for msg in messages if msg.author == user and msg.content), None)
+        if not user_message:
+            embed = discord.Embed(
+                description=" ❌  Failed to meme, *explodes*",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
+        pranked_message = ''.join([c.upper() if random.choice([True, False]) else c.lower()
+                                for c in user_message.content])
+        await user_message.reply(pranked_message)
+    
+    # PatPat :3
+    @commands.hybrid_command(
+        name='pet',
+        description=':3')
+    @app_commands.describe(user=':3:3:3')
+    @not_blacklisted()
+    async def pet_pet(self, ctx:Context, user:discord.User=None) -> None:
+        await ctx.defer()
+        if not user:
+            embed = discord.Embed(
+                title="Sad pet :(",
+                description=" ❌  Give me a user to pet",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
+        image = await user.avatar.read()
+        source = io.BytesIO(image)
+        dest = io.BytesIO()
+        make_petpet(source, dest)
+        dest.seek(0)
+        await ctx.send(file=discord.File(dest, filename=f'"{image[0]}-petpet.gif'))
+    
+    # Shows a random cat
+    @commands.hybrid_command(
+        name='cat',
+        description='meow :3')
+    @not_blacklisted()
+    async def cat(self, ctx:Context) -> None:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.thecatapi.com/v1/images/search") as resp:
+                if resp.status != 200:
+                    embed = discord.Embed(
+                        title="Sad meow :(",
+                        description=" ❌  Kitty not found.",
+                        color=0xd91313)
+                    return await ctx.send(embed=embed)
+                js = await resp.json()
+                embed = discord.Embed(color=0xe3a01b)
+                embed.set_image(url=js[0]['url'])
+                await ctx.send(embed=embed)
+    
+    # Shows a random dog
+    @commands.hybrid_command(
+        name='dog',
+        description='Woof >:3')
+    @not_blacklisted()
+    async def dog(self, ctx:Context) -> None:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://random.dog/woof") as resp:
+                if resp.status != 200:
+                    embed = discord.Embed(
+                        title="Sad woof :(",
+                        description=" ❌  Doggy not found.",
+                        color=0xd91313)
+                    return await ctx.send(embed=embed)
+                filename = await resp.text()
+                url = f'https://random.dog/{filename}'
+                filesize = ctx.guild.filesize_limit if ctx.guild else 8388608
+                if filename.endswith(('.mp4', '.webm')):
+                    async with ctx.typing():
+                        async with session.get(url) as other:
+                            if other.status != 200:
+                                embed = discord.Embed(
+                                    title="Sad woof :(",
+                                    description=" ❌  Doggy not found.",
+                                    color=0xd91313)
+                                return await ctx.send(embed=embed)
+                            if int(other.headers['Content-Length']) >= filesize:
+                                await self.dog(ctx)
+                            fp = io.BytesIO(await other.read())
+                            await ctx.send(file=discord.File(fp, filename=filename))
+                else:
+                    embed = discord.Embed(color=0xe3a01b)
+                    embed.set_image(url=url)
+                    await ctx.send(embed=embed)
     
     # Receives, translates, and shows a random fact from 'uselessfacts'
     @commands.hybrid_command(

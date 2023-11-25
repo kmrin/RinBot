@@ -1,10 +1,4 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
-import json, os
 from typing import Callable, TypeVar
 from discord.ext import commands
 from exceptions import *

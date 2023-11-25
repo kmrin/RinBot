@@ -1,8 +1,3 @@
-"""
-RinBot v1.9.0 (GitHub Release)
-made by rin
-"""
-
 # Imports
 import discord, os, sys, json
 from discord import app_commands

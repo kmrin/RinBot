@@ -1,10 +1,5 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
-import discord, asyncio
+import discord, asyncio, os, json
 from discord import app_commands
 from discord.app_commands.models import Choice
 from discord.ext import commands

@@ -1,10 +1,5 @@
-"""
-RinBot v1.9.0 (GitHub release)
-made by rin
-"""
-
 # Imports
-import discord, requests, io, base64
+import discord, requests, io, base64, os
 from discord.ext import commands
 from discord.ext.commands import Context
 from discord import app_commands

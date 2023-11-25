@@ -11,3 +11,8 @@ aiohttp
 transformers
 torch
 websocket
+bs4
+backports.cached-property
+pydantic==1.9.0
+opencv-python
+pytesseract

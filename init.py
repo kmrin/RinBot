@@ -1,11 +1,13 @@
 """
-RinBot v1.9.0 (GitHub release)
+RinBot v1.9.1 (GitHub release)
 made by rin
 """
 
 # Make sure cache dirs exist
 import os
-folders = ["cache", "cache/fun", "cache/chatlog", "cache/favorites", "cache/histories", "cache/stablediffusion"]
+folders = ["cache", "cache/fun", "cache/chatlog", 
+           "cache/favorites", "cache/histories", 
+           "cache/stablediffusion", "cache/ocr"]
 for folder in folders:
     if not os.path.exists(f"{os.path.realpath(os.path.dirname(__file__))}/{folder}"):
         os.makedirs(f"{os.path.realpath(os.path.dirname(__file__))}/{folder}")
@@ -144,7 +146,7 @@ async def check_owners():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(" >   RinBot v1.9.0 (GitHub release)   ")
+    bot.logger.info(" >   RinBot v1.9.1 (GitHub release)   ")
     bot.logger.info("--------------------------------------")
     bot.logger.info(f" > Logged as {bot.user.name}")
     bot.logger.info(f" > API Version: {discord.__version__}")
@@ -158,7 +160,7 @@ async def on_ready() -> None:
         for member in guild.members:
             await db_manager.add_user_to_currency(member.id, guild.id)
     
-    # Load AI extensions
+    # Load AI channel
     if AI_ENABLED:
         bot.logger.info('Using AI...')
         for items in bot.guild_ids:
@@ -216,27 +218,30 @@ async def on_guild_join(guild):
 # Processes standard message commands
 @bot.event
 async def on_message(message: discord.Message) -> None:
-    if message.author == bot.user or message.author.bot:
-        return
-    
-    # Anti-spam measure
-    global author_msg_times
-    aid = message.author.id
-    ct = datetime.datetime.now().timestamp() * 1000
-    if not author_msg_times.get(aid, False):
-        author_msg_times[aid] = []
-    author_msg_times[aid].append(ct)
-    et = ct - time_window_milliseconds
-    em = [mt for mt in author_msg_times[aid] 
-          if mt < et]
-    for mt in em:
-        author_msg_times[aid].remove(mt)
-    if len(author_msg_times[aid]) > max_msg_per_window:
-        await db_manager.update_message_count(message.author.id, message.guild.id, True)
-    else:
-        await db_manager.update_message_count(message.author.id, message.guild.id)
-    
-    await bot.process_commands(message)
+    try:
+        if message.author == bot.user or message.author.bot:
+            return
+        
+        # Anti-spam measure
+        global author_msg_times
+        aid = message.author.id
+        ct = datetime.datetime.now().timestamp() * 1000
+        if not author_msg_times.get(aid, False):
+            author_msg_times[aid] = []
+        author_msg_times[aid].append(ct)
+        et = ct - time_window_milliseconds
+        em = [mt for mt in author_msg_times[aid] 
+            if mt < et]
+        for mt in em:
+            author_msg_times[aid].remove(mt)
+        if len(author_msg_times[aid]) > max_msg_per_window:
+            await db_manager.update_message_count(message.author.id, message.guild.id, True)
+        else:
+            await db_manager.update_message_count(message.author.id, message.guild.id)
+        
+        await bot.process_commands(message)
+    except AttributeError:
+        pass
 
 # Show executed commands on the log
 @bot.event
@@ -317,53 +322,33 @@ async def on_command_error(context: Context, error) -> None:
 
 # Loads extensions (command cogs)
 async def load_extensions() -> None:
-    global AI_ENABLED
+    ai_ext = ["imagecaption", "languagemodel", "message_handler", "stablediffusion"]
+    booru_ext = ["danbooru"]
+    e621_ext = ["e621"]
+    rule34_ext = ["rule34"]
+    sum = ai_ext + booru_ext + e621_ext + rule34_ext
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/extensions"):
         if file.endswith(".py"):
             extension = file[:-3]
-            try:
-                await bot.load_extension(f"extensions.{extension}")
-                bot.logger.info(f"Extension '{extension}' loaded")
-            except Exception as e:
-                exception = f"{type(e).__name__}: {e}"
-                bot.logger.error(f"Error while loading extension '{extension}'\n{exception}")
-    if AI_ENABLED:
-        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/ai"):
-            if file.endswith(".py"):
-                extension = file[:-3]
-                try:
-                    await bot.load_extension(f"ai.{extension}")
-                    if extension == 'languagemodel':
-                        bot.endpoint_connected = True
-                    bot.logger.info(f"AI extension '{extension}' loaded.")
-                except Exception as e:
-                    if extension == 'languagemodel':
-                        bot.endpoint_connected = False
-                    exception = f"{type(e).__name__}: {e}"
-                    bot.logger.error(f"Error on AI extension '{extension}': \n{exception}")
-    if RULE_34_ENABLED:
-        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/rule34"):
-            if file.endswith(".py"):
-                extension = file[:-3]
-                try:
-                    if extension == 'rule34Ex':
-                        await bot.load_extension(f"rule34.{extension}")
-                        bot.logger.info(f"Extension 'Rule34' loaded.")
-                except Exception as e:
-                    exception = f"{type(e).__name__}: {e}"
-                    bot.logger.error(f"Error on extension '{extension}': \n{exception}")
-    if BOORU_ENABLED:
-        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/booru"):
-            if file.endswith(".py"):
-                extension = file[:-3]
-                try:
-                    if extension == 'danbooruEx':
-                        await bot.load_extension(f"booru.{extension}")
-                        bot.logger.info(f"Extension '{extension}' loaded.")
-                except Exception as e:
-                    exception = f"{type(e).__name__}: {e}"
-                    bot.logger.error(f"Error on extension '{extension}': \n{exception}")
-    
+            if AI_ENABLED and extension in ai_ext:
+                await load_extension(extension)
+            elif BOORU_ENABLED and extension in booru_ext:
+                await load_extension(extension)
+            elif RULE_34_ENABLED and extension in rule34_ext:
+                await load_extension(extension)
+            is_general = all(extension not in sl for sl in sum)
+            if is_general:
+                await load_extension(extension)
+
+# Loads an extension
+async def load_extension(extension) -> None:
+    try:
+        await bot.load_extension(f"extensions.{extension}")
+        bot.logger.info(f'Extension "{extension}" loaded')
+    except Exception as e:
+        exception = f"{type(e).__name__}: {e}"
+        bot.logger.info(f'Error loading extension "{extension}"\n{exception}')
+
 # Wait 5 seconds when coming from a reset
 try:
     if sys.argv[1] == 'reset':
