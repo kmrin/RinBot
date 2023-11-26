@@ -1,6 +1,31 @@
 # Imports
-import urllib.parse, re
+import urllib.parse, re, platform, psutil, cpuinfo, GPUtil
 from translate import Translator
+
+# Returns a dict with the current system specs
+async def get_specs() -> dict:
+    sys_info = {}
+    os_info = f"{platform.system()} {platform.version()}"
+    cpu_info = f"{cpuinfo.get_cpu_info()['brand_raw']} {psutil.cpu_freq().max / 1000:.1f}GHz"
+    ram_info = f"{psutil.virtual_memory().total / (1024**3):.2f}GB"
+    try:
+        gpu_list = GPUtil.getGPUs()
+        gpu_info:GPUtil.GPU = gpu_list[0]
+        gpu_name = gpu_info.name
+        gpu_memory = gpu_info.memoryTotal
+        gpu_info_str = f"{gpu_name} ({meg_to_gig(gpu_memory)}GB)"
+    except:
+        gpu_info_str = f"GPU Not Available"
+    sys_info['os'] = os_info
+    sys_info['cpu'] = cpu_info
+    sys_info['ram'] = ram_info
+    sys_info['gpu'] = gpu_info_str
+    return sys_info
+
+# Converts a value in megabytes to gigabytes
+def meg_to_gig(m):
+    g = m / 1024
+    return f"{g:.1f}"
 
 # Converts a HEX #FFFFFF value to a integer 0xFFFFFF value
 def hexToInt(value):

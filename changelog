@@ -68,3 +68,4 @@
 	* New command "/ocr" that reads text from an image and sends back the result.
 	* New command "/meme" that "memes" with someone's last message.
 	* New command "/pet" that gives headpats to someone :3
+	* New command "/specs" that shows a embed with the specs of the system running the bot.

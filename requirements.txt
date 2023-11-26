@@ -16,3 +16,7 @@ backports.cached-property
 pydantic==1.9.0
 opencv-python
 pytesseract
+platform
+psutil
+py-cpuinfo
+gputil

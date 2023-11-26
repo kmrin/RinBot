@@ -1,15 +1,38 @@
 # Imports
 import platform, discord
 from discord.ext import commands
-from discord.ext.commands import Context
+from discord.ext.commands import Context, Bot
 from discord import app_commands
-from program.helpers import translate_to
+from program.helpers import translate_to, get_specs
 from program.checks import *
 
 # 'general' command block
 class General(commands.Cog, name='general'):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot:Bot = bot
+    
+    # Shows an embed with the technical specifications of the system running the bot
+    @commands.hybrid_command(
+        name='specs',
+        description='Shows the specs. of the system running the bot')
+    @not_blacklisted()
+    async def specs(self, ctx:Context) -> None:
+        await ctx.defer()
+        specs = await get_specs()
+        embed = discord.Embed(title=' :desktop:  System Specs', color=discord.Color.blue())
+        try:
+            embed.set_thumbnail(url=self.bot.user.avatar.url)
+        except:
+            embed.set_thumbnail(url=self.bot.user.default_avatar.url)
+        embed.add_field(name="System", value=specs['os'], inline=False)
+        embed.add_field(name="CPU", value=specs['cpu'], inline=False)
+        embed.add_field(name="RAM", value=specs['ram'], inline=False)
+        embed.add_field(name="GPU", value=specs['gpu'], inline=False)
+        try:
+            embed.set_footer(text=f"Requested by: {ctx.author.global_name}", icon_url=ctx.author.avatar.url)
+        except AttributeError:
+            embed.set_footer(text=f"Requested by: {ctx.author.global_name}", icon_url=ctx.author.default_avatar.url)
+        await ctx.send(embed=embed)
     
     # Translates a string from one language to another
     @commands.hybrid_command(
