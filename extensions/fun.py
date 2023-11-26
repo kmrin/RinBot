@@ -159,12 +159,19 @@ class Fun(commands.Cog, name='fun'):
                 description=" ❌  Give me a user to pet",
                 color=0xd91313)
             return await ctx.send(embed=embed)
-        image = await user.avatar.read()
+        try:
+            image = await user.avatar.read()
+        except AttributeError:
+            image = await user.default_avatar.read()
         source = io.BytesIO(image)
         dest = io.BytesIO()
         make_petpet(source, dest)
         dest.seek(0)
-        await ctx.send(file=discord.File(dest, filename=f'"{image[0]}-petpet.gif'))
+        await ctx.send(
+            f"{ctx.author.mention} petted {user.mention}"
+            if not ctx.author.id == user.id else
+            f"{ctx.author.mention} petted themselves", 
+            file=discord.File(dest, filename=f'"{image[0]}-petpet.gif'))
     
     # Shows a random cat
     @commands.hybrid_command(
