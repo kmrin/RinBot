@@ -48,8 +48,8 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/translate`| Translates a text from one language to another using the "Translate" library |
 | `/rininfo` | Shows information about the bot |
 | `/serverinfo` | Shows information about the server |
+| `/specs` | Shows the specs. of the system running the bot |
 | `/ping` | Pong! |
-
 
 #### Moderation Cog
 | Command | Description |
