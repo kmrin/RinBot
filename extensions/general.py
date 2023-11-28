@@ -3,6 +3,7 @@ import platform, discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 from discord import app_commands
+from discord.app_commands.models import Choice
 from program.helpers import translate_to, get_specs
 from program.checks import *
 
@@ -10,6 +11,106 @@ from program.checks import *
 class General(commands.Cog, name='general'):
     def __init__(self, bot):
         self.bot:Bot = bot
+    
+    # Shows someone's profile banner
+    @commands.hybrid_command(
+        name='profilebanner',
+        description="Shows someone's profile banner")
+    @app_commands.describe(user='The user')
+    @app_commands.describe(server='Show server specific banner')
+    @app_commands.choices(
+        server=[Choice(name='Yes', value=1)])
+    @not_blacklisted()
+    async def profilebanner(self, ctx:Context, user:discord.User=None, server:Choice[int]=0) -> None:
+        if not user:
+            embed = discord.Embed(
+                description=" ❌  Invalid parameters.",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
+        if user.isnumeric():
+            user = self.bot.get_user(int(user))
+        embed = discord.Embed(
+            title=f"{user.display_name}'s profile banner:",
+            color=0xe3a01b)
+        try:
+            if server != 0:
+                member = ctx.guild.get_member(user.id)
+                if member.banner:
+                    embed.set_image(url=member.banner.url)
+                else:
+                    embed.set_image(url=user.banner.url)
+            else:
+                embed.set_image(url=user.banner.url)
+        except AttributeError:
+            embed = discord.Embed(
+                description=" ❌  User doesn't have a banner.",
+                color=0xd91313)
+            await ctx.send(embed=embed)
+    
+    # Shows someone's profile pic
+    @commands.hybrid_command(
+        name='profilepic',
+        description="Shows someone's profile picture on a embed")
+    @app_commands.describe(user='The user')
+    @app_commands.describe(server='Show server specific avatar')
+    @app_commands.choices(
+        server=[Choice(name='Yes', value=1)])
+    @not_blacklisted()
+    async def profilepic(self, ctx:Context, user:discord.User=None, server:Choice[int]=0) -> None:
+        if not user:
+            embed = discord.Embed(
+                description=" ❌  Invalid parameters.",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
+        if user.isnumeric():
+            user = self.bot.get_user(int(user))
+        embed = discord.Embed(
+            title=f"{user.display_name}'s profile picture:",
+            color=0xe3a01b)
+        try:
+            if server != 0:
+                member = ctx.guild.get_member(user.id)
+                if member.guild_avatar:
+                    embed.set_image(url=member.guild_avatar)
+                else:
+                    embed.set_image(url=user.avatar.url)
+            else:
+                embed.set_image(url=user.avatar.url)
+        except AttributeError:
+            embed.set_image(url=user.default_avatar.url)
+        await ctx.send(embed=embed)
+    
+    # Sends someone a dm
+    @commands.hybrid_command(
+        name='dm',
+        description='Sends someone a DM')
+    @app_commands.describe(user='The user')
+    @app_commands.describe(message='The message to be sent')
+    @not_blacklisted()
+    async def dm(self, ctx:Context, user:discord.User=None, message:str=None) -> None:
+        if not user or message:
+            embed = discord.Embed(
+                description=" ❌  Invalid parameters.",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
+        try:
+            msg = await user.send(message)
+            if msg:
+                embed = discord.Embed(
+                    description=" ✅  Sent.",
+                    color=0x25D917)
+                return await ctx.send(embed=embed)
+            else:
+                embed = discord.Embed(
+                    description=" ❌  Couldn't send message.",
+                    color=0xd91313)
+                return await ctx.send(embed=embed)
+        except Exception as e:
+            embed = discord.Embed(
+                title="Couldn't send message",
+                description=f" ❌  {e}",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
     
     # Shows an embed with the technical specifications of the system running the bot
     @commands.hybrid_command(

@@ -64,6 +64,7 @@
 - 1.9.1:
 	* Fixed an "AttributeError" that would trigger when using commands in RinBot's DMs.
 	* RinBot's file system has been re-organized to keep things clean.
+	* New commands "/profilebanner", "/profilepic" and "/dm" in general.
 	* New commands "/cat" and "/dog" that shows a random image of each respective animal.
 	* New command "/ocr" that reads text from an image and sends back the result.
 	* New command "/meme" that "memes" with someone's last message.
