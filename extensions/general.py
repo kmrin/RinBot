@@ -88,7 +88,7 @@ class General(commands.Cog, name='general'):
     @app_commands.describe(message='The message to be sent')
     @not_blacklisted()
     async def dm(self, ctx:Context, user:discord.User=None, message:str=None) -> None:
-        if not user or message:
+        if not user or not message:
             embed = discord.Embed(
                 description=" ❌  Invalid parameters.",
                 color=0xd91313)
