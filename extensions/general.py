@@ -27,8 +27,6 @@ class General(commands.Cog, name='general'):
                 description=" ❌  Invalid parameters.",
                 color=0xd91313)
             return await ctx.send(embed=embed)
-        if user.isnumeric():
-            user = self.bot.get_user(int(user))
         embed = discord.Embed(
             title=f"{user.display_name}'s profile banner:",
             color=0xe3a01b)
@@ -62,8 +60,6 @@ class General(commands.Cog, name='general'):
                 description=" ❌  Invalid parameters.",
                 color=0xd91313)
             return await ctx.send(embed=embed)
-        if user.isnumeric():
-            user = self.bot.get_user(int(user))
         embed = discord.Embed(
             title=f"{user.display_name}'s profile picture:",
             color=0xe3a01b)
