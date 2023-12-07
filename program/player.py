@@ -53,6 +53,7 @@ class Player():
                 voice_channel = self.ctx.author.voice.channel
                 self.client: discord.VoiceClient = await voice_channel.connect()
                 voice_channels[self.ctx.guild.id] = self.client
+                print("Returning true")
                 return True
             else:
                 self.client: discord.VoiceClient = voice_channels[self.ctx.guild.id]
@@ -62,12 +63,14 @@ class Player():
                         description="I'm already connected to a voice channel on this server!",
                         color=0xd81313)
                     await self.ctx.send(embed=embed)
+                    print("Already connected")
                     return False
         else:
             embed = discord.Embed(
                 description=" ❌ You are either on a invalid channel, or I don't have the necessary permissions to access it.",
                 color=0xD81313)
             await self.ctx.send(embed=embed)
+            print("After embed")
             return False
     
     # Disconnects and resets values
