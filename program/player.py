@@ -55,7 +55,7 @@ class Player():
                 print("GUILD NOT IN VOICE CHANNELS")
                 voice_channel = self.ctx.author.voice.channel
                 print("CREATED CHANNEL VAR")
-                self.client: discord.VoiceClient = await voice_channel.connect()
+                self.client = await voice_channel.connect()
                 print("CONNECTED TO CLIENT")
                 print(voice_channels)
                 voice_channels[self.ctx.guild.id] = self.client
@@ -64,7 +64,7 @@ class Player():
                 print("Returning true")
                 return True
             else:
-                self.client: discord.VoiceClient = voice_channels[self.ctx.guild.id]
+                self.client = voice_channels[self.ctx.guild.id]
                 if self.ctx.author.voice.channel.id != self.client.channel.id:
                     embed = discord.Embed(
                         title=' ❌  Error',
@@ -85,7 +85,7 @@ class Player():
     async def disconnect(self):
         if self.ctx.guild:
             if self.ctx.guild.id in voice_channels:
-                self.client: discord.VoiceClient = voice_channels.pop(self.ctx.guild.id)
+                self.client = voice_channels.pop(self.ctx.guild.id)
                 await self.client.disconnect()
                 await self.cancelPlaylist(fromdc=True)
     
