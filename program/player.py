@@ -48,20 +48,11 @@ class Player():
     
     # Connects to the user's voice channel
     async def connect(self):
-        print("CONNECT")
         if self.ctx.guild and self.ctx.author.voice:
-            print("AUTHOR IN VOICE")
             if self.ctx.guild.id not in voice_channels:
-                print("GUILD NOT IN VOICE CHANNELS")
                 voice_channel = self.ctx.author.voice.channel
-                print("CREATED CHANNEL VAR")
                 self.client = await voice_channel.connect()
-                print("CONNECTED TO CLIENT")
-                print(voice_channels)
                 voice_channels[self.ctx.guild.id] = self.client
-                print(voice_channels)
-                print("ADDED VOICE ID TO VOICE CHANNELS")
-                print("Returning true")
                 return True
             else:
                 self.client = voice_channels[self.ctx.guild.id]
