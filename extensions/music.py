@@ -72,6 +72,7 @@ class Music(commands.Cog, name='music'):
         current_player:Player = players[ctx.guild.id]
         
         # Connect to the voice channel
+        print("Before connection")
         connection = await current_player.connect()
         if isinstance(connection, bool):
             if not connection:
@@ -80,6 +81,7 @@ class Music(commands.Cog, name='music'):
                     color=0xd91313)
                 await ctx.send(embed=embed)
                 return
+        print("After connection")
         
         # Activate shuffling for playlists
         if shuffle != 0:
