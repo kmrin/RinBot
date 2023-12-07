@@ -80,10 +80,12 @@ class Player():
     
     # Does the necessary treatment of the requested song, adds it to queue, and begins playing
     async def addToQueue(self, song, pl_item=False, history_item=0, playlist_id=0):
-        
+        print("In queue func")
         # If it ain't a URL, do a search query
         if not is_url(song):
+            print("Not a URL")
             song_query = processYoutubeSearch(song)
+            print(song_query)
             if isinstance(song_query, discord.Embed):
                 await self.ctx.send(embed=song_query)
                 await self.disconnect()
@@ -97,7 +99,9 @@ class Player():
                 title=f' 🌐  Search results for `"{song}"`:',
                 description=f"{message}",
                 color=0x25d917)
+            print("message before view:", message)
             view = SearchSelector(self.ctx, self.bot, self)
+            print("message after view:", message)
             await self.ctx.send(embed=embed, view=view)
             
             # Wait for user response
