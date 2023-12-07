@@ -136,6 +136,7 @@ class Player():
             song = processYoutubeLink(temp_pl_data['entries'][playlist_id - 1]['url'])
         else:
             song = processYoutubeLink(song)
+            print(song)
         if isinstance(song, discord.Embed):
             await self.ctx.send(embed=song)
             await self.disconnect()
