@@ -51,7 +51,10 @@ class Player():
         if self.ctx.guild and self.ctx.author.voice:
             if self.ctx.guild.id not in voice_channels:
                 voice_channel = self.ctx.author.voice.channel
-                self.client = await voice_channel.connect()
+                try:
+                    self.client = await voice_channel.connect()
+                except Exception as e:
+                    print(f"Error connecting to voice channel: {e}")
                 voice_channels[self.ctx.guild.id] = self.client
                 return True
             else:
