@@ -74,7 +74,9 @@ class Music(commands.Cog, name='music'):
         # Connect to the voice channel
         print("Before connection")
         connection = await current_player.connect()
+        print("After var")
         if isinstance(connection, bool):
+            print("In instance")
             if not connection:
                 embed = discord.Embed(
                     description=" ❌  Couldn't connect to voice channel. Check my permissions.",
