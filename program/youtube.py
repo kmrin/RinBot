@@ -26,35 +26,35 @@ ffmpeg_opts = {
 
 # Processes standalone youtube links and returns the necessary data for further processing
 def processYoutubeLink(link:str):
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(link, download=False)
-            duration = formatTime(info['duration'])
-            thumbnail = info.get('thumbnail', '')
-            if 'formats' in info and info['formats']:
-                audio = next((format for format in info['formats']
-                              if format.get('acodec') == 'opus'), None)
-            if audio:
-                data = {
-                    'title': info['title'],
-                    'url': link,
-                    'thumb': thumbnail,
-                    'duration': duration,
-                    'uploader': info['uploader'],
-                    'source': discord.FFmpegOpusAudio(audio['url'], **ffmpeg_opts)}
-                return data
-            else:
-                embed = discord.Embed(
-                    title='Error',
-                    description=" ❌ YT-DLP error, could not grab song info :(",
-                    color=0xD81313)
-                return embed
-    except yt_dlp.DownloadError as e:
+    #try:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(link, download=False)
+        duration = formatTime(info['duration'])
+        thumbnail = info.get('thumbnail', '')
+        if 'formats' in info and info['formats']:
+            audio = next((format for format in info['formats']
+                        if format.get('acodec') == 'opus'), None)
+        if audio:
+            data = {
+                'title': info['title'],
+                'url': link,
+                'thumb': thumbnail,
+                'duration': duration,
+                'uploader': info['uploader'],
+                'source': discord.FFmpegOpusAudio(audio['url'], **ffmpeg_opts)}
+            return data
+        else:
+            embed = discord.Embed(
+                title='Error',
+                description=" ❌ YT-DLP error, could not grab song info :(",
+                color=0xD81313)
+            return embed
+    """except yt_dlp.DownloadError as e:
         embed = discord.Embed(
             title=' ❌ Error on YT-DLP:',
             description=f"``{e}``",
             color=0xd81313)
-        return embed
+        return embed"""
 
 # Processes youtube playlist links and returns the necessary data for further processing
 def processYoutubePlaylist(link:str):
