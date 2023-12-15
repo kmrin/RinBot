@@ -14,7 +14,7 @@ for folder in folders:
         print(f"[init.py]-[Info]: Created directory '{folder}'")
 
 # Imports
-import subprocess, asyncio, platform, sys, aiosqlite, exceptions, discord, time, datetime
+import subprocess, asyncio, platform, sys, aiosqlite, exceptions, discord, time, datetime, random
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 from program.logger import logger
@@ -238,6 +238,11 @@ async def on_message(message: discord.Message) -> None:
             await db_manager.update_message_count(message.author.id, message.guild.id, True)
         else:
             await db_manager.update_message_count(message.author.id, message.guild.id)
+        
+        # mark-delete-inator
+        if message.author.id == 209030349357842433:
+            if random.randint(1, 20) == 20:
+                await message.delete()
         
         await bot.process_commands(message)
     except AttributeError:
