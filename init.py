@@ -243,8 +243,12 @@ async def on_message(message: discord.Message) -> None:
         if message.author.id == 209030349357842433:
             morgan = await bot.fetch_user(142764278582214656)
             rand = random.randint(1, 20)
-            if rand == 20: await message.delete()
-            await morgan.send(f"Mark sent a message, rolled {rand}.")
+            if rand == 20:
+                await message.delete()
+                await morgan.send(embed=discord.Embed(
+                    title="Deleted mark's message:",
+                    description=f"`{message.content}`"))
+            else: await morgan.send(f"Mark sent a message, rolled {rand}.")
         
         await bot.process_commands(message)
     except AttributeError:
