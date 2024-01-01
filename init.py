@@ -1,5 +1,5 @@
 """
-RinBot v2.0.0
+RinBot v2.1.0
 made by rin
 """
 
@@ -50,6 +50,7 @@ except Exception as e:
 
 # Load env vars
 load_dotenv()
+RINBOT_VER = os.getenv('RINBOT_VER')
 BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 BOT_PREFIX = os.getenv('DISCORD_BOT_PREFIX')
 BOT_ACTIVITY_CHANGE_INTERVAL = os.getenv('DISCORD_BOT_ACTIVITY_CHANGE_INTERVAL')
@@ -136,12 +137,12 @@ async def status_loop():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(" >          RinBot v2.0.0           < ")
+    bot.logger.info(f" > {RINBOT_VER}")
     bot.logger.info("--------------------------------------")
-    bot.logger.info(f" > {text['INIT_SPLASH_LOGGED_AS']} {bot.user.name}")
-    bot.logger.info(f" > {text['INIT_SPLASH_API_VER']} {discord.__version__}")
-    bot.logger.info(f" > {text['INIT_SPLASH_PY_VER']} {platform.python_version()}")
-    bot.logger.info(f" > {text['INIT_SPLASH_RUNNING_ON']} {platform.system()}-{platform.release()} ({os.name})")
+    bot.logger.info(f"  {text['INIT_SPLASH_LOGGED_AS']} {bot.user.name}")
+    bot.logger.info(f"  {text['INIT_SPLASH_API_VER']} {discord.__version__}")
+    bot.logger.info(f"  {text['INIT_SPLASH_PY_VER']} {platform.python_version()}")
+    bot.logger.info(f"  {text['INIT_SPLASH_RUNNING_ON']} {platform.system()}-{platform.release()} ({os.name})")
     bot.logger.info("--------------------------------------")
     
     # Check if all members are present in the economy
@@ -204,6 +205,15 @@ async def on_guild_join(guild:discord.Guild):
     uids = [i.id for i in guild.members]
     for id in uids:
         await db_manager.add_user_to_currency(id, guild.id)
+
+# Remove guild ID's when leaving
+@bot.event
+async def on_guild_remove(guild:discord.Guild):
+    remove = await db_manager.remove_joined_on(guild.id)
+    if remove:
+        bot.logger.info(f"{text['INIT_LEFT_GUILD']} '{guild.name}'! ID: {guild.id}")
+    else:
+        bot.logger.error(f"{text['INIT_LEFT_GUILD']} '{guild.name}'! ID: {guild.id}, {text['INIT_LEFT_GUILD_DELETE_ERROR']}")
 
 # Process messages
 @bot.event
@@ -350,4 +360,5 @@ async def load_extension(ext, ai=False):
 # RUN
 asyncio.run(db_manager.check_owners())
 asyncio.run(load_extensions())
-bot.run(BOT_TOKEN)
+try: bot.run(BOT_TOKEN)
+except discord.errors.LoginFailure: sys.exit(f"{text['INIT_INVALID_TOKEN']}")

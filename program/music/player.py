@@ -85,11 +85,16 @@ class Player():
             self.client.stop()
     
     # Adds tracks to the player's song queue
-    async def add_to_queue(self, data):
+    async def add_to_queue(self, interaction:discord.Interaction, data):
         
         """
         data structure:
-            data = {"titles": [], "urls": [], "durations": [], "uploaders": []}
+            data: dict = {"titles": [], "urls": [], "durations": [], "uploaders": []}
+        
+        returns:
+            data: list = [embed, view]
+            Note: The view item will only be returned if the items added to the queue
+                  are more than 15, otherwise it returns None
         
         If it's a playlist, the item will not contain any "duration" or "uploader"
         """
@@ -112,7 +117,7 @@ class Player():
             embed = discord.Embed(
                 description=f"{text['PLAYER_SONG_QUEUE_ERROR']}",
                 color=RED)
-            await self.interaction.channel.send(embed=embed)
+            await interaction.followup.send(embed=embed)
         
         # Show recently added tracks
         else:
@@ -122,17 +127,18 @@ class Player():
                 embed = discord.Embed(
                     title=f"{text['PLAYER_ADDED_TO_QUEUE']}",
                     description="\n".join(chunks[0]), color=GREEN)
-                await self.interaction.followup.send(embed=embed, view=PageSwitcher(self.bot, embed, chunks))
+                view=PageSwitcher(self.bot, embed, chunks)
+                await interaction.followup.send(embed=embed, view=view)
             else:
                 embed = discord.Embed(
                     title=f"{text['PLAYER_ADDED_TO_QUEUE']}",
                     description=queue, color=GREEN)
-                await self.interaction.followup.send(embed=embed)
-    
-        # Start playing if nothing is happening
-        if not self.client.is_playing() and not self.is_paused:
-            await self.play()
-    
+                await interaction.followup.send(embed=embed)
+
+            # Start playing if nothing is happening
+            if not self.client.is_playing() and not self.is_paused:
+                await self.play()
+
     # Checks if there are songs in queue, processes them and plays them on the vc
     async def play(self):
         if self.queue.len() > 0:
@@ -179,3 +185,22 @@ class Player():
                     await self.disconnect()
             except AttributeError:
                 pass
+    
+    # Adds a song from history to queue
+    async def pick_from_history(self, interaction, entry:int) -> dict:
+        try:
+            await self.load_history()
+            if not self.song_history:
+                return discord.Embed(
+                    description=f"{text['PLAYER_HISTORY_EMPTY']}", color=RED)
+            song = self.song_history[entry - 1]
+            self.song_history.remove(self.song_history[entry - 1])
+            await db_manager.update_history(self.guild_id, self.song_history)
+            return await self.add_to_queue(interaction, song)
+        except IndexError:
+            self.manual_dc = False
+            await self.disconnect()
+            return discord.Embed(
+                title=f"{text['ERROR']}",
+                description=f"{text['PLAYER_HISTORY_OUT_OF_RANGE'][0]} {entry} {text['PLAYER_HISTORY_OUT_OF_RANGE'][1]}",
+                color=RED)

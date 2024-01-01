@@ -18,7 +18,7 @@ def is_owner() -> Callable[[T], T]:
 # Checks if a user is in the 'admins' class
 def is_admin() -> Callable[[T], T]:
     async def predicate(context: commands.Context) -> bool:
-        if not await db_manager.is_admin(context.author.id):
+        if not await db_manager.is_admin(context.author.id, context.guild.id):
             raise E.UserNotAdmin
         return True
     return commands.check(predicate)

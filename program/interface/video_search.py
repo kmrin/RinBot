@@ -47,7 +47,8 @@ class VideoSearchSelect(discord.ui.Select):
                     data["urls"].append(self.results["urls"][index])
                     data["durations"].append(self.results["durations"][index])
                     data["uploaders"].append(self.results["uploaders"][index])
-        await self.player.add_to_queue(data)
+        # Send tracks to player for processing
+        await self.player.add_to_queue(interaction, data)
 
 class PlaylistSearchSelect(discord.ui.Select):
     def __init__(self, bot, results, player):
@@ -82,8 +83,9 @@ class PlaylistSearchSelect(discord.ui.Select):
                     embed = discord.Embed(
                         description=f"{text['MUSIC_ADDING_PL'][0]} `{pl_data['count']}` {text['MUSIC_ADDING_PL'][1]} `{pl_data['title']}`",
                         color=YELLOW)
-                    await interaction.channel.send(embed=embed)
-                    await self.player.add_to_queue(data)
+                    await interaction.followup.send(embed=embed)
+                    # Send tracks to player for processing
+                    await self.player.add_to_queue(interaction, data)
 
 class VideoSearchView(discord.ui.View):
     def __init__(self, bot, results, player):

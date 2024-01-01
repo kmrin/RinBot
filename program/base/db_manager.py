@@ -59,9 +59,9 @@ async def check_owners():
                 id = input('Your ID: ')
                 if id.isnumeric():
                     add_owner = await add_user_to_owners(id)
-                    add_admin = await add_user_to_admins(id)
-                    if not add_owner or not add_admin:
+                    if not add_owner:
                         bot.logger.error(f"{text['DB_MANAGER_USER_NOT_ADDED']}")
+                        await check_owners()
                     else:
                         valid = True
                         bot.logger.info(f"{text['DB_MANAGER_THANKING']}")
@@ -124,8 +124,7 @@ async def add_user_to_owners(user_id:int) -> bool:
 # Removes a user from the owners class
 async def remove_user_from_owners(user_id:int) -> bool:
     try:
-        owner = await is_owner(user_id)
-        if owner:
+        if await is_owner(user_id):
             conn = await init_db()
             await conn.execute("DELETE FROM owners WHERE user_id=?", (user_id,))
             await conn.commit()
@@ -140,11 +139,11 @@ async def remove_user_from_owners(user_id:int) -> bool:
         await conn.close()
 
 # Checks if the user is a admin
-async def is_admin(user_id:int) -> bool:
+async def is_admin(user_id:int, guild_id:int) -> bool:
     try:
         conn = await init_db()
         async with conn.execute(
-            "SELECT * FROM admins WHERE user_id=?", (user_id,)
+            "SELECT * FROM admins WHERE user_id=? AND guild_id=?", (user_id,guild_id,)
         ) as cursor:
             result = await cursor.fetchone()
             return result is not None
@@ -170,13 +169,13 @@ async def get_admins() -> list:
         await conn.close()
 
 # Adds a user to the admins class
-async def add_user_to_admins(user_id:int) -> bool:
+async def add_user_to_admins(user_id:int, guild_id:int) -> bool:
     try:
         conn = await init_db()
-        await conn.execute("INSERT INTO admins(user_id) VALUES(?)", (user_id,))
+        await conn.execute("INSERT INTO admins(user_id,guild_id) VALUES(?,?)", (user_id,guild_id,))
         await conn.commit()
         async with conn.execute(
-            "SELECT user_id FROM admins WHERE user_id=?", (user_id,)
+            "SELECT user_id FROM admins WHERE user_id=? AND guild_id=?", (user_id,guild_id,)
         ) as cursor:
             result = await cursor.fetchone()
             if result: return True 
@@ -188,12 +187,12 @@ async def add_user_to_admins(user_id:int) -> bool:
         await conn.close()
 
 # Removes a user from the admins class
-async def remove_user_from_admins(user_id:int) -> bool:
+async def remove_user_from_admins(user_id:int, guild_id:int) -> bool:
     try:
         admin = await is_admin(user_id)
         if admin:
             conn = await init_db()
-            await conn.execute("DELETE FROM admins WHERE user_id=?", (user_id,))
+            await conn.execute("DELETE FROM admins WHERE user_id=? AND guild_id=?", (user_id,guild_id,))
             await conn.commit()
             async with conn.execute("SELECT COUNT (*) FROM admins") as cursor:
                 rows = await cursor.fetchone()
@@ -281,13 +280,27 @@ async def add_joined_on(guild_id:int) -> bool:
             "SELECT * FROM joined_on WHERE guild_id=?", (guild_id,)
         ) as cursor:
             result = await cursor.fetchone()
-            if result: return True
-            else: return False
+            return True if result else False
     except Exception as e:
         e = format_exception(e)
         bot.logger.error(f"[db_manager.py]: {e}")
     finally:
         await conn.close()
+
+# Removes a joined server from the database
+async def remove_joined_on(guild_id:int) -> bool:
+    try:
+        conn = await init_db()
+        await conn.execute("DELETE FROM joined_on WHERE guild_id=?", (guild_id,))
+        await conn.commit()
+        async with conn.execute(
+            "SELECT * FROM joined_on WHERE guild_id=?", (guild_id,)
+        ) as cursor:
+            result = await cursor.fetchone()
+            return False if result else True
+    except Exception as e:
+        e = format_exception(e)
+        bot.logger.error(f"[db_manager.py]: {e}")
 
 # Returns the IDs of all joined servers
 async def get_joined_ids() -> list:
@@ -640,7 +653,7 @@ async def remove_from_favorites(user_id, pl_id):
                 ,(json.dumps(current), user_id))
             await conn.commit()
             return discord.Embed(
-                description=f" {text['DB_MANAGER_REM_FAV_REMOVED'][0]}  `{item['title']}` {text['DB_MANAGER_REM_FAV_REMOVED'][1]}",
+                description=f"{text['DB_MANAGER_REM_FAV_REMOVED'][0]}  `{item['title']}` {text['DB_MANAGER_REM_FAV_REMOVED'][1]}",
                 color=0x25d917)
         except IndexError:
             return discord.Embed(

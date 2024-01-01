@@ -31,9 +31,9 @@
         "DB_MANAGER_ERROR_BASE": "[db_manager.py]-[ERROR]:",
         "DB_MANAGER_ERROR_SCHEMA_NOT_FOUND": "[db_manager.py]-[ERROR]: Database schema file not found",
         "DB_MANAGER_FRESH_DB": "Fresh database, first start detected, Welcome!",
-        "DB_MANAGER_INSTRUCTIONS": "Please copy and paste your discord user ID so we can add you as a owner and admin of the bot.",
+        "DB_MANAGER_INSTRUCTIONS": "Please copy and paste your discord user ID so we can add you as a owner of the bot.",
         "DB_MANAGER_ASKING_ID": "Your ID: ",
-        "DB_MANAGER_THANKING": "Thanks! You've been added to the 'owners' and 'admins' class, have fun! :D",
+        "DB_MANAGER_THANKING": "Thanks! You've been added to the 'owners' class, have fun! :D",
         "DB_MANAGER_INVALID_ID": "Invalid ID. Make sure it only contains numbers.",
         "DB_MANAGER_USER_NOT_ADDED": "There was an issue adding you to my database :(",
         "DB_MANAGER_REM_FAV_REMOVED": ["✅", "removed from your favorites!"],
@@ -62,7 +62,7 @@
         "INIT_JOINED_GUILD": "Joined",
         "INIT_BLOCKED": "You are blocked from using RinBot!",
         "INIT_NOT_OWNER": "You are not on RinBot's `owners` class.",
-        "INIT_NOT_ADMIN": "You are not on RinBot's `admins` class.",
+        "INIT_NOT_ADMIN": "You are not on the `admins` class. If you are an admin on this server, use `/admins set` to get validated and added to the class.",
         "INIT_USER_NO_PERMS_1": "You don't have `",
         "INIT_USER_NO_PERMS_2": "` permissions, which are necessary to run this command.",
         "INIT_BOT_NO_PERMS_1": "I don't have `",
@@ -80,6 +80,9 @@
         "INIT_TRIED_ON_DMS": "on my DMs",
         "INIT_TRIED_COMM_CLASS": "tried running a command of class",
         "INIT_TRIED_COMM_NOT_IN_CLASS": "but they're not a part of this class",
+        "INIT_LEFT_GUILD": "Left guild",
+        "INIT_LEFT_GUILD_DELETE_ERROR": "but I couldn't remove it from my database",
+        "INIT_INVALID_TOKEN": "Could not loggin to discord -> Invalid token.",
 
         "GENERAL_REQUESTED_BY": "Requested by:",
         
@@ -180,6 +183,7 @@
 
         "MODERATION_CENSOR_NAME": "censor",
         "MODERATION_CENSOR_DESC": "Deletes a number of messages from this text channel",
+        "MODERATION_CENSOR_EMBED": [" ⚠️  Clearing", "messages from"],
 
         "MODERATION_BL_NAME": "blacklist",
         "MODERATION_BL_DESC": "Manipulates the list of users that can't use RinBot",
@@ -210,6 +214,11 @@
         "MODERATION_ADMINS_ERROR_ADDING": ["Couldn't add **", "** to the admins class"],
         "MODERATION_ADMINS_REMOVED": [" ✅  **", "**was successfuly removed from the admins class"],
         "MODERATION_ADMINS_ERROR_REMOVING": ["Couldn't remove **", "** from the admins class"],
+        "MODERATION_ADMINS_SET_NAME": "set",
+        "MODERATION_ADMINS_SET_DESC": "Configures a user to be added to the admins class",
+        "MODERATION_ADMINS_SET_NOT_ADMIN": " ❌  You are not an administrator on this server",
+        "MODERATION_ADMINS_SET_ADDED": "has been added to this server's admin class on RinBot",
+        "MODERATION_ADMINS_SET_NOT_ADDED": "could not be added to this server's admin class on RinBot.",
 
         "MODERATION_WARNINGS_NAME": "warnings",
         "MODERATION_WARNINGS_DESC": "Manipulates user warnings",
@@ -364,6 +373,11 @@
         "MUSIC_PLAY_SEARCH_PL_DESC": "Choose one or more playlists from a search query",
         "MUSIC_PLAY_SEARCH_PL_DESCRIBE": "Your search query",
 
+        "MUSIC_PLAY_HISTORY_NAME": "history",
+        "MUSIC_PLAY_HISTORY_DESC": "Play from history",
+        "MUSIC_PLAY_HISTORY_ID_DESC": "The ID (number) of the song",
+        "MUSIC_PLAY_HISTORY_CHECKING": " 🕒  Checking history...",
+
         "MUSIC_QUEUE_NAME": "queue",
         "MUSIC_QUEUE_DESC": "Shows or manipulates the song queue",
         "MUSIC_QUEUE_SHOW_NAME": "show",
@@ -423,6 +437,10 @@
         "MUSIC_USING_PLAYER": "Using existing player for guild",
         "MUSIC_QUEUE_LENGHT": "Total queue time:",
 
+        "MUSIC_SHUFFLE_NAME": "shuffle",
+        "MUSIC_SHUFFLE_DESC": "Shuffle the current song queue",
+        "MUSIC_SHUFFLE_SHUFFLED": " ✅  Queue shuffled!",
+
         "BOORU_NAME": "booru",
         "BOORU_DESC": "Commands for danbooru",
         "BOORU_RANDOM_NAME": "random",
@@ -434,6 +452,7 @@
         "BOORU_RANDOM_MAX_API": " ❌  Due to API limitations, provide only a max. of 2 tags.",
         "BOORU_RANDOM_MAX_API_GOLD": " ❌  Due to API limitations, provide only a max. of 6 tags.",
         "BOORU_RANDOM_API_ERROR": " ❌  Error on DanbooruAPI",
+        "BOORU_RANDOM_EMPTY_RESPONSE": " ❌  No results found for your tags",
 
         "RULE34_NAME": "rule34",
         "RULE34_DESC": "Commands for rule34",
@@ -483,9 +502,9 @@
         "DB_MANAGER_ERROR_BASE": "[db_manager.py]-[ERROR]:",
         "DB_MANAGER_ERROR_SCHEMA_NOT_FOUND": "[db_manager.py]-[ERROR]: Arquivo schema da base de dados não encontrado",
         "DB_MANAGER_FRESH_DB": "Base de dados limpa, primeira inicialização detectada, bem-vindo(a)!",
-        "DB_MANAGER_INSTRUCTIONS": "Por-favor copie e cole a sua ID de usuário do discord abaixo para eu te adicionar na classe donos e admins.",
+        "DB_MANAGER_INSTRUCTIONS": "Por-favor copie e cole sua ID para adicionarmos você como dono(a) da bot.",
         "DB_MANAGER_ASKING_ID": "Sua ID: ",
-        "DB_MANAGER_THANKING": "Brigadinha! Você agora está nas classes dono e admin da RinBot, divirta-se!",
+        "DB_MANAGER_THANKING": "Brigadinha! Você agora faz parte da classe 'owners', divirta-se! :D",
         "DB_MANAGER_INVALID_ID": "ID inválida. Tenha certeza de que ela contém apenas números.",
         "DB_MANAGER_USER_NOT_ADDED": "Ocorreu um erro ao te adicionar na base de dados :(",
         "DB_MANAGER_REM_FAV_REMOVED": ["✅", "removido dos seus favoritos!"],
@@ -513,7 +532,7 @@
         "INIT_JOINED_GUILD": "Entrei em",
         "INIT_BLOCKED": "Você está bloqueado(a) de usar a RinBot!",
         "INIT_NOT_OWNER": "Você não está na classe `owners` da RinBot.",
-        "INIT_NOT_ADMIN": "Você não está na classe `admins` da RinBot.",
+        "INIT_NOT_ADMIN": "Você não está na classe `admins. Se você é um admin neste servidor, use `/admins set` pra ser validado(a) e adicionado(a) a classe.",
         "INIT_USER_NO_PERMS_1": "Você não tem as permissões `",
         "INIT_USER_NO_PERMS_2": "` que são necessárias para usar este comando.",
         "INIT_BOT_NO_PERMS_1": "Eu não tenho as permissões `",
@@ -667,6 +686,11 @@
         "MODERATION_WARNINGS_WARN_LIMIT_REACHED_EMBED": "foi kickado(a) do servidor por atingir o limite de avisos.",
         "MODERATION_WARNINGS_WARN_REMOVED": ["Removi o aviso de ID", "de", "Avisos totais do usuário:"],
         "MODERATION_WARNINGS_WARN": "Aviso:",
+        "MODERATION_ADMINS_SET_NAME": "set",
+        "MODERATION_ADMINS_SET_DESC": "Configura um usuário para ser adicionado(a) a classe admins",
+        "MODERATION_ADMINS_SET_NOT_ADMIN": " ❌  Você não é admin neste servidor",
+        "MODERATION_ADMINS_SET_ADDED": "foi adicionado(a) à classe 'admin' da RinBot neste servidor.",
+        "MODERATION_ADMINS_SET_NOT_ADDED": ", não consegui te adicionar na classe 'admin' da RinBot neste servidor.",
 
         "FUN_OCR_NAME": "ocr",
         "FUN_OCR_DESC": "Lê o texto em uma imagem e o retorna",
@@ -795,6 +819,11 @@
         "MUSIC_PLAY_SEARCH_PL_DESC": "Escolha uma ou mais playlists de uma busca",
         "MUSIC_PLAY_SEARCH_PL_DESCRIBE": "Sua busca",
 
+        "MUSIC_PLAY_HISTORY_NAME": "history",
+        "MUSIC_PLAY_HISTORY_DESC": "Tocar do histórico",
+        "MUSIC_PLAY_HISTORY_ID_DESC": "A ID (número) da música",
+        "MUSIC_PLAY_HISTORY_CHECKING": " 🕒  Verificando histórico...",
+
         "MUSIC_QUEUE_NAME": "fila",
         "MUSIC_QUEUE_DESC": "Comandos de fila",
         "MUSIC_QUEUE_SHOW_NAME": "mostrar",
@@ -829,6 +858,10 @@
         "MUSIC_USING_PLAYER": "Usando player existente para guilda",
         "MUSIC_QUEUE_LENGHT": "Tempo total da fila:",
 
+        "MUSIC_SHUFFLE_NAME": "randomizar",
+        "MUSIC_SHUFFLE_DESC": "Randomiza a fila atual",
+        "MUSIC_SHUFFLE_SHUFFLED": " ✅  Fila randomizada!",
+
         "BOORU_NAME": "booru",
         "BOORU_DESC": "Comandos para o danbooru",
         "BOORU_RANDOM_NAME": "random",
@@ -840,6 +873,7 @@
         "BOORU_RANDOM_MAX_API": " ❌  Por conta de limitações na API do danbooru. Utilize apenas 2 tags",
         "BOORU_RANDOM_MAX_API_GOLD": " ❌  Por conta de limitações na API do danbooru. Utilize apenas 6 tags.",
         "BOORU_RANDOM_API_ERROR": " ❌  Erro na API",
+        "BOORU_RANDOM_EMPTY_RESPONSE": " ❌  Nenhum resultado encontrado para as suas tags",
 
         "RULE34_NAME": "rule34",
         "RULE34_DESC": "Comandos para Rule34",

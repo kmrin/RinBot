@@ -114,7 +114,7 @@ class Music(Cog, name="music"):
                 data["uploaders"].append(link_data["uploader"])
         
         # Send tracks to player for processing
-        await current_player.add_to_queue(data)
+        await current_player.add_to_queue(interaction, data)
 
     @play_group.command(
         name=f"{text['MUSIC_PLAY_SEARCH_NAME']}",
@@ -223,6 +223,55 @@ class Music(Cog, name="music"):
             return await interaction.followup.send(embed=embed)
         view = PlaylistSearchView(self.bot, query, current_player)
         await interaction.followup.send(f"{text['MUSIC_PLAY_SEARCH_RESULTS']} **{search}**", view=view)
+
+    @play_group.command(
+        name=f"{text['MUSIC_PLAY_HISTORY_NAME']}",
+        description=f"{text['MUSIC_PLAY_HISTORY_DESC']}")
+    @app_commands.describe(id=f"{text['MUSIC_PLAY_HISTORY_ID_DESC']}")
+    @not_blacklisted()
+    async def play_history(self, interaction:discord.Interaction, id:str=None) -> None:
+        await interaction.response.defer()
+        if not id or not id.isnumeric():
+            embed = discord.Embed(
+                description=f"{text['ERROR_INVALID_PARAMETERS']}",
+                color=RED)
+            return await interaction.followup.send(embed=embed)
+        
+        # Generate a player object for the current guild
+        try:
+            if interaction.guild.id not in players:
+                self.bot.logger.info(f"{text['MUSIC_GENERATING_PLAYER']} {interaction.guild.name} (ID: {interaction.guild.id})")
+                players[interaction.guild.id] = Player(self.bot, interaction)
+            else:
+                self.bot.logger.info(f"{text['MUSIC_USING_PLAYER']} {interaction.guild.name} (ID: {interaction.guild.id})")
+            current_player:Player = players[interaction.guild.id]
+        except Exception as e:
+            e = format_exception(e)
+            embed = discord.Embed(
+                title=f"{text['MUSIC_PLAYER_GEN_ERROR']}",
+                color=RED)
+            return await interaction.followup.send(embed=embed)
+        
+        # Connect to vc
+        conn = await current_player.connect()
+        if isinstance(conn, discord.Embed):
+            try:
+                if not current_player.client.is_playing() and not current_player.is_paused:
+                    current_player.manual_dc = True
+                    await current_player.disconnect()
+                    del players[interaction.guild.id]
+            except AttributeError:
+                pass
+            return await interaction.followup.send(embed=conn)
+        
+        # Add requested item from song history
+        embed = discord.Embed(
+            description=f"{text['MUSIC_PLAY_HISTORY_CHECKING']}",
+            color=GREEN)
+        await interaction.response.send_message(embed=embed)
+
+        # Send tracks to player for processing
+        await current_player.pick_from_history(interaction, id)
 
     @queue_group.command(
         name=f"{text['MUSIC_QUEUE_SHOW_NAME']}",
@@ -351,6 +400,30 @@ class Music(Cog, name="music"):
         await interaction.response.send_message(embed=embed)
     
     @commands.hybrid_command(
+        name=f"{text['MUSIC_SHUFFLE_NAME']}",
+        description=f"{text['MUSIC_SHUFFLE_DESC']}")
+    @not_blacklisted()
+    async def shuffle(self, ctx:Context):
+        
+        # If we're doing nothing
+        if ctx.guild.id not in players:
+            embed = discord.Embed(
+                description=f"{text['MUSIC_NO_INSTANCE']}",
+                color=0xd91313)
+            return await ctx.send(embed=embed)
+        
+        # If yes, grab current player object
+        current_player:Player = players[ctx.guild.id]
+        
+        # Shuffle
+        current_player.queue.shuffle()
+        
+        embed = discord.Embed(
+            description=f"{text['MUSIC_SHUFFLE_SHUFFLED']}",
+            color=GREEN)
+        await ctx.send(embed=embed)
+    
+    @commands.hybrid_command(
         name=f"{text['MUSIC_SHOWCT_NAME']}",
         description=f"{text['MUSIC_SHOWCT_DESC']}")
     @not_blacklisted()
@@ -364,6 +437,26 @@ class Music(Cog, name="music"):
             return await ctx.send(embed=embed)
         
         await ctx.send(view=MediaControls(self.bot, players[ctx.guild.id]))
+
+    # Please
+    async def cog_check(self, ctx):
+        return hasattr(ctx, "guild") and ctx.guild.id in players
+    
+    @commands.Cog.listener("on_voice_state_update")
+    async def on_vc_update(self, member, before, after):
+        if member == self.bot.user:
+            if before.channel and not after.channel:
+                await self.cleanup(before.channel.guild.id)
+    
+    async def cleanup(self, guild_id):
+        if guild_id in players:
+            current_player:Player = players[guild_id]
+            try:
+                current_player.manual_dc = True
+                await current_player.disconnect()
+                del players[guild_id]
+            except AttributeError:
+                pass
 
 # SETUP
 async def setup(bot:Bot):

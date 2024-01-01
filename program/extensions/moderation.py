@@ -1,5 +1,5 @@
 # Imports
-import discord, os
+import discord, os, asyncio
 from discord.app_commands import Group
 from discord.ext.commands import Bot, Cog, Context
 from program.base.checks import *
@@ -107,12 +107,12 @@ class Moderation(Cog, name="moderation"):
                 description=f"{text['ERROR_INVALID_PARAMETERS']}",
                 color=RED)
             return await interaction.response.send_message(embed=embed)
-        if await db_manager.is_admin(user.id):
+        if await db_manager.is_admin(user.id, interaction.guild.id):
             embed = discord.Embed(
                 description=f"{text['MODERATION_ADMINS_ALREADY_ADMIN']}",
                 color=RED)
             return await interaction.response.send_message(embed=embed)
-        if await db_manager.add_user_to_admins(user.id):
+        if await db_manager.add_user_to_admins(user.id, interaction.guild.id):
             embed = discord.Embed(
                 description=f"{text['MODERATION_ADMINS_ADDED'][0]}{user.name} {text['MODERATION_ADMINS_ADDED'][1]}",
                 color=GREEN)
@@ -133,12 +133,12 @@ class Moderation(Cog, name="moderation"):
                 description=f"{text['ERROR_INVALID_PARAMETERS']}",
                 color=RED)
             return await interaction.response.send_message(embed=embed)
-        if not await db_manager.is_admin(user.id):
+        if not await db_manager.is_admin(user.id, interaction.guild.id):
             embed = discord.Embed(
                 description=f"{text['MODERATION_ADMINS_NOT_ADMIN']}",
                 color=RED)
             return await interaction.response.send_message(embed=embed)
-        if await db_manager.remove_user_from_admins(user.id):
+        if await db_manager.remove_user_from_admins(user.id, interaction.guild.id):
             embed = discord.Embed(
                 description=f"{text['MODERATION_ADMINS_REMOVED'][0]}{user.name} {text['MODERATION_ADMINS_REMOVED'][1]}",
                 color=GREEN)
@@ -146,6 +146,27 @@ class Moderation(Cog, name="moderation"):
             embed = discord.Embed(
                 description=f"{text['MODERATION_ADMINS_ERROR_REMOVING'][0]}{user.name} {text['MODERATION_ADMINS_ERROR_REMOVING'][1]}",
                 color=RED)
+        await interaction.response.send_message(embed=embed)
+    
+    @admins_group.command(
+        name=f"{text['MODERATION_ADMINS_SET_NAME']}",
+        description=f"{text['MODERATION_ADMINS_SET_DESC']}")
+    @not_blacklisted()
+    async def admins_set(self, interaction:discord.Interaction, user:discord.User=None) -> None:
+        if not user:
+            embed = discord.Embed(
+                description=f"{text['ERROR_INVALID_PARAMETERS']}",
+                color=RED)
+            return await interaction.response.send_message(embed=embed)
+        if not interaction.user.guild_permissions.administrator:
+            embed = discord.Embed(
+                description=f"{text['MODERATION_ADMINS_SET_NOT_ADMIN']}",
+                color=RED)
+        else:
+            add = await db_manager.add_user_to_admins(user.id, interaction.guild.id)
+            embed = discord.Embed(
+                description=f"{user.name} {text['MODERATION_ADMINS_SET_ADDED']}" if add else f"{user.name} {text['MODERATION_ADMINS_SET_NOT_ADDED']}",
+                color=GREEN if add else RED)
         await interaction.response.send_message(embed=embed)
     
     @blacklist_group.command(
@@ -228,10 +249,11 @@ class Moderation(Cog, name="moderation"):
                 color=RED)
             return await ctx.send(embed=embed)
         embed = discord.Embed(
-            description=" ✅  Cleared!",
+            description=f"{text['MODERATION_CENSOR_EMBED'][0]} `{amount}` {text['MODERATION_CENSOR_EMBED'][1]} `{ctx.channel.name}`",
             color=GREEN)
-        await ctx.channel.purge(limit=int(amount))
         await ctx.send(embed=embed)
+        await asyncio.sleep(2)
+        await ctx.channel.purge(limit=int(amount))
 
 # SETUP
 async def setup(bot:Bot):

@@ -1,0 +1,14 @@
+> v2.0.0:
+    * Initial release
+
+> v2.1.0:
+    * Fixed an issue where the "/censor" command would cause a unresponsive app error
+    * Fixed an issue where the "/play search" command would trigger a HTTP exception
+    * RinBot now deletes a guild from the database if she gets removed from it
+    * RinBot now properly checks if a valid bot token has been provided under ".env"
+    * RinBot now handles being manually disconnected from a vc by server mods
+    * Interactions are now handled better by the music cog and it's relatives
+    * The admins class is now both user id and guild id dependant instead of user id only
+    * The "/booru random" command now properly handles empty responses for invalid tags
+    * Added "/admins set" command so a server admin can add themselves to the admins class
+    * Added "/shuffle" command to the music cog
