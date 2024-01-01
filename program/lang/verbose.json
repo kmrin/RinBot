@@ -525,7 +525,7 @@
         "INIT_SPLASH_RUNNING_ON": " > Rodando em:",
         "INIT_CHECKING_ECONOMY": "Verificando presença na economia",
         "INIT_CHECKING_GUILDS": "Verificando guildas presentes",
-        "INIT_ACTIVITY": ["Ouvindo os seus comandos :3"],
+        "INIT_ACTIVITY": [" ✌️  Ouvindo os seus comandos :3", " 🥰  Ao seu dispor"],
         "INIT_SYNCHING_COMMANDS": "Sincronizando comandos",
         "INIT_NEW_MEMBER_TITLE": " :star:  Novo membro!",
         "INIT_NEW_MEMBER_DESC": "Bem-vindo(a) à",
