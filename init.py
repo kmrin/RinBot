@@ -22,7 +22,8 @@ text = load_lang()
 
 # Make sure cache dirs exist
 try:
-    folders = ["cache", "cache/fun", "cache/chatlog", "cache/stablediffusion", "cache/ocr"]
+    folders = ["cache", "cache/fun", "cache/chatlog", "cache/stablediffusion", "cache/ocr",
+               "assets/images/fortnite/downloaded", "assets/images/fortnite/images"]
     for folder in folders:
         folder_path = f"{os.path.realpath(os.path.dirname(__file__))}/{folder}"
         if not os.path.exists(folder_path):
