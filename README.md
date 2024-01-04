@@ -18,16 +18,17 @@ She was private code a while back, but I decided to publish at least a "alternat
 - Server moderation tools such as the command `/censor` that clears a certain amount of messages in a text chat.
 - YouTube music playback with search queries and support for playlists.
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
-- Rule34 integration if you're into that.
+- Rule34 and Danbooru integration if you're into that.
+- Integration with the fnbr Fortnite API
 
 ## Economy system
 As of update 1.8, RinBot now has a economy system with oranges as the currency.
 **The way it works is as follows:**
 * Users will receive 500 oranges by default upon entering a server and being registered in the economy database.
 * Users will be rewarded 25 oranges every 50 messages sent. `A anti-spam measure was applied to ensure this feature isn't abused.`
-* Users can transfer oranges between eachother using the `/orange_transfer` command.
-* Users can see the top 10 users with the most oranges using the `/orange_rank` command.
-* Users can use their oranges to buy items from the shop using the `/orange_store` and `/orange_buy` command.
+* Users can transfer oranges between eachother using the `/orange transfer` command.
+* Users can see the top 10 users with the most oranges using the `/orange rank` command.
+* Users can use their oranges to buy items from the shop using the `/orange store` and `/orange buy` command.
 ## NOTE: Currently only roles are supported by the orange store, more item types will be added in the future.
 
 ## User ID permission class system
@@ -36,90 +37,100 @@ It looks complicated, but it's easy to understand. RinBot has a "class" system c
 
 The **"owners"** class are the ones to have absolute full control of the entire bot. They can reset it, shut it down, manipulate extensions, add/remove users from the admin class, and of course, they can use any commands. As soon as you run the `init.py` file, and it creates a fresh database, you will be prompted to add your discord ID to be set as the owner of the bot.
 
-The **"admins"** class is meant for administrators / moderators of the server the bot is on. It provides access to commands of the "moderation" command cog, where they can blacklist users, manipulate warnings and use the `/censor` command. To add / remove users from this class, a user in the "owners" class needs to use the `/admins` command.
+The **"admins"** class is meant for administrators / moderators of the server the bot is on. It provides access to commands of the "moderation" command cog, where they can blacklist users, manipulate warnings and use the `/censor` command. To add / remove users from this class, a user with admin priv on the server needs to use the `/admins set` command.
 
 Users inside the **blacklisted** class are well... blacklisted from using ANY functionality of the bot. To add / remove users from this class, a user in the admins or owners class needs to use the `/blacklist` command.
 
 ## Commands
 
-#### General Cog
+#### General
 | Command | Description |
 | - | - |
-| `/translate`| Translates a text from one language to another using the "Translate" library |
+| `/help` | You just used it. |
 | `/rininfo` | Shows information about the bot |
-| `/serverinfo` | Shows information about the server |
 | `/specs` | Shows the specs. of the system running the bot |
 | `/ping` | Pong! |
+| `/translate` | Translates a text from one language to another using the "Translate" library |
 
-#### Moderation Cog
+#### Config
 | Command | Description |
 | - | - |
-| `/censor`| Deletes a specified number of messages from the text channel it was typed in |
-| `/admins` | Manipulates (adds / removes) users from the admins class |
-| `/blacklist` | Manipulates (adds / removes / shows) users from the blacklisted class |
-| `/warning` | Manipulates (adds / removes / shows) user warnings |
-| `/nickname` | Changes the server nickname of a member |
-| `/kick` | Kicks a server member |
-| `/ban` | Bans a server member |
+| `/set welcome-channel` | Sets a text channel on your server for RinBot to greet new members with a custom message |
+| `/set fortnite-daily-shop-channel` | Sets a text channel on your server for RinBot to send the daily fortnite item shop (Updates everyday at 00:05 UTC) |
+| `/toggle welcome-channel` | Toggles on and off the welcome channel functionality |
+| `/toggle fortnite-daily-shop-channel` | Toggles on and off the fortnite daily shop functionality |
+## NOTE: In order to use the fortnite daily shop function, a user must have a valid fnbr API Key configured on the .env file
 
-#### Owner Cog
+#### Moderation
 | Command | Description |
 | - | - |
-| `/extension`| Manipulates (loads / unloads / reloads) command cogs (extensions) |
-| `/reset` | Starts a new instance of the bot by executing the `init.py` script using the subprocess library, and then killing the original instance |
-| `/shutdown` | Shuts the bot down. |
-| `/owners` | Manipulates (adds / removes) users from the owners class |
+| `/censor` | Deletes a specified number of messages from the text channel it was typed in |
+| `/admins add` | Adds a user to the admins class |
+| `/admins remove` | Removes a user from the admins class |
+| `/blacklist show` | Shows the users inside the blacklist (if any) |
+| `/blacklist add` | Adds a user to the blacklist |
+| `/blacklist remove` | Removes a user from the blacklist |
+| `/warnings show` | Shows a user's warnings |
+| `/warnings add` | Adds a warning to a user |
+| `/warnings remove` | Removes a warning from a user by it's warn ID |
 
-#### Fun Cog
+#### Owner
 | Command | Description |
 | - | - |
-| `/cat`| Shows a random picture of a cat |
-| `/dog`| Shows a random picture of a dog |
-| `/ocr`| Reads text from an image attachment and sends back the result |
-| `/meme`| Memes on someone's last message |
-| `/pet`| Pets someone :3 |
-| `/fact`| Shows a random useless fact |
-| `/heads-or-tails` | Plays heads or tails |
-| `/rps` | Plays Rock Paper Scissors |
+| `/shutdown` |  Shuts the bot down. |
+| `/owners add` | Adds a user to the owners class (adds to admins as well if not present) |
+| `/owners remove` | Removes a user from the owners class  |
+| `/extension load` | Loads a bot extension |
+| `/extension unload` | Unloads a bot extension |
+| `/extension reload` | Reloads a bot extension |
 
-#### Music Cog
+#### Fun
 | Command | Description |
 | - | - |
-| `/play`| Connects to your voice-channel and starts playing songs from youtube through a given link, search query, or playlist (disconnects after 2 seconds of innactivity) |
-| `/queue` | Allows you to view or manipulate the current song queue |
-| `/history` | Allows you to view or manipulate the song history (stores the last 50 played songs) |
-| `/cancelplaylist` | Stops the current playlist from continuing |
-| `/showcontrols` | Shows the multimedia control buttons (useful if the original ones are too far up on the text channel, that's why I made it :p) |
-| `/showplaylist` | Shows a list of songs from a given playlist |
-| `/playlists` | Manipulates (adds / removes / clears) your individual list of favourite playlists |
+| `/cat` | Shows a random picture or gif of a cat |
+| `/dog` | Shows a random picture, gif or video of a dog |
+| `/pet` | Pets someone :3 |
+| `/fact` | Shows a random useless fact |
+| `/heads-or-tails` |  Plays heads or tails |
+| `/rps` |  Plays Rock Paper Scissors |
 
-#### Economy Cog
+#### Music
 | Command | Description |
 | - | - |
-| `/orange_rank` | Shows the top 10 members with the most oranges |
-| `/orange_transfer` | Transfer oranges between users |
-| `/orange_store` | Shows the items on the store |
-| `/orange_new_role` | Adds a role item to be bought from the store |
-| `/orange_buy` | Buys an item from the store (by name) |
+| `/showcontrols` | Shows multimedia controls for current media player |
+| `/play link` | Plays music through youtube links (single or list of links, playlists and shorts are supported) |
+| `/play search` | Plays music from a youtube search query (you can select up to 25 search results) |
+| `/play search_playlist` | Plays music from one or more selected playlists from a search query (you can select up to 25 playlists) |
+| `/queue show` | Shows the current song queue |
+| `/queue show url=Yes` | Same as **/queue show** but titles are switched for URLs |
+| `/queue clear` | Clears the current song queue |
+| `/queue clear id=?` | Clears a specific track from the song queue by their ID (number) |
+| `/history show` | Shows the server's song history (last 25 played songs) |
+| `/history show url=Yes` | Same as **/history show** but titles are switched for URLs |
+| `/history clear` | Clears the server's song history |
 
-#### StableDiffusion Cog
+#### Economy
 | Command | Description |
 | - | - |
-| `/generateimage`| Generates an image using AI through a StableDiffusion instance ("masterpiece, best quality") are already included on the positive prompt, so you can omit those |
+| `/orange rank` |  Shows the top 10 members with the most oranges |
+| `/orange transfer` |  Transfer oranges between users |
+| `/orange store` |  Shows the items on the store |
+| `/orange new_role` |  Adds a role item to be bought from the store |
+| `/orange buy` |  Buys an item from the store (by name) |
 
-#### Booru Cog
+#### Booru
 | Command | Description |
 | - | - |
-| `/booru-random` | Shows a random image from danbooru using the tags and rating given by the user |
+| `/booru random` | Shows a random image from danbooru using the tags and rating given by the user |
 
 ## NOTE: In order to use Danbooru, the user has to configure it properly through the .env file, by changing the "BOORU_ENABLE" flag from False to True, and adding their username and API key.
 ## NOTE 2: If you have a "Gold" danbooru account, make sure to change the "BOORU_IS_GOLD" flag inside .env from False to True, so you can take advantage of your 6 max tags search.
 
-#### Rule 34 Cog
+#### Rule 34
 | Command | Description |
 | - | - |
-| `/rule34-random` | Shows an image or gif from rule34 with your given tags |
-| `/rule34-icame` | Shows the top 10 characters on rule34's i came list |
+| `/rule34 random` | Shows an image or gif from rule34 with your given tags |
+| `/rule34 icame` | Shows the top 10 characters on rule34's i came list |
 
 ## NOTE: Due to the nature of Rule34, it's functionallity is disabled by default, in order to use Rule34, an owner of the bot must change the "RULE_34_ENABLED" flag inside the .env file from False to True
 
@@ -132,8 +143,8 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 
 ## Ok, cool! How do I host my own instance of RinBot?
 #### It's easy:
-- Download the latest release or clone this repository
 - Download and install python
+- Download the latest release or clone this repository
 - Open a command line inside RinBot's directory and run `pip install -r requirements.txt`
 - Add your discord bot token to the `.env` file
-- Run the `init.py` file
+- Run the `init.py` file and follow the start-up instructions

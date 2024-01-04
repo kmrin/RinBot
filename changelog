@@ -12,3 +12,13 @@
     * The "/booru random" command now properly handles empty responses for invalid tags
     * Added "/admins set" command so a server admin can add themselves to the admins class
     * Added "/shuffle" command to the music cog
+
+> v2.2.0:
+    * Properly updated majority of commands to app_commands
+    * Fixed a major security issue where app_commands where ignoring predicate checks
+    * Fixed a lot of database functions that were not properly updated to the new guild_id model
+    * Fixed an issue where the music player would return the entire queue when adding songs instead of just the added ones
+    * Fixed an issue where a lot of commands would go unresponsive due to poor error handling
+    * Welcome channel is now configurable through a command and lets users personalize their welcome messages
+    * Added compatibility with the fnbr fortnite api to get BR store updates on your text channel
+    * Other improvements over 2.1

@@ -1,19 +1,21 @@
 """
-RinBot v2.1.0
+RinBot v2.2.0
 made by rin
 """
 
 # Imports
-import os, sys, platform, subprocess, asyncio, discord, datetime, random
+import os, sys, platform, subprocess, asyncio, discord, random, pytz
+from discord import app_commands
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
-from program.base import db_manager
-from program.base.exceptions import Exceptions as E
-from program.base.logger import logger
-from program.base.helpers import load_lang, format_exception, strtobool
-from langchain.llms.koboldai import KoboldApiLLM
+from rinbot.base import db_manager
+from rinbot.base.exceptions import Exceptions as E
+from rinbot.base.logger import logger
+from rinbot.base.helpers import load_lang, format_exception, strtobool, format_date
+from rinbot.base.colors import *
+from rinbot.fortnite.daily_shop import get_shop
 from dotenv import load_dotenv
-from program.base.colors import *
+from datetime import datetime
 
 # Load verbose
 text = load_lang()
@@ -33,7 +35,7 @@ except Exception as e:
 # Check if ffmpeg is present
 try:
     if platform.system() == "Windows":
-        if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/program/bin/ffmpeg.exe"):
+        if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/rinbot/bin/ffmpeg.exe"):
             sys.exit(f"{text['INIT_FFMPEG_NOT_FOUND_WINDOWS']}")
     elif platform.system() == "Linux":
         try:
@@ -54,7 +56,6 @@ RINBOT_VER = os.getenv('RINBOT_VER')
 BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 BOT_PREFIX = os.getenv('DISCORD_BOT_PREFIX')
 BOT_ACTIVITY_CHANGE_INTERVAL = os.getenv('DISCORD_BOT_ACTIVITY_CHANGE_INTERVAL')
-WELCOME_CHANNEL = os.getenv('WELCOME_CHANNEL_ID')
 BOORU_ENABLED = strtobool(os.getenv('BOORU_ENABLED'))
 RULE34_ENABLED = strtobool(os.getenv('RULE34_ENABLED'))
 AI_ENABLED = strtobool(os.getenv('AI_ENABLED'))
@@ -64,6 +65,8 @@ AI_CHANNEL = os.getenv('AI_CHANNEL')
 AI_CHAT_HISTORY_LINE_LIMIT = os.getenv('AI_CHAT_HISTORY_LINE_LIMIT')
 AI_MAX_NEW_TOKENS = os.getenv('AI_MAX_NEW_TOKENS')
 AI_LANGUAGE = os.getenv('AI_LANGUAGE')
+FN_SHOP_ENABLED = strtobool(os.getenv('FNBR_DAILY_SHOP_ENABLED'))
+FN_UPDATE_TIME = os.getenv('FNBR_UPDATE_TIME')
 
 # Bot intents (many)
 intents = discord.Intents.all()
@@ -97,12 +100,13 @@ bot = Bot(
 bot.logger = logger
 db_manager.declare_bot(bot)
 
-# Vars
+# Vars and consts
 freshstart = True
 message_count = {}
 time_window_milliseconds = 5000
 max_msg_per_window = 5
 author_msg_times = {}
+utc = pytz.utc
 HOURS = {text['HOURS']}
 MINUTES = {text['MINUTES']}
 SECONDS = {text['SECONDS']}
@@ -111,6 +115,8 @@ ADMIN = {text['ADMIN']}
 
 # Will I use AI?
 if AI_ENABLED:
+    from langchain.llms.koboldai import KoboldApiLLM
+    
     # Specific AI settings
     bot.endpoint = str(AI_ENDPOINT_KOBOLD)
     if len(bot.endpoint.split("/api")) > 0:
@@ -125,6 +131,50 @@ if AI_ENABLED:
     bot.endpoint_type = "Kobold"
     bot.llm = KoboldApiLLM(endpoint=bot.endpoint, max_length=AI_MAX_NEW_TOKENS)
 
+# Show fortnite daily shop
+async def show_fn_daily_shop():
+    # Grab shop data
+    bot.logger.info(f"{text['INIT_FN_UPDATING']}")
+    shop = await get_shop()
+    img_dir = f"{os.path.realpath(os.path.dirname(__file__))}/rinbot/assets/images/fortnite/images"
+    img_files = [f for f in os.listdir(img_dir) if f.endswith(".png")]
+    embed = discord.Embed(
+        title=f"{text['INIT_DAILY_SHOP_EMBED'][0]} **{format_date(shop['date'])}**",
+        description=f"{text['INIT_DAILY_SHOP_EMBED'][1]} **{len(img_files)}** {text['INIT_DAILY_SHOP_EMBED'][2]} **{shop['count']}** {text['INIT_DAILY_SHOP_EMBED'][3]}",
+        color=PURPLE)
+
+    # Show store for each guild that has it enabled
+    for guild in bot.guilds:
+        check = await db_manager.get_daily_shop_channel(guild.id)
+        if check:
+            if check[0] == 1:
+                channel = await bot.fetch_channel(check[1])
+                await channel.send(embed=embed)
+                batches = []
+                for i in range(0, len(img_files), 6):
+                    batch = []
+                    img_names = img_files[i:i+6]
+                    for img in img_names:
+                        img_path = os.path.join(img_dir, img)
+                        batch.append(discord.File(img_path, filename=img))
+                    batches.append(batch)
+                for batch in batches:
+                    await channel.send(files=batch)
+
+    # Delete images to prevent cache buildup and mixing with other shops
+    for file in os.listdir(img_dir):
+        file_path = os.path.join(img_dir, file)
+        os.remove(file_path)
+    bot.logger.info(f"{text['INIT_FN_UPDATED']}")
+async def daily_shop_scheduler():
+    while True and FN_SHOP_ENABLED:
+        time = FN_UPDATE_TIME.split(":")
+        curr_time = datetime.now(utc).strftime("%H:%M:%S")
+        target_time = f"{time[0]}:{time[1]}:{time[2]}"
+        if curr_time == target_time:
+            await show_fn_daily_shop()
+        await asyncio.sleep(1)
+
 # Change status every 5 minutes (if there are more than 1)
 @tasks.loop(minutes=int(BOT_ACTIVITY_CHANGE_INTERVAL))
 async def status_loop():
@@ -137,12 +187,12 @@ async def status_loop():
 async def on_ready() -> None:
     # Initial logger info (splash)
     bot.logger.info("--------------------------------------")
-    bot.logger.info(f" > {RINBOT_VER}")
+    bot.logger.info(f"  > {RINBOT_VER}")
     bot.logger.info("--------------------------------------")
-    bot.logger.info(f"  {text['INIT_SPLASH_LOGGED_AS']} {bot.user.name}")
-    bot.logger.info(f"  {text['INIT_SPLASH_API_VER']} {discord.__version__}")
-    bot.logger.info(f"  {text['INIT_SPLASH_PY_VER']} {platform.python_version()}")
-    bot.logger.info(f"  {text['INIT_SPLASH_RUNNING_ON']} {platform.system()}-{platform.release()} ({os.name})")
+    bot.logger.info(f" {text['INIT_SPLASH_LOGGED_AS']} {bot.user.name}")
+    bot.logger.info(f" {text['INIT_SPLASH_API_VER']} {discord.__version__}")
+    bot.logger.info(f" {text['INIT_SPLASH_PY_VER']} {platform.python_version()}")
+    bot.logger.info(f" {text['INIT_SPLASH_RUNNING_ON']} {platform.system()}-{platform.release()} ({os.name})")
     bot.logger.info("--------------------------------------")
     
     # Check if all members are present in the economy
@@ -163,10 +213,13 @@ async def on_ready() -> None:
 
     # Start tasks
     status_loop.start()
+    asyncio.create_task(daily_shop_scheduler())
 
     # Sync slash commands
     bot.logger.info(f"{text['INIT_SYNCHING_COMMANDS']}")
     await bot.tree.sync()
+    
+    await bot.tree.sync(guild=await bot.fetch_guild(1183797796000763995))
 
 # Member welcome
 @bot.event
@@ -174,23 +227,20 @@ async def on_member_join(member:discord.Member):
     # Add new member to the economy
     await db_manager.add_user_to_currency(int(member.id), int(member.guild.id))
     
-    # Show welcome message
-    if WELCOME_CHANNEL.isnumeric():
-        try:
-            channel = bot.get_channel(int(WELCOME_CHANNEL))
-            if channel:
-                embed = discord.Embed(
-                    title=f"{text['INIT_NEW_MEMBER_TITLE']}",
-                    description=f"{text['INIT_NEW_MEMBER_DESC']} {member.guild.name}, {member.name}!",
-                    color=YELLOW)
-                try:
-                    embed.set_thumbnail(url=member.avatar.url)
-                except AttributeError:
-                    embed.set_thumbnail(url=member.default_avatar.url)
-                await channel.send(embed=embed)
-        except Exception as e:
-            e = format_exception(e)
-            bot.logger.error(f"{text['INIT_ERROR_BASE']} {e}")
+    # Check if guild has a welcome channel setup and show welcome message
+    try:
+        guild_data = await db_manager.get_welcome_channel(member.guild.id)
+        if guild_data:
+            if guild_data[0] == 1:
+                channel = bot.get_channel(int(guild_data[1]))
+                if channel:
+                    embed = discord.Embed(
+                        title=f"{text['INIT_NEW_MEMBER_TITLE'][0]} {member.mention}{text['INIT_NEW_MEMBER_TITLE'][1]}",
+                        description=f"{guild_data[2]}", color=YELLOW)
+                    await channel.send(embed=embed)
+    except Exception as e:
+        e = format_exception(e)
+        bot.logger.error(f"{text['INIT_ERROR_BASE']} {e}")
 
 # Save new guild ID's when joining
 @bot.event
@@ -226,7 +276,7 @@ async def on_message(message:discord.Message):
         # Anti-spam measure for economy system
         global author_msg_times
         aid = message.author.id
-        ct = datetime.datetime.now().timestamp() * 1000
+        ct = datetime.now().timestamp() * 1000
         if not author_msg_times.get(aid, False):
             author_msg_times[aid] = []
         author_msg_times[aid].append(ct)
@@ -315,19 +365,74 @@ async def on_command_error(ctx:Context, error) -> None:
         await ctx.send(embed=embed)
     else:
         raise error
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error) -> None:
+    if isinstance(error, app_commands.CommandOnCooldown):
+        minutes, seconds = divmod(error.retry_after, 60)
+        hours, minutes = divmod(minutes, 60)
+        hours = hours % 24
+        embed = discord.Embed(
+            description=f"{text['INIT_COMM_ERROR_DELAY']} {f'{round(hours)} {HOURS}' if round(hours) > 0 else ''} {f'{round(minutes)} {MINUTES}' if round(minutes) > 0 else ''} {f'{round(seconds)} {SECONDS}' if round(seconds) > 0 else ''}.",
+            color=0xE02B2B,)
+        await interaction.response.send_message(embed=embed)
+    elif isinstance(error, E.AC_UserBlacklisted):
+        embed = discord.Embed(
+            description=f"{text['INIT_BLOCKED']}", color=0xE02B2B)
+        await interaction.response.send_message(embed=embed)
+        if interaction.guild:
+            bot.logger.warning(
+                f"{interaction.user} (ID: {interaction.user.id}) {text['INIT_TRIED_COMM']} {text['INIT_TRIED_COMM_GUILD']} {interaction.guild.name} (ID: {interaction.guild.id}), {text['INIT_TRIED_COMM_BLOCKED']}")
+        else:
+            bot.logger.warning(
+                f"{interaction.user} (ID: {interaction.user.id}) {text['INIT_TRIED_COMM']} {text['INIT_TRIED_ON_DMS']}, {text['INIT_TRIED_COMM_BLOCKED']}")
+    elif isinstance(error, E.AC_UserNotOwner):
+        embed = discord.Embed(
+            description=f"{text['INIT_NOT_OWNER']}", color=0xE02B2B)
+        await interaction.response.send_message(embed=embed)
+        if interaction.guild:
+            bot.logger.warning(
+                f"{interaction.user} (ID: {interaction.user.id}) {text['INIT_TRIED_COMM_CLASS']} `{OWNER}` {interaction.guild.name} (ID: {interaction.guild.id}), {text['INIT_TRIED_COMM_NOT_IN_CLASS']}")
+        else:
+            bot.logger.warning(
+                f"{interaction.user} (ID: {interaction.user.id}) {text['INIT_TRIED_COMM_CLASS']} `{OWNER}` {text['INIT_TRIED_ON_DMS']}, {text['INIT_TRIED_COMM_NOT_IN_CLASS']}")
+    elif isinstance(error, E.AC_UserNotAdmin):
+        embed = discord.Embed(
+            description=f"{text['INIT_NOT_ADMIN']}", color=0xE02B2B)
+        await interaction.response.send_message(embed=embed)
+        if interaction.guild:
+            bot.logger.warning(
+                f"{interaction.user} (ID: {interaction.user.id}) {text['INIT_TRIED_COMM_CLASS']} `{ADMIN}` {interaction.guild.name} (ID: {interaction.guild.id}), {text['INIT_TRIED_COMM_NOT_IN_CLASS']}")
+        else:
+            bot.logger.warning(
+                f"{interaction.user} (ID: {interaction.user.id}) {text['INIT_TRIED_COMM_CLASS']} `{ADMIN}` {text['INIT_TRIED_ON_DMS']}, {text['INIT_TRIED_COMM_NOT_IN_CLASS']}")
+    elif isinstance(error, app_commands.MissingPermissions):
+        embed = discord.Embed(
+            description=f"{text['INIT_USER_NO_PERMS_1']}"
+            + ", ".join(error.missing_permissions)
+            + f"{text['INIT_USER_NO_PERMS_2']}",
+            color=0xE02B2B,)
+        await interaction.response.send_message(embed=embed)
+    elif isinstance(error, app_commands.BotMissingPermissions):
+        embed = discord.Embed(
+            description=f"{text['INIT_BOT_NO_PERMS_1']}"
+            + ", ".join(error.missing_permissions)
+            + f"{text['INIT_BOT_NO_PERMS_2']}",
+            color=0xE02B2B,)
+        await interaction.response.send_message(embed=embed)
+    else:
+        raise error
 
 # Loads extensions (command cogs)
-async def load_extensions() -> None:
+async def load_extensions():
     if AI_ENABLED:
-        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/program/kobold/cogs"):
+        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/rinbot/kobold/cogs"):
             if file.endswith(".py"):
                 extension = file[:-3]
                 await load_extension(extension, True)
     booru_ext = ["booru"]
-    e621_ext = ["e621"]
     rule34_ext = ["rule34"]
-    sum = booru_ext + e621_ext + rule34_ext
-    for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/program/extensions"):
+    sum = booru_ext + rule34_ext
+    for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/rinbot/extensions"):
         if file.endswith(".py"):
             extension = file[:-3]
             if BOORU_ENABLED and extension in booru_ext:
@@ -342,14 +447,14 @@ async def load_extensions() -> None:
 async def load_extension(ext, ai=False):
     if not ai:
         try:
-            await bot.load_extension(f"program.extensions.{ext}")
+            await bot.load_extension(f"rinbot.extensions.{ext}")
             bot.logger.info(f"{text['INIT_EXTENSION_LOADED']} '{ext}'")
         except Exception as e:
             e = format_exception(e)
             bot.logger.error(f"{text['INIT_ERROR_LOADING_EXTENSION']} '{ext}': {e}")
     else:
         try:
-            await bot.load_extension(f"program.kobold.cogs.{ext}")
+            await bot.load_extension(f"rinbot.kobold.cogs.{ext}")
             if ext == 'languagemodel':
                 bot.endpoint_connected = True
             bot.logger.info(f"{text['INIT_EXTENSION_LOADED']} '{ext}'")
