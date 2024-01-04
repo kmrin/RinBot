@@ -220,8 +220,6 @@ async def on_ready() -> None:
     bot.logger.info(f"{text['INIT_SYNCHING_COMMANDS']}")
     await bot.tree.sync()
     
-    await bot.tree.sync(guild=await bot.fetch_guild(1183797796000763995))
-
 # Member welcome
 @bot.event
 async def on_member_join(member:discord.Member):
