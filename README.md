@@ -46,7 +46,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 #### General
 | Command | Description |
 | - | - |
-| `/help` | You just used it. |
+| `/help` | Shows a paged embed with all of rinbot's commands. |
 | `/rininfo` | Shows information about the bot |
 | `/specs` | Shows the specs. of the system running the bot |
 | `/ping` | Pong! |
