@@ -78,7 +78,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | Command | Description |
 | - | - |
 | `/shutdown` |  Shuts the bot down. |
-| `/owners add` | Adds a user to the owners class (adds to admins as well if not present) |
+| `/owners add` | Adds a user to the owners class |
 | `/owners remove` | Removes a user from the owners class  |
 | `/extension load` | Loads a bot extension |
 | `/extension unload` | Unloads a bot extension |
