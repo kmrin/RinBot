@@ -129,7 +129,7 @@ class RinBot(Bot):
         super().__init__(command_prefix=config["PREFIX"], intents=intents)
     
     async def setup_hook(self) -> None:
-        nodes = [wavelink.Node(uri="http://localhost:6969", password="rinbot")]
+        nodes = [wavelink.Node(uri=config['LAVALINK_ENDPOINT'], password=config['LAVALINK_PASSWORD'])]
         await wavelink.Pool.connect(nodes=nodes, client=self, cache_capacity=None)
     
     async def on_wavelink_node_ready(self, payload:wavelink.NodeReadyEventPayload) -> None:
@@ -429,10 +429,7 @@ async def lavalink():
     system = platform.system().lower()
     if system == "windows":
         script_path = r"rinbot\bin\run_lavalink.bat"
-    elif system == "linux":
-        script_path = f"{os.path.realpath(os.path.dirname(__file__))}/rinbot/bin/run_lavalink.sh"
-        subprocess.run(["chmod", "+x", script_path])
-        script_path = "./rinbot/bin/run_lavalink.sh"
+    elif system == "linux": return
     process = await asyncio.create_subprocess_shell(
         script_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = await process.communicate()

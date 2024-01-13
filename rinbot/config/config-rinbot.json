@@ -4,6 +4,9 @@
     "LANGUAGE": "en",
     "ACTIVITY_SWITCH_INTERVAL": 5,
     
+    "LAVALINK_ENDPOINT": "http://localhost:6969",
+    "LAVALINK_PASSWORD": "rinbot",
+
     "RULE34_ENABLED": false,
     
     "BOORU_ENABLED": false,
