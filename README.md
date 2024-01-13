@@ -52,7 +52,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 #### General
 | Command | Description |
 | - | - |
-| `/help` | You just used it. |
+| `/help` | Shows a paged embed with all of rinbot's commands. |
 | `/rininfo` | Shows information about the bot |
 | `/specs` | Shows the specs. of the system running the bot |
 | `/ping` | Pong! |
@@ -87,7 +87,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | Command | Description |
 | - | - |
 | `/shutdown` |  Shuts the bot down. |
-| `/owners add` | Adds a user to the owners class (adds to admins as well if not present) |
+| `/owners add` | Adds a user to the owners class |
 | `/owners remove` | Removes a user from the owners class  |
 | `/extension load` | Loads a bot extension |
 | `/extension unload` | Unloads a bot extension |
