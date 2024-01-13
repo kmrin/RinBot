@@ -345,6 +345,9 @@
 
         "MUSIC_NO_PLAYERS": " ❌  No players active.",
 
+        "MUSIC_QUEUE_GROUP_NAME": "queue",
+        "MUSIC_QUEUE_GROUP_DESC": "Queue manipulation commands",
+
         "MUSIC_PLAY_NAME": "play",
         "MUSIC_PLAY_DESC": "Plays music on your voice channel",
         "MUSIC_PLAY_TRACK": "The link or song query",
@@ -734,6 +737,9 @@
         "OWNER_SHUTDOWN_NAME": "desligar",
 
         "MUSIC_NO_PLAYERS": " ❌  Nenhum player ativo",
+
+        "MUSIC_QUEUE_GROUP_NAME": "fila",
+        "MUSIC_QUEUE_GROUP_DESC": "Comandos para manipular a fila",
 
         "MUSIC_PLAY_NAME": "tocar",
         "MUSIC_PLAY_DESC": "Toca músicas no seu canal de voz",

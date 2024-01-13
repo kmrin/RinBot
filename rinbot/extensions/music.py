@@ -33,7 +33,7 @@ class Music(Cog, name="music"):
         self.bot:Bot = bot
 
     # Command groups
-    queue_group = app_commands.Group(name="queue", description="Queue manipulation")
+    queue_group = app_commands.Group(name=f"{text['MUSIC_QUEUE_GROUP_NAME']}", description=f"{text['MUSIC_QUEUE_GROUP_DESC']}")
 
     # Play music on the user's voice channel
     @app_commands.command(
