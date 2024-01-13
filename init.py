@@ -430,7 +430,8 @@ async def lavalink():
     if system == "windows":
         script_path = r"rinbot\bin\run_lavalink.bat"
     elif system == "linux":
-        subprocess.run(["chmod", "+x", "rinbot/bin/lavalink.sh"])
+        script_path = f"{os.path.realpath(os.path.dirname(__file__))}/rinbot/bin/run_lavalink.sh"
+        subprocess.run(["chmod", "+x", script_path])
         script_path = "./rinbot/bin/run_lavalink.sh"
     process = await asyncio.create_subprocess_shell(
         script_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

@@ -161,7 +161,7 @@ class Music(Cog, name="music"):
     
     # Applies a nightcore filter to the song
     @app_commands.command(
-        name=text['MUSIC_NIGHTCORE_'],
+        name=text['MUSIC_NIGHTCORE_NAME'],
         description=text['MUSIC_NIGHTCORE_DESC'])
     @not_blacklisted()
     async def _nightcore(self, interaction:Interaction) -> None:
