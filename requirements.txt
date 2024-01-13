@@ -21,3 +21,4 @@ youtube-search-python
 telegram
 python-telegram-bot
 pytz
+wavelink

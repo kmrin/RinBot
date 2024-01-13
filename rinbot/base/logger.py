@@ -1,3 +1,12 @@
+"""
+#### Logger
+- Log states:
+    * logger.info
+    * logger.warning
+    * logger.error
+    * logger.critical
+"""
+
 import logging
 
 class LoggingFormatter(logging.Formatter):

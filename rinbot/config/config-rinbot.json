@@ -1,0 +1,24 @@
+{
+    "VER": "RinBot v3.0.0 (Release)",
+    "PREFIX": "!",
+    "LANGUAGE": "en",
+    "ACTIVITY_SWITCH_INTERVAL": 5,
+    
+    "RULE34_ENABLED": false,
+    
+    "BOORU_ENABLED": false,
+    "BOORU_USERNAME": "",
+    "BOORU_IS_GOLD": false,
+    "BOORU_KEY": "",
+
+    "FORTNITE_DAILY_SHOP_ENABLED": false,
+    "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:05:00",
+    "FORTNITE_DAILY_SHOP_FNBR_KEY": "",
+
+    "AI_ENABLED": false,
+    "AI_CHANNEL": false,
+    "AI_ENDPOINT_KOBOLD": "http://localhost:5001",
+    "AI_ENDPOINT_STABLEDIFFUSION": "http://127.0.0.1:7860",
+
+    "": ""
+}

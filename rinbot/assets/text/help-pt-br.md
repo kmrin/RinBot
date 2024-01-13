@@ -23,6 +23,9 @@
  `/avisos mostrar` Mostra os avisos de um usuário
  `/avisos adicionar` Adiciona um aviso a um usuário
  `/avisos remover` Remove um aviso de um usuário pela sua ID (número do aviso)
+ `/banir` Bane um membro da guilda
+ `/kickar` Kicka um membro da guilda
+ `/nick` Muda o nick de um membro da guilda
 
 ### Owner
  `/desligar`  Desliga a bot
@@ -41,17 +44,13 @@
  `/ppt` Joga pedra papel tesoura
 
 ### Music
- `/mostrar_controles` Mostra controles multimídia do player atual
- `/tocar links` Toca músicas por links do youtube (links de playlists suportados, suporta múltiplos links)
- `/tocar busca` Toca músicas por uma busca no youtube (até 25 de uma vez)
- `/tocar busca_playlist` Toca músicas de uma ou mais playlists através de uma busca no youtube (até 25 de uma vez)
- `/fila mostrar` Mostra a fila atual
- `/fila mostrar url=Sim` Mesmo que **/fila mostrar** mas os títulos são trocados por URLs
- `/fila limpar` Limpa a fila atual
- `/fila limpar id=?` Limpa um item específico da fila atual pela sua ID (número)
- `/historico mostrar` Mostra o histórico de músicas da guilda
- `/historico mostrar url=Sim` Mesmo que **/historico mostrar** mas os títulos são trocados por URLs
- `/historico limpar` Limpa o histórico de músicas da guilda
+ `/tocar` Toca músicas de vários lugares diferentes num canal de voz
+ `/fila mostrar` Mostra a fila de músicas atual
+ `/fila limpar` Limpa a fila de músicas
+ `/nightcore` Liga ou desliga o efeito nightcore
+ `/recomendado` Liga ou desliga recomendações automáticas
+ `/randomizar` Embaralha a fila de músicas
+ `/mostrar_controles` Mostra os controles multimídia
 
 ### Economy
  `/laranja rank` Mostra o rank top 10 dos usuários com mais laranjas na economia

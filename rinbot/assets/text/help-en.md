@@ -23,6 +23,9 @@
  `/warnings show` Shows a user's warnings
  `/warnings add` Adds a warning to a user
  `/warnings remove` Removes a warning from a user by it's warn ID
+ `/ban` Bans a member from the guild
+ `/kick` Kicks a member from the guild
+ `/nick` Changes the nickname of a guild member
 
 ### Owner
  `/shutdown`  Shuts the bot down.
@@ -41,17 +44,13 @@
  `/rps`  Plays Rock Paper Scissors
 
 ### Music
- `/showcontrols` Shows multimedia controls for current media player
- `/play link` Plays music through youtube links (single or list of links, playlists and shorts are supported)
- `/play search` Plays music from a youtube search query (you can select up to 25 search results)
- `/play search_playlist` Plays music from one or more selected playlists from a search query (you can select up to 25 playlists)
+ `/play` Plays tracks from various sources on a voice channel
  `/queue show` Shows the current song queue
- `/queue show url=Yes` Same as **/queue show** but titles are switched for URLs
  `/queue clear` Clears the current song queue
- `/queue clear id=?` Clears a specific track from the song queue by their ID (number)
- `/history show` Shows the server's song history (last 25 played songs)
- `/history show url=Yes` Same as **/history show** but titles are switched for URLs
- `/history clear` Clears the server's song history
+ `/nightcore` Toggles a nightcore effect on and off
+ `/recommended` Toggles the autoplay of recommended tracks on and off
+ `/shuffle` Shuffles the current queue
+ `/show_controls` Shows the multimedia controls view
 
 ### Economy
  `/orange rank`  Shows the top 10 members with the most oranges

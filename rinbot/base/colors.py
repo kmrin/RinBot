@@ -1,3 +1,7 @@
+"""
+#### HEX colors used in embeds
+"""
+
 RED    = 0xd91313
 GREEN  = 0x2fd64e
 BLUE   = 0x1869cc

@@ -4,6 +4,12 @@ RinBot is a discord bot fully developed in Python using libraries such as `disco
 
 She was private code a while back, but I decided to publish at least a "alternative" version of her on github, to work as a starting point for future bots, or for you to just tinker with it.
 
+### Requirements
+| Requirement | Version |
+| - | - |
+| Python | 3.9+ and the necessary modules under requirements.txt |
+| Java | 17+ |
+
 ## Code overview
 
 - Programmed with both Windows and Linux in mind.
@@ -25,7 +31,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 As of update 1.8, RinBot now has a economy system with oranges as the currency.
 **The way it works is as follows:**
 * Users will receive 500 oranges by default upon entering a server and being registered in the economy database.
-* Users will be rewarded 25 oranges every 50 messages sent. `A anti-spam measure was applied to ensure this feature isn't abused.`
+* Users will be rewarded 25 oranges every 50 messages sent.
 * Users can transfer oranges between eachother using the `/orange transfer` command.
 * Users can see the top 10 users with the most oranges using the `/orange rank` command.
 * Users can use their oranges to buy items from the shop using the `/orange store` and `/orange buy` command.
@@ -59,7 +65,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/set fortnite-daily-shop-channel` | Sets a text channel on your server for RinBot to send the daily fortnite item shop (Updates everyday at 00:05 UTC) |
 | `/toggle welcome-channel` | Toggles on and off the welcome channel functionality |
 | `/toggle fortnite-daily-shop-channel` | Toggles on and off the fortnite daily shop functionality |
-## NOTE: In order to use the fortnite daily shop function, a user must have a valid fnbr API Key configured on the .env file
+## NOTE: In order to use the fortnite daily shop function, a user must have a valid fnbr API Key configured under "/rinbot/config/config-rinbot.json"
 
 #### Moderation
 | Command | Description |
@@ -73,6 +79,9 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/warnings show` | Shows a user's warnings |
 | `/warnings add` | Adds a warning to a user |
 | `/warnings remove` | Removes a warning from a user by it's warn ID |
+| `/ban` | Bans a user from the guild |
+| `/kick` | Kicks a user from the guild |
+| `/nick` | Changes a user's nickname on the guild |
 
 #### Owner
 | Command | Description |
@@ -97,17 +106,18 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 #### Music
 | Command | Description |
 | - | - |
-| `/showcontrols` | Shows multimedia controls for current media player |
-| `/play link` | Plays music through youtube links (single or list of links, playlists and shorts are supported) |
-| `/play search` | Plays music from a youtube search query (you can select up to 25 search results) |
-| `/play search_playlist` | Plays music from one or more selected playlists from a search query (you can select up to 25 playlists) |
+| `/play` | Plays tracks from various sources on a voice channel |
 | `/queue show` | Shows the current song queue |
-| `/queue show url=Yes` | Same as **/queue show** but titles are switched for URLs |
 | `/queue clear` | Clears the current song queue |
-| `/queue clear id=?` | Clears a specific track from the song queue by their ID (number) |
-| `/history show` | Shows the server's song history (last 25 played songs) |
-| `/history show url=Yes` | Same as **/history show** but titles are switched for URLs |
-| `/history clear` | Clears the server's song history |
+| `/nightcore` | Toggles a nightcore effect on and off |
+| `/recommended` | Toggles the autoplay of recommended tracks on and off |
+| `/shuffle` | Shuffles the current queue |
+| `/volume` | Changes the player's volume |
+| `/show_controls` | Shows the multimedia control buttons |
+
+## NOTE: In order to use track sources like spotify, deezer, etc, make sure to open the "application.yml" lavalink config file and setup LavaSrc properly, by default RinBot does not provide any access tokens for those sources for obvious reasons. If you leave everything untouched, only Youtube, YoutubeMusic and SoundCloud will work.
+
+## NOTE 2: "/recommended" will not work when playing SoundCloud tracks (This is being investigated at the moment as to why and how to fix it).
 
 #### Economy
 | Command | Description |
@@ -136,9 +146,9 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 
 ## AI (Kobold and StableDiffusion)
 #### To integrate RinBot with your running instance of Kobold / StableDiffusion or both, follow these steps:
-- Open `.env` and set the `use_ai` variable to `True` (this will make the bot load the necessary ai extensions located inside the `ai` folder)
-- Still inside `.env`, change the `ENDPOINT` value to whatever URL:PORT you're using to access Kobold, the one already present is the default and should probably work if you're running the language model localy, same thing goes for stablediffusion, through the `STABLE_DIFFUSION_ENDPOINT` value.
-- Next, copy the ID of a empty / new discord text chat from your server, and paste it on the `CHANNEL_ID` value. This will make the bot behave like a "chatGPT", but on your discord server!
+- Open `/rinbot/config/config-rinbot.json` and set the `AI_ENABLED` variable to `true` (this will make the bot load the necessary ai extensions located inside the `ai` folder)
+- Still inside `/rinbot/config/config-rinbot.json`, change the `AI_ENDPOINT_KOBOLD` value to whatever URL:PORT you're using to access Kobold, the one already present is the default and should probably work if you're running the language model localy, same thing goes for stablediffusion, through the `AI_ENDPOINT_STABLEDIFFUSION` value.
+- Next, copy the ID of a empty / new discord text chat from your server, and paste it on the `AI_CHANNEL` value. This will make the bot behave like a "chatGPT", but on your discord server!
 - To use StableDiffusion, make sure to open the webui with the `-api` flag, or else the bot won't be able to use it
 
 ## Ok, cool! How do I host my own instance of RinBot?
@@ -146,5 +156,4 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 - Download and install python
 - Download the latest release or clone this repository
 - Open a command line inside RinBot's directory and run `pip install -r requirements.txt`
-- Add your discord bot token to the `.env` file
 - Run the `init.py` file and follow the start-up instructions
