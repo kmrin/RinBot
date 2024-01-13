@@ -133,10 +133,10 @@ class RinBot(Bot):
         await wavelink.Pool.connect(nodes=nodes, client=self, cache_capacity=None)
     
     async def on_wavelink_node_ready(self, payload:wavelink.NodeReadyEventPayload) -> None:
-        logger.info(f"Wavelink Node connected: {payload.node} | Resumed: {payload.resumed} | Session ID: {payload.session_id}")
+        logger.info(f"{text['INIT_WAVELINK_NODE_CONNECTED'][0]} {payload.node} | {text['INIT_WAVELINK_NODE_CONNECTED'][1]} {payload.resumed} | {text['INIT_WAVELINK_NODE_CONNECTED'][2]} {payload.session_id}")
     
     async def on_wavelink_track_start(self, payload:wavelink.TrackStartEventPayload) -> None:
-        logger.info(f"Wavelink Track started: {payload.track.title} | On: {payload.player.guild.name} ({payload.player.guild.id})")
+        logger.info(f"{text['INIT_WAVELINK_TRACK_STARTED'][0]} {payload.track.title} | {text['INIT_WAVELINK_TRACK_STARTED'][1]} {payload.player.guild.name} ({payload.player.guild.id})")
     
         player:wavelink.Player | None = payload.player
         if not player: return
@@ -145,16 +145,16 @@ class RinBot(Bot):
         track:wavelink.Playable = payload.track
         
         # Now Playing embed
-        embed = discord.Embed(title=" 🎵  Now Playing", color=PURPLE)
+        embed = discord.Embed(title=text['INIT_WAVELINK_NOW_PLAYING'][0], color=PURPLE)
         embed.description = f"```{track.title}```"
-        embed.set_footer(text=f"By: {track.author}")
+        embed.set_footer(text=f"{text['INIT_WAVELINK_NOW_PLAYING'][1]} {track.author}")
         
         if track.artwork:
             embed.set_image(url=track.artwork)
         if track.length:
-            embed.set_footer(text=f"{embed.footer.text} | Duration: {format_millsec(track.length)}")
+            embed.set_footer(text=f"{embed.footer.text} | {text['INIT_WAVELINK_NOW_PLAYING'][2]} {format_millsec(track.length)}")
         if original and original.recommended:
-            embed.set_footer(text=f"{embed.footer.text} | Recommended from: {track.source}")
+            embed.set_footer(text=f"{embed.footer.text} | {text['INIT_WAVELINK_NOW_PLAYING'][3]} {track.source}")
         
         # Media controls view
         view = MediaControls(player)
@@ -169,33 +169,21 @@ class RinBot(Bot):
         player:wavelink.Player | None = payload.player
         if not player: return
         
-        logger.info(f"Wavelink Track ended: {payload.track.title} | On: {player.guild.name} ({player.guild.id})")
+        logger.info(f"{text['INIT_WAVELINK_TRACK_ENDED'][0]} {payload.track.title} | {text['INIT_WAVELINK_TRACK_ENDED'][1]} {player.guild.name} ({player.guild.id})")
         if len(player.queue) == 0 and not player.autoplay.name == "enabled":
             embed = discord.Embed(
-                description=" :wave:  Disconnecting. End of Queue.", color=YELLOW)
+                description=text['INIT_WAVELINK_DISCONNECTING'], color=YELLOW)
             await asyncio.sleep(2)
             await player.home.send(embed=embed)
             await player.disconnect()
             player.cleanup()
         elif len(player.queue) == 0 and payload.track.source == "soundcloud" and player.autoplay.name == "enabled":
             embed = discord.Embed(
-                description=" :wave:  Disconnecting. `Recommended` playback not supported for SoundCloud tracks.", color=RED)
+                description=text['INIT_WAVELINK_DISCONNECTING_SC'], color=RED)
             await asyncio.sleep(2)
             await player.home.send(embed=embed)
             await player.disconnect()
             player.cleanup()
-    
-    async def on_wavelink_track_stuck(self, payload:wavelink.TrackStuckEventPayload) -> None:
-        logger.error(f"Wavelink Track stuck: {payload.track.title} | On: {payload.player.guild.name} ({payload.player.guild.id})")
-    
-    async def on_wavelink_track_exception(self, payload:wavelink.TrackExceptionEventPayload) -> None:
-        logger.error(f"Wavelink Track exception: {payload.track.title} | On: {payload.player.guild.name} ({payload.player.guild.id}) | Exception: {payload.exception}")
-    
-    async def on_wavelink_websocket_closed(self, payload:wavelink.WebsocketClosedEventPayload) -> None:
-        logger.info(f"Wavelink WebSocket closed: {payload.code} | On: {payload.player.guild.name} ({payload.player.guild.id}) | Reason: {payload.reason}")
-    
-    async def on_wavelink_inactive_player(self, player:wavelink.Player) -> None:
-        await player.channel.send()
 
 # Client
 client = RinBot()
