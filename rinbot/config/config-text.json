@@ -683,6 +683,7 @@
         "MODERATION_CENSOR_DESC": "Deleta um número de mensagens nesse canal de texto",
         "MODERATION_CENSOR_EMBED": [" ⚠️  Limpando", "mensagens de"],
         "MODERATION_CENSOR_NAME": "censurar",
+        "MODERATION_CENSOR_FROM_USER": "Deletar mensagens de um usuário específico",
         "MODERATION_WARNINGS_ADD_DESC": "Adiciona avisos a um usuário",
         "MODERATION_WARNINGS_ADD_NAME": "adicionar",
         "MODERATION_WARNINGS_CREATE_WARNING": [" • Avisado(a) por <@", "ID de aviso #"],
