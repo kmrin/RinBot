@@ -8,6 +8,7 @@ from rinbot.base.colors import *
 text = load_lang()
 
 async def get_shop(api:str) -> dict:
+    logger.info("Getting shop items")
     response = requests.get("https://fnbr.co/api/shop", headers={"x-api-key": api})
     response = response.json()
     
@@ -21,8 +22,10 @@ async def get_shop(api:str) -> dict:
     for i in response["data"]["featured"]:
         if i["type"] in types and i["rarity"] in rarities:
             items.append({"name": i["name"], "type": i["type"], "price": i["price"], "rarity": i["rarity"], "image": i["images"]["icon"] if not i["images"]["featured"] else i["images"]["featured"]})
+    logger.info("Items gathered")
     
     async def get_image(url, item_name):
+        logger.info(f"Getting image for {item_name}")
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
@@ -30,6 +33,7 @@ async def get_shop(api:str) -> dict:
                         f.write(await response.read())
     
     async def composite_image(item_name, item_rarity, item_price):
+        logger.info(f"Generating composite for {item_name}")
         async def add_name(draw):
             if len(item_name) > 18: font_size = 55
             if len(item_name) <= 18: font_size = 75
@@ -70,6 +74,7 @@ async def get_shop(api:str) -> dict:
         
         # Save
         final.save(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/images/{item_name}.png")
+        logger.info(f"Generated {item_name}")
         
         # Delete original image
         await asyncio.sleep(0.2)
@@ -90,8 +95,10 @@ async def get_shop(api:str) -> dict:
 
 # Sends image batches
 async def send_batches(channel, batches):
-    for batch in batches:
+    logger.info("Sending batches")
+    for index, batch in enumerate(batches):
         await channel.send(files=batch)
+        logger.info(f"Sent batch {index} to channel {channel.name} (ID: {channel.id})")
 
 # Show daily shop
 async def show_fn_daily_shop(client:discord.Client, key:str) -> None:
@@ -120,6 +127,7 @@ async def show_fn_daily_shop(client:discord.Client, key:str) -> None:
             img_path = os.path.join(img_dir, img)
             batch.append(discord.File(img_path, filename=img))
         batches.append(batch)
+        logger.info(f"Generated image batch {i}")
     
     # Show store for each guild that has it enabled
     tasks = []
