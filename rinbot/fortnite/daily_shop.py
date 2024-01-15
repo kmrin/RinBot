@@ -9,9 +9,7 @@ from rinbot.base.colors import *
 
 text = load_lang()
 
-img_dir = f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/images"
-img_files = [f for f in os.listdir(img_dir) if f.endswith(".png")]
-
+# Downloads the images from the shop
 async def get_shop(api:str) -> dict:
     logger.info("Getting shop items")
     response = requests.get("https://fnbr.co/api/shop", headers={"x-api-key": api})
@@ -79,7 +77,6 @@ async def get_shop(api:str) -> dict:
         
         # Save
         final.save(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/images/{item_name}.png")
-        logger.info(f"Generated {item_name}")
         
         # Delete original image
         await asyncio.sleep(0.2)
@@ -98,32 +95,7 @@ async def get_shop(api:str) -> dict:
     await generate_images(items)
     return {"date": response["data"]["date"], "count": len(response["data"]["featured"])}
 
-async def generate_file(img_name) -> discord.File:
-    path = os.path.join(img_dir, img_name)
-    return discord.File(path, filename=img_name)
-
-# Generates a list of image batches
-async def generate_batches(guild_name) -> list:
-    batches = []
-    for i in range(0, len(img_files), 6):
-        batch = []
-        img_names = img_files[i:i+6]
-        tasks = [generate_file(img) for img in img_names]
-        results = await asyncio.gather(*tasks)
-        batch.extend(results)
-        batches.append(batch)
-    logger.info(f"Generated image batch for {guild_name}")
-    return batches
-
-# Sends image batches
-async def send_batches(hook:Webhook, embed):
-    batches = await generate_batches(hook.guild.name)
-    await hook.send(embed=embed)
-    for index, batch in enumerate(batches):
-        await hook.send(files=batch)
-        logger.info(f"Sent batch {index} to channel {hook.channel.name} (ID: {hook.channel.id})")
-
-# Show daily shop
+# Shows the daily shop
 async def show_fn_daily_shop(client:Bot, key:str) -> None:
     """
     #### Show Fortnite Daily Shop
@@ -134,13 +106,43 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
     # Grab shop data
     logger.info(text['DAILY_SHOP_UPDATING'])
     shop = await get_shop(api=key)
+    
+    # Vals
+    img_dir = f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/images"
+    img_files = [f for f in os.listdir(img_dir) if f.endswith(".png")]
     embed = discord.Embed(
         title=f"{text['DAILY_SHOP_EMBED'][0]} **{format_date(shop['date'])}**",
         description=f"{text['DAILY_SHOP_EMBED'][1]} **{len(img_files)}** {text['DAILY_SHOP_EMBED'][2]} **{shop['count']}** {text['DAILY_SHOP_EMBED'][3]}",
         color=PURPLE)
     
-    # Show store for each guild that has it enabled
-    tasks = []
+    # Returns a file obj
+    async def generate_file(img_name) -> discord.File:
+        path = os.path.join(img_dir, img_name)
+        return discord.File(path, filename=img_name)
+    
+    # Generates a list of image batches
+    async def generate_batches(guild) -> list:
+        batches = []
+        for i in range(0, len(img_files), 6):
+            batch = []
+            img_names = img_files[i:i+6]
+            tasks = [generate_file(img) for img in img_names]
+            results = await asyncio.gather(*tasks)
+            batch.extend(results)
+            batches.append(batch)
+        logger.info(f"Generated image batch for {guild}")
+        return batches
+    
+    # Sends all batches to their respective channels
+    async def send_batches(hook:Webhook):
+        batches = await generate_batches(hook.guild.name)
+        await hook.send(embed=embed)
+        for i, batch in enumerate(batches):
+            await hook.send(files=batch)
+            logger.info(f"Sent batch {i} to channel {hook.channel.name} (ID: {hook.channel.id})")
+
+    # Generate the batches
+    send_batch_tasks = []
     for guild in client.guilds:
         shop_channels = await get_table("daily_shop_channels")
         if str(guild.id) in shop_channels:
@@ -148,14 +150,12 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
                 channel = client.get_channel(shop_channels[str(guild.id)]["channel_id"]) or await client.fetch_channel(shop_channels[str(guild.id)]["channel_id"])
                 channel_hooks = await channel.webhooks()
                 if not channel_hooks:
-                    hook = await channel.create_webhook(name="RinBot Daily Shop")
+                    channel_hook = await channel.create_webhook(name="RinBot Daily Shop")
                 else:
-                    hook = channel_hooks[0]
-                await hook.edit(name="RinBot Daily Shop", avatar=await client.user.avatar.read())
-                tasks.append(send_batches(hook, embed))
-    if tasks:
-        logger.info("Sending batches")
-        await asyncio.gather(*tasks)
+                    channel_hook = channel_hooks[0]
+                await channel_hook.edit(name="RinBot Daily Shop", avatar=await client.user.avatar.read())
+                send_batch_tasks.append(asyncio.create_task(send_batches(channel_hook)))
+    await asyncio.gather(*send_batch_tasks)
     
     # Delete images to prevent cache buildup and mixing with other shop rotations
     for file in os.listdir(img_dir):
