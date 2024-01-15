@@ -93,7 +93,7 @@ async def get_shop(api:str) -> dict:
     await generate_images(items)
     return {"date": response["data"]["date"], "count": len(response["data"]["featured"])}
 
-# Sends image batches
+# Sends image batches asynchronously (nuked by discord, thanks boys)
 async def send_batches(channel, batches):
     logger.info("Sending batches")
     for index, batch in enumerate(batches):
@@ -130,15 +130,15 @@ async def show_fn_daily_shop(client:discord.Client, key:str) -> None:
         logger.info(f"Generated image batch {i}")
     
     # Show store for each guild that has it enabled
-    tasks = []
     for guild in client.guilds:
         shop_channels = await get_table("daily_shop_channels")
         if str(guild.id) in shop_channels:
             if shop_channels[str(guild.id)]["active"]:
                 channel = client.get_channel(shop_channels[str(guild.id)]["channel_id"]) or await client.fetch_channel(shop_channels[str(guild.id)]["channel_id"])
                 await channel.send(embed=embed)
-                tasks.append(send_batches(channel, batches))
-    if tasks: await asyncio.gather(*tasks)
+                for index, batch in enumerate(batches):
+                    await channel.send(files=batch)
+                    logger.info(f"Sent batch {index} to channel {channel.name} (ID: {channel.id})")
     
     # Delete images to prevent cache buildup and mixing with other shop rotations
     for file in os.listdir(img_dir):
