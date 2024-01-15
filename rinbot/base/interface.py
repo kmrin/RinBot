@@ -172,7 +172,7 @@ class VideoSearchSelect(discord.ui.Select):
     async def callback(self, interaction:discord.Interaction):
         for video in self.results:
             for selected in self.values:
-                if selected == video.title:
+                if selected == video.title and selected not in self.added:
                     self.player.results.append(video)
                     self.added.append(video.title)
         message = [f"**{index+1}.** {item}" for index, item in enumerate(self.added)]

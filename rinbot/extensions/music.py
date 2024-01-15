@@ -83,11 +83,11 @@ class Music(Cog, name="music"):
             if len(tracks) > 1:
                 player.results = []
                 view = VideoSearchView(tracks, player)
-                await interaction.response.send_message(f"{text['MUSIC_PLAY_SEARCH_RESULTS']} `{track}`:", view=view)
+                await respond(interaction, PURPLE, message=f"{text['MUSIC_PLAY_SEARCH_RESULTS']} `{track}`:", view=view)
                 await view.wait()
                 if not player.results:
                     await player.disconnect()
-                    return await respond(interaction, RED, message=text['MUSIC_PLAY_TIMEOUT'])
+                    return await respond(interaction, RED, message=text['MUSIC_PLAY_TIMEOUT'], response_type=1)
                 for track in player.results:
                     await player.queue.put_wait(track)
             else:
