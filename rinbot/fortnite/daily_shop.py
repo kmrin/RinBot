@@ -140,7 +140,7 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
                 channel = client.get_channel(shop_channels[str(guild.id)]["channel_id"]) or await client.fetch_channel(shop_channels[str(guild.id)]["channel_id"])
                 channel_hooks = await channel.webhooks()
                 if not channel_hooks:
-                    hook = await channel.create_webhook()
+                    hook = await channel.create_webhook(name="RinBot Daily Shop")
                 else:
                     hook = channel_hooks[0]
                 await hook.edit(name="RinBot Daily Shop", avatar=await client.user.avatar.read())
