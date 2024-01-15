@@ -158,6 +158,6 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
         await asyncio.gather(*tasks)
     
     # Delete images to prevent cache buildup and mixing with other shop rotations
-    """ for file in os.listdir(img_dir):
+    for file in os.listdir(img_dir):
         os.remove(os.path.join(img_dir, file))
-    logger.info(text['DAILY_SHOP_UPDATED']) """
+    logger.info(text['DAILY_SHOP_UPDATED'])
