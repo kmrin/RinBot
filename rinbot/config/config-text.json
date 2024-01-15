@@ -372,6 +372,7 @@
         "MUSIC_QUEUE_CLEAR_ALREADY": " ❌  The queue is already empty.",
         "MUSIC_QUEUE_CLEAR_REMOVED": [" ✅  Removed", "from queue"],
         "MUSIC_QUEUE_CLEAR_INDEX_ERROR": [" ❌  Index", "is out of queue range"],
+        "MUSIC_QUEUE_CLEAR_CLEARED": " ✅  Cleared!",
 
         "MUSIC_NIGHTCORE_NAME": "nightcore",
         "MUSIC_NIGHTCORE_DESC": "Applies a nightcore filter to the song",
@@ -765,6 +766,7 @@
         "MUSIC_QUEUE_CLEAR_ALREADY": " ❌  A fila já está vazia",
         "MUSIC_QUEUE_CLEAR_REMOVED": [" ✅  Removido", "da fila"],
         "MUSIC_QUEUE_CLEAR_INDEX_ERROR": [" ❌  ", "está fora de alcance da fila"],
+        "MUSIC_QUEUE_CLEAR_CLEARED": " ✅  Limpa!",
 
         "MUSIC_NIGHTCORE_NAME": "nightcore",
         "MUSIC_NIGHTCORE_DESC": "Aplica um efeito nightcore na música atual",

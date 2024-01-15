@@ -153,9 +153,13 @@ class Music(Cog, name="music"):
         if len(queue) == 0:
             return await respond(interaction, RED, message=text['MUSIC_QUEUE_CLEAR_ALREADY'])
         try:
-            track:wavelink.Playable = queue[int(id)-1]
-            await queue.delete(int(id)-1)
-            await respond(interaction, GREEN, message=f"{text['MUSIC_QUEUE_CLEAR_REMOVED'][0]} `{track.title}` {text['MUSIC_QUEUE_CLEAR_REMOVED'][1]}")
+            if id:
+                track:wavelink.Playable = queue[int(id)-1]
+                await queue.delete(int(id)-1)
+                await respond(interaction, GREEN, message=f"{text['MUSIC_QUEUE_CLEAR_REMOVED'][0]} `{track.title}` {text['MUSIC_QUEUE_CLEAR_REMOVED'][1]}")
+            else:
+                queue.clear()
+                await respond(interaction, GREEN, message=text['MUSIC_QUEUE_CLEAR_CLEARED'])
         except IndexError:
             await respond(interaction, RED, message=f"{text['MUSIC_QUEUE_CLEAR_INDEX_ERROR'][0]} `{id}` {text['MUSIC_QUEUE_CLEAR_INDEX_ERROR'][1]}")
     

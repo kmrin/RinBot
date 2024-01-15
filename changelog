@@ -5,3 +5,4 @@
     * Fixed the daily shop.
     * Fixed "Unknow Interaction" error when using the /play command
     * Fixed an error that made the player add duplicated tracks due to them having the same name
+    * Fixed /queue clear command
