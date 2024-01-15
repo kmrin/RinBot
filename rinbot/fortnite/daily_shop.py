@@ -105,17 +105,15 @@ async def generate_file(img_name) -> discord.File:
 # Generates a list of image batches
 async def generate_batches(guild_name) -> list:
     batches = []
-    tasks = []
     for i in range(0, len(img_files), 6):
         batch = []
         img_names = img_files[i:i+6]
-        for img in img_names:
-            tasks.append(asyncio.create_task(generate_file(img)))
-        asyncio.gather(*tasks)
-        for task in tasks:
-            batch.append(task.result())
+        tasks = [generate_file(img) for img in img_names]
+        results = await asyncio.gather(*tasks)
+        batch.extend(results)
         batches.append(batch)
-        logger.info(f"Generated image batch for {guild_name}")
+    logger.info(f"Generated image batch for {guild_name}")
+    return batches
 
 # Sends image batches
 async def send_batches(hook:Webhook, embed):
@@ -160,6 +158,6 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
         await asyncio.gather(*tasks)
     
     # Delete images to prevent cache buildup and mixing with other shop rotations
-    for file in os.listdir(img_dir):
+    """ for file in os.listdir(img_dir):
         os.remove(os.path.join(img_dir, file))
-    logger.info(text['DAILY_SHOP_UPDATED'])
+    logger.info(text['DAILY_SHOP_UPDATED']) """
