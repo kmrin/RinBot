@@ -1,2 +1,5 @@
 > v3.0.0:
     * Initial release
+
+> v3.0.1:
+    * The bot now uses webhooks to send the fortnite daily shop

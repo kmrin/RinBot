@@ -54,6 +54,7 @@ class Config(Cog, name="config"):
         description=text['CONFIG_SET_DAILY_SHOP_DESC'])
     @not_blacklisted()
     @is_admin()
+    @app_commands.checks.bot_has_permissions(manage_webhooks=True)
     async def _set_welcome(self, interaction:Interaction, channel:discord.TextChannel=None) -> None:
         if not channel:
             return await respond(interaction, RED, text['ERROR_INVALID_PARAMETERS'])

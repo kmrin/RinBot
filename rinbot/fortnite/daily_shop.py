@@ -1,5 +1,7 @@
 import aiohttp, asyncio, requests, os, discord
 from PIL import Image, ImageFont, ImageDraw
+from discord import Webhook
+from discord.ext.commands import Bot
 from rinbot.base.logger import logger
 from rinbot.base.helpers import load_lang, format_date
 from rinbot.base.db_man import *
@@ -93,15 +95,15 @@ async def get_shop(api:str) -> dict:
     await generate_images(items)
     return {"date": response["data"]["date"], "count": len(response["data"]["featured"])}
 
-# Sends image batches asynchronously (nuked by discord, thanks boys)
-async def send_batches(channel, batches):
-    logger.info("Sending batches")
+# Sends image batches
+async def send_batches(hook:Webhook, embed, batches):
+    await hook.send(embed=embed)
     for index, batch in enumerate(batches):
-        await channel.send(files=batch)
-        logger.info(f"Sent batch {index} to channel {channel.name} (ID: {channel.id})")
+        await hook.send(files=batch)
+        logger.info(f"Sent batch {index} to channel {hook.channel.name} (ID: {hook.channel.id})")
 
 # Show daily shop
-async def show_fn_daily_shop(client:discord.Client, key:str) -> None:
+async def show_fn_daily_shop(client:Bot, key:str) -> None:
     """
     #### Show Fortnite Daily Shop
     This function iterates through each guild the bot is in
@@ -130,15 +132,22 @@ async def show_fn_daily_shop(client:discord.Client, key:str) -> None:
         logger.info(f"Generated image batch {i}")
     
     # Show store for each guild that has it enabled
+    tasks = []
     for guild in client.guilds:
         shop_channels = await get_table("daily_shop_channels")
         if str(guild.id) in shop_channels:
             if shop_channels[str(guild.id)]["active"]:
                 channel = client.get_channel(shop_channels[str(guild.id)]["channel_id"]) or await client.fetch_channel(shop_channels[str(guild.id)]["channel_id"])
-                await channel.send(embed=embed)
-                for index, batch in enumerate(batches):
-                    await channel.send(files=batch)
-                    logger.info(f"Sent batch {index} to channel {channel.name} (ID: {channel.id})")
+                channel_hooks = await channel.webhooks()
+                if not channel_hooks:
+                    hook = await channel.create_webhook()
+                else:
+                    hook = channel_hooks[0]
+                await hook.edit(name="RinBot Daily Shop", avatar=await client.user.avatar.read())
+                tasks.append(send_batches(hook, embed, batches))
+    if tasks:
+        logger.info("Sending batches")
+        await asyncio.gather(*tasks)
     
     # Delete images to prevent cache buildup and mixing with other shop rotations
     for file in os.listdir(img_dir):
