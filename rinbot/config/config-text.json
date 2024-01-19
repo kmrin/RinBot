@@ -447,7 +447,7 @@
         "INTERFACE_PAGINATOR_PREV": " ⏪  Pág. anterior",
         "INTERFACE_ZEROOWNERS_SELECT_PLACEHOLDER": "Selecione um usuário...",
 
-        "INIT_ACTIVITY": [" ✌️  Escutando aos seus comandos :3", " 🥰  Ao seu serviço"],
+        "INIT_ACTIVITY": [" ✌️  Escutando os seus comandos :3", " 🥰  Ao seu dispor"],
         "INIT_CREATED_DIRECTORY": "Diretório criado:",
         "INIT_INVALID_JAVA_VERSION": "A versão instalada do java é inválida",
         "INIT_JAVA_NOT_FOUND": "Java não encontrado. Por-favor instale o java 17 ou superior.",
@@ -773,7 +773,7 @@
         "MUSIC_NIGHTCORE_ACTIVE": " 🎼  1, 2, 7, 3 down the rockefeller street!",
         "MUSIC_NIGHTCORE_INNACTIVE": " ↩️  De volta ao normal!",
 
-        "MUSIC_REC_NAME": "recomenado",
+        "MUSIC_REC_NAME": "recomendado",
         "MUSIC_REC_DESC": "Continua tocando músicas recomendadas infinitamente",
         "MUSIC_REC_TOGGLE": [" ✅  Músicas recomendadas", "ativas!", "inativas!"],
 
