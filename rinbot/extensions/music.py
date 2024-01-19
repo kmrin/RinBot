@@ -197,7 +197,7 @@ class Music(Cog, name="music"):
             await respond(interaction, PURPLE, message=f"{text['MUSIC_REC_TOGGLE'][0]} {text['MUSIC_REC_TOGGLE'][1]}")
         elif player.autoplay.name == "enabled":
             player.autoplay = wavelink.AutoPlayMode.partial
-            await respond(interaction, PURPLE, message=f"{text['MUSIC_REC_TOGGLE'][0]} {text['MUSIC_REC_TOGGLE'][1]}!")
+            await respond(interaction, PURPLE, message=f"{text['MUSIC_REC_TOGGLE'][0]} {text['MUSIC_REC_TOGGLE'][2]}!")
     
     # Shuffles the current queue
     @app_commands.command(
