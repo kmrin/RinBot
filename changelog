@@ -6,3 +6,8 @@
     * Fixed "Unknow Interaction" error when using the /play command
     * Fixed an error that made the player add duplicated tracks due to them having the same name
     * Fixed /queue clear command
+
+> v3.1.0:
+    * Fixed an issue that caused the "/set welcome-channel" command to disappear
+    * Fixed an issue where english strings appeared in the portuguese language table
+    * Added valorant daily shop functionality

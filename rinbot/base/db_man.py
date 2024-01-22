@@ -90,7 +90,7 @@ async def populate():
         base = {
             "bot": {"token": False}, "owners": [], "admins": {}, "blacklist": {}, 
             "guilds": [], "warns": {}, "currency": {}, "histories": {}, 
-            "welcome_channels": {}, "daily_shop_channels": {}, "store": {}}
+            "welcome_channels": {}, "daily_shop_channels": {}, "store": {}, "valorant": {}}
         for table, data in base.items():
             query = await conn.execute(f"SELECT data FROM {table}")
             is_present = await query.fetchone()
@@ -115,6 +115,7 @@ async def get_table(table:str) -> dict | list:
     - welcome_channels `{guild_id}`
     - daily_shop_channels `{guild_id}`
     - store `{guild_id}`
+    - valorant `{guild_id}`
     """
     try:
         conn = await init_db()
@@ -145,6 +146,7 @@ async def update_table(table:str, data) -> bool:
     - welcome_channels `{guild_id}`
     - daily_shop_channels `{guild_id}`
     - store `{guild_id}`
+    - valorant `{guild_id}`
     """
     try:
         conn = await init_db()

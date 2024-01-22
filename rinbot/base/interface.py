@@ -6,6 +6,10 @@
 import discord, random, wavelink
 from rinbot.base.colors import *
 from rinbot.base.helpers import load_lang
+from rinbot.valorant.resources import get_item_type
+from rinbot.valorant.db import DATABASE
+from rinbot.base.logger import logger
+from typing import Awaitable
 
 # Load text
 text = load_lang()
@@ -199,3 +203,47 @@ class VideoSearchView(discord.ui.View):
     
     async def on_timeout(self):
         self.stop()
+
+class Valorant2FAView(discord.ui.Modal, title=text['INTERFACE_VAL_2FA_TITLE']):
+    def __init__(self, interaction:discord.Interaction, db:DATABASE, cookie:dict, message:str, label:str) -> None:
+        super().__init__(timeout=600)
+        self.interaction = interaction
+        self.db = db
+        self.cookie = cookie
+        self.two2fa.placeholder = message
+        self.two2fa.label = label
+    
+    two2fa = discord.ui.TextInput(label=text['INTERFACE_VAL_2FA_LABEL'], max_length=6, style=discord.TextStyle.short)
+    
+    async def on_submit(self, interaction:discord.Interaction) -> None:
+        code = self.two2fa.value
+        if code:
+            cookie = self.cookie
+            user_id = self.interaction.user.id
+            auth = self.db.auth
+            auth.locale_code = self.interaction.locale
+            
+            async def send_embed(content:str) -> Awaitable[None]:
+                embed = discord.Embed(
+                    description=content, color=PURPLE)
+                if interaction.response.is_done():
+                    return await interaction.followup.send(embed=embed, ephemeral=True)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+            
+            if not code.isdigit():
+                return await send_embed(f"`{code}` {text['INTERFACE_VAL_2FA_INVALID']}")
+            
+            auth = await auth.give2facode(code, cookie)
+            
+            if auth["auth"] == "response":
+                login = await self.db.login(user_id, auth)
+                if login["auth"]:
+                    return await send_embed(f"{text['INTERFACE_VAL_2FA_LOGGED']} **{login['player']}**!")
+                return await send_embed(login['error'])
+            elif auth["auth"] == "failed":
+                return await send_embed(text['INTERFACE_VAL_2FA_WRONG'])
+    
+    async def on_error(self, interaction:discord.Interaction, error:Exception) -> None:
+        logger.error(text['INTERFACE_VAL_2FA_ERROR'], error)
+        embed = discord.Embed(description=text['INTERFACE_VAL_2FA_WRONG'], color=RED)
+        await interaction.response.send_message(embed=embed, ephemeral=True)

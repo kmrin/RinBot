@@ -1,5 +1,5 @@
 """
-RinBot v3.0.1
+RinBot v3.1.0
 made by rin
 """
 
@@ -15,6 +15,7 @@ from rinbot.base.loader import load_extensions
 from rinbot.base.colors import *
 from rinbot.base.interface import MediaControls
 from rinbot.fortnite.daily_shop import show_fn_daily_shop
+from rinbot.valorant.daily_shop import show_val_daily_shop
 from datetime import datetime
 
 # Load text
@@ -25,7 +26,7 @@ try:
     folders = [
         "rinbot/cache", "rinbot/cache/fun", "rinbot/cache/chatlog", "rinbot/cache/stablediffusion",
         "rinbot/assets/images/fortnite/downloaded", "rinbot/assets/images/fortnite/images",
-        "rinbot/cache/lavalink", "rinbot/cache/lavalink/log"]
+        "rinbot/cache/lavalink", "rinbot/cache/lavalink/log", "rinbot/cache/valorant"]
     for folder in folders:
         path = f"{os.path.realpath(os.path.dirname(__file__))}/{folder}"
         if not os.path.exists(path):
@@ -187,6 +188,8 @@ class RinBot(Bot):
 
 # Client
 client = RinBot()
+client.val_db = None
+client.val_endpoint = None
 
 # Will I use AI?
 if config["AI_ENABLED"] and config["AI_CHANNELS"]:
@@ -206,8 +209,8 @@ if config["AI_ENABLED"] and config["AI_CHANNELS"]:
     client.endpoint_type = "Kobold"
     client.llm = KoboldApiLLM(endpoint=client.endpoint, max_length=800)
 
-# Daily shop scheduler
-async def daily_shop_scheduler():
+# Fortnite daily shop scheduler
+async def fortnite_daily_shop_scheduler():
     logger.info(text['INIT_DAILY_SHOP_STARTED'])
     while True and config["FORTNITE_DAILY_SHOP_ENABLED"]:
         time = config["FORTNITE_DAILY_SHOP_UPDATE_TIME"].split(":")
@@ -215,6 +218,17 @@ async def daily_shop_scheduler():
         target_time = f"{time[0]}:{time[1]}:{time[2]}"
         if curr_time == target_time:
             await show_fn_daily_shop(client, config["FORTNITE_DAILY_SHOP_FNBR_KEY"])
+        await asyncio.sleep(1)
+
+# Valorant daily shop scheduler
+async def valorant_daily_shop_scheduler():
+    logger.info("Valorant daily shop task started")
+    while True and config["VALORANT_DAILY_SHOP_ENABLED"]:
+        time = config["VALORANT_DAILY_SHOP_UPDATE_TIME"].split(":")
+        curr_time = datetime.now(utc).strftime("%H:%M:%S")
+        target_time = f"{time[0]}:{time[1]}:{time[2]}"
+        if curr_time == target_time:
+            await show_val_daily_shop(client)
         await asyncio.sleep(1)
 
 # Change status every 5 minutes (if there are more than 1)
@@ -260,11 +274,25 @@ async def on_ready() -> None:
     if update: logger.info(text['INIT_CHECKED_GUILDS'])
     else: logger.error(text['INIT_ERROR_CHECKING_GUILDS'])
     
+    # Make sure all members are registered on the valorant stuff
+    logger.info("Checking valorant stuff")
+    val = await get_table("valorant")
+    for guild in client.guilds:
+        if str(guild.id) not in val.keys:
+            val[str(guild.id)] = {"active": False, "channel_id": 0, "members": {}}
+        for member in guild.members:
+            if str(member.id) not in val[str(guild.id)].keys:
+                val[str(guild.id)]["members"][str(member.id)] = {"active": False, "type": 0}
+    update = await update_table("valorant", val)
+    if update: logger.info("Checked valorant stuff")
+    else: logger.error("Error checking valorant stuff")
+    
     # Start client tasks
     status_loop.start()
     
     # Start async tasks
-    asyncio.create_task(daily_shop_scheduler())
+    asyncio.create_task(fortnite_daily_shop_scheduler())
+    asyncio.create_task(valorant_daily_shop_scheduler())
     
     # Sync commands
     logger.info(text['INIT_SYNCHING_COMMANDS'])

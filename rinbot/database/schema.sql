@@ -9,3 +9,4 @@ CREATE TABLE IF NOT EXISTS `histories` (`data` JSON);
 CREATE TABLE IF NOT EXISTS `welcome_channels` (`data` JSON);
 CREATE TABLE IF NOT EXISTS `daily_shop_channels` (`data` JSON);
 CREATE TABLE IF NOT EXISTS `store` (`data` JSON);
+CREATE TABLE IF NOT EXISTS `valorant` (`data` JSON);

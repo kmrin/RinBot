@@ -11,7 +11,7 @@ text = load_lang()
 
 # Downloads the images from the shop
 async def get_shop(api:str) -> dict:
-    logger.info("Getting shop items")
+    logger.info(text['FN_FS_GETTING'])
     response = requests.get("https://fnbr.co/api/shop", headers={"x-api-key": api})
     response = response.json()
     
@@ -28,7 +28,7 @@ async def get_shop(api:str) -> dict:
     logger.info("Items gathered")
     
     async def get_image(url, item_name):
-        logger.info(f"Getting image for {item_name}")
+        logger.info(f"{text['FN_FS_IMG_GET']} {item_name}")
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
@@ -36,7 +36,7 @@ async def get_shop(api:str) -> dict:
                         f.write(await response.read())
     
     async def composite_image(item_name, item_rarity, item_price):
-        logger.info(f"Generating composite for {item_name}")
+        logger.info(f"{text['FN_FS_IMG_GEN']} {item_name}")
         async def add_name(draw):
             if len(item_name) > 18: font_size = 55
             if len(item_name) <= 18: font_size = 75
@@ -130,7 +130,7 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
             results = await asyncio.gather(*tasks)
             batch.extend(results)
             batches.append(batch)
-        logger.info(f"Generated image batch for {guild}")
+        logger.info(f"{text['FN_FS_BATCH_GEN']} {guild}")
         return batches
     
     # Sends all batches to their respective channels
@@ -139,7 +139,7 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
         await hook.send(embed=embed)
         for i, batch in enumerate(batches):
             await hook.send(files=batch)
-            logger.info(f"Sent batch {i} to channel {hook.channel.name} (ID: {hook.channel.id})")
+            logger.info(f"{text['FN_FS_BATCH_SEND'][0]} {i} {text['FN_FS_BATCH_SEND'][1]} {hook.channel.name} (ID: {hook.channel.id})")
 
     # Generate the batches
     send_batch_tasks = []
@@ -150,10 +150,10 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
                 channel = client.get_channel(shop_channels[str(guild.id)]["channel_id"]) or await client.fetch_channel(shop_channels[str(guild.id)]["channel_id"])
                 channel_hooks = await channel.webhooks()
                 if not channel_hooks:
-                    channel_hook = await channel.create_webhook(name="RinBot Daily Shop")
+                    channel_hook = await channel.create_webhook(name=text['FN_FS_HOOK_NAME'])
                 else:
                     channel_hook = channel_hooks[0]
-                await channel_hook.edit(name="RinBot Daily Shop", avatar=await client.user.avatar.read())
+                await channel_hook.edit(name=text['FN_FS_HOOK_NAME'], avatar=await client.user.avatar.read())
                 send_batch_tasks.append(asyncio.create_task(send_batches(channel_hook)))
     await asyncio.gather(*send_batch_tasks)
     
