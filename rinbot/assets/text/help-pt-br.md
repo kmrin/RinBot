@@ -9,9 +9,11 @@
 
 ### Config
  `/config canal-boasvindas` Configura um canal no servidor onde a RinBot da as boas-vindas a novos membros com uma mensagem customizada.
- `/config fortnite-loja-diaria` Configura um canal no servidor onde a RinBot mostra a loja diária do fortnite (Atualiza todo dia às )
+ `/config fortnite-loja-diaria` Configura um canal no servidor onde a RinBot mostra a loja diária do fortnite (Atualiza todo dia às 21:05 horário de Brasília)
+ `/config valorant-loja-diaria` Configura um canal no servidor onde a RinBot mostra a loja diária do valorant (Atualiza todo dia às 21:05 horário de Brasília) 
  `/toggle canal-boasvindas` Liga e desliga a funcionalidade do canal de boas-vindas
- `/toggle fortnite-loja-diaria` Liga e desliga a functionalidade do canal da loja do fortnite
+ `/toggle fortnite-loja-diaria` Liga e desliga a funcionalidade do canal da loja do fortnite
+ `/toggle valorant-loja-diaria` Liga e desliga a funcionalidade do canal da loja do valorant
 
 ### Moderation
  `/censurar` Deleta um número especificado de mensagens do canal de texto
@@ -58,6 +60,13 @@
  `/laranja loja` Mostra itens da loja
  `/laranja novo_cargo` Adiciona um item de cargo na loja
  `/laranja comprar` Compra um item da loja
+
+### Valorant
+ `/valorant login` Loga na sua conta da Riot
+ `/valorant logout` Desloga da sua conta da Riot e a deleta da base de dados da bot
+ `/valorant cookie` Loga na sua conta da Riot usando um cookie
+ `/valorant store` Mostra sua loja diária do valorant
+ `/valorant configurar-usuario` Configura suas preferências da loja diária do valorant
 
 ### Booru
  `/booru random` Mostra uma imagem aleatória do danbooru com as tags e classificação indicadas

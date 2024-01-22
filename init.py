@@ -275,7 +275,7 @@ async def on_ready() -> None:
     else: logger.error(text['INIT_ERROR_CHECKING_GUILDS'])
     
     # Make sure all members are registered on the valorant stuff
-    logger.info("Checking valorant stuff")
+    logger.info(text['INIT_CHECKING_VALORANT'])
     val = await get_table("valorant")
     for guild in client.guilds:
         if str(guild.id) not in val.keys:
@@ -284,8 +284,8 @@ async def on_ready() -> None:
             if str(member.id) not in val[str(guild.id)].keys:
                 val[str(guild.id)]["members"][str(member.id)] = {"active": False, "type": 0}
     update = await update_table("valorant", val)
-    if update: logger.info("Checked valorant stuff")
-    else: logger.error("Error checking valorant stuff")
+    if update: logger.info(text['INIT_CHECKED_VALORANT'])
+    else: logger.error(text['INIT_ERROR_CHECKING_VALORANT'])
     
     # Start client tasks
     status_loop.start()

@@ -5,6 +5,7 @@
     * /valorant logout `Logs out of the user's Riot account and deletes it from the database`
     * /valorant cookie `Logs into the user's Riot account using a cookie`
     * /valorant store `Shows the user's daily valorant store`
+    * /valorant config `Sets user settings regarding the store`
 """
 
 # Imports
@@ -12,6 +13,7 @@ import contextlib, discord
 from discord import app_commands, Interaction
 from discord.ext import tasks
 from discord.ext.commands import Cog, Bot
+from discord.app_commands import Choice
 from discord.utils import MISSING
 from rinbot.valorant import cache as Cache
 from rinbot.valorant.db import DATABASE
@@ -172,6 +174,27 @@ class Valorant(Cog, name="valorant"):
         data = endpoint.store_fetch_storefront()
         embeds = self.get_store_embeds(endpoint.player, data)
         await interaction.followup.send(embeds=embeds)
+    
+    # User settings
+    @val_group.command(
+        name=text['VALORANT_CONFIG_NAME'], description=text['VALORANT_CONFIG_DESC'])
+    @app_commands.choices(type=[
+        Choice(name=text['VALORANT_CONFIG_TYPE1'], value=0),
+        Choice(name=text['VALORANT_CONFIG_TYPE2'], value=1)])
+    @not_blacklisted()
+    async def config(self, interaction:Interaction, active:Choice[int]=0, type:Choice[int]=0) -> None:
+        try: active = active.value
+        except: active = 0
+        try: type = type.value
+        except: type = 0
+        val = await get_table("valorant")
+        if type == 1:
+            if val[str(interaction.guild.id)]["active"] == False:
+                return await respond(interaction, RED, message=text['VALORANT_CONFIG_GUILD_MISCONFIG'])
+        val[str(interaction.guild.id)]["members"][str(interaction.user.id)]["active"] = True if active == 1 else False
+        val[str(interaction.guild.id)]["members"][str(interaction.user.id)]["type"] = type
+        await update_table("valorant", val)
+        await respond(interaction, GREEN, message=text['VALORANT_CONFIG_SET'])
 
 # SETUP
 async def setup(bot:Bot):

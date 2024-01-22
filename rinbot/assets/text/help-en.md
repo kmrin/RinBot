@@ -10,8 +10,10 @@
 ### Config
  `/set welcome-channel` Sets a text channel on your server for RinBot to greet new members with a custom message
  `/set fortnite-daily-shop-channel` Sets a text channel on your server for RinBot to send the daily fortnite item shop (Updates everyday at 00:05 UTC)
+ `/set valorant-daily-shop-channel` Sets a text channel on your server for RinBot to send the daily valorant item shop (Updates everyday at 00:10 UTC)
  `/toggle welcome-channel` Toggles on and off the welcome channel functionality
  `/toggle fortnite-daily-shop-channel` Toggles on and off the fortnite daily shop functionality
+ `/toggle valorant-daily-shop-channel` Toggles on and off the valorant daily shop functionality
 
 ### Moderation
  `/censor` Deletes a specified number of messages from the text channel it was typed in
@@ -58,6 +60,13 @@
  `/orange store`  Shows the items on the store
  `/orange new_role`  Adds a role item to be bought from the store
  `/orange buy`  Buys an item from the store (by name)
+
+### Valorant
+ `/valorant login` Logs into your Riot account
+ `/valorant logout` Logs out of your Riot account and deletes it from RinBot's database
+ `/valorant cookie` Logs into your Riot account using a cookie
+ `/valorant store` Shows your valorant daily shop
+ `/valorant user-config` Sets user settings for their daily shop
 
 ### Booru
  `/booru random`  Shows a random image from danbooru using the tags and rating given by you
