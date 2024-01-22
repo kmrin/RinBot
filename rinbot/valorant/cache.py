@@ -93,5 +93,6 @@ def get_cache() -> None:
     fetch_skin()
     fetch_tier()
     pre_fetch_price()
+    fetch_currencies()
 
     logger.info(text['VAL_CACHE_LOADED'])

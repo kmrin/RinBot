@@ -8,6 +8,7 @@
     * Fixed /queue clear command
 
 > v3.1.0:
-    * Fixed an issue that caused the "/set welcome-channel" command to disappear
+    * Fixed an issue where commands would not respond if executed on rinbot's DMs
+    * Fixed an issue that caused the "/set welcome-channel" command to not appear
     * Fixed an issue where english strings appeared in the portuguese language table
     * Added valorant daily shop functionality

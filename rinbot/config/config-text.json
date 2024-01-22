@@ -11,6 +11,7 @@
         "HOURS": "hours",
         "MINUTES": "minutes",
         "SECONDS": "seconds",
+        "NOW": "now",
 
         "ERROR": " ❌  Error.",
         "ERROR_CANT_SEND_MESSAGE": " ❌  Couldn't send message.",
@@ -57,6 +58,8 @@
         "INTERFACE_VAL_2FA_LOGGED": " ✅  Successfuly logged in as",
         "INTERFACE_VAL_2FA_WRONG": " ❌  Something went wrong :(",
         "INTERFACE_VAL_2FA_ERROR": "[Valorant]: 2FA View Error:",
+        "INTERFACE_VAL_2FA_ENABLED": "You have 2FA enabled!",
+        "INTERFACE_VAL_2FA_SENT": "Riot sent a code to",
 
         "VAL_CACHE_VERSION": "[Valorant] Fetching version",
         "VAL_CACHE_WEAPON_SKIN": "[Valorant] Fetching weapons skin",
@@ -72,7 +75,7 @@
         "VAL_DB_LOGOUT_ERROR": "[Valorant] Logout error:",
         "VAL_DB_LOGOUT_ERROR_KEY": "[Valorant] Logout error: KeyError",
 
-        "VAL_DS_EMBED": ["", "'s Daily store", "Expires "],
+        "VAL_DS_EMBED": ["", "'s Daily store", "Expires in"],
         "VAL_DS_ENDPOINT_ERROR": "[Valorant] Error getting endpoint for",
         "VAL_DS_HOOK_NAME": "RinBot Valorant Offers",
         "VAL_DS_HOOK_ERROR": "[Valorant] Error getting webhook:",
@@ -84,6 +87,12 @@
         "VAL_EP_ERROR": "[Valorant] Error activating endpoint",
         "VAL_EP_COOKIES_ERROR": "[Valorant] Cookies expired",
         "VAL_EP_REQUEST_ERROR": "[Valorant] Put request failed",
+
+        "VAL_AUTH_X_ERROR": "An unknown error occurred, please do /login again.",
+        "VAL_AUTH_COOKIE_EXPIRED": "Cookies are expired, please do /login again.",
+        "VAL_AUTH_COOKIE_FAILED": "Failed to log in with cookie",
+        "VAL_AUTH_NOT_SUPPORTED": "Temporary log in does not support 2FA.",
+        "VAL_AUTH_NO_TAGLINE": "This user hasn't created a name or tagline yet.",
 
         "FN_DS_GETTING": "[Fortnite] Getting shop items",
         "FN_DS_IMG_GET": "[Fortnite] Getting image for",
@@ -141,7 +150,8 @@
         "INIT_CHECKING_VALORANT": "Checking valorant data",
         "INIT_CHECKED_VALORANT": "Checked valorant data",
         "INIT_ERROR_CHECKING_VALORANT": "An error occurred while checking valorant data",
-        
+        "INIT_NOT_IN_GUILD": " ❌  This command only works on a server",
+
         "INIT_WAVELINK_NODE_CONNECTED": ["Wavelink Node connected:", "Resumed:", "Session ID:"],
         "INIT_WAVELINK_TRACK_STARTED": ["Wavelink Track started:", "On:"],
         "INIT_WAVELINK_NOW_PLAYING": [" 🎵  Now Playing", "By:", "Duration:", "Recommended from:"],
@@ -450,7 +460,7 @@
 
         "VALORANT_UPDATED_CACHE": "[Valorant] Updated cache",
         "VALORANT_PROVIDE_BOTH": "Please provide both username and password!",
-        "VALORANT_USER_STORE": ["", "'s Daily store", "Expires "],
+        "VALORANT_USER_STORE": ["", "'s Daily store", "Expires in"],
         "VALORANT_LOGIN_NAME": "login",
         "VALORANT_LOGIN_DESC": "Log in with your Riot account",
         "VALORANT_LOGIN_SUCCESS": " ✅  Successfuly logged in as",
@@ -467,10 +477,11 @@
         "VALORANT_STORE_DESC": "Shows your daily store",
         "VALORANT_CONFIG_NAME": "user-config",
         "VALORANT_CONFIG_DESC": "Sets the type of notification you wish to receive",
-        "VALORANT_CONFIG_TYPE_1": "Send it to my DMs!",
-        "VALORANT_CONFIG_TYPE_2": "Send it on the server's channel!",
+        "VALORANT_CONFIG_TYPE1": "Send it to my DMs!",
+        "VALORANT_CONFIG_TYPE2": "Send it on the server's channel!",
         "VALORANT_CONFIG_SET": " ✅  Settings saved!",
         "VALORANT_CONFIG_GUILD_MISCONFIG": " ❌  This server doesn't have a dedicated channel configured. Use the DMs setting.",
+        "VALORANT_NO_LOGIN": " ❌  You are not logged in",
 
         "": ""
     },
@@ -486,6 +497,7 @@
         "HOURS": "horas",
         "MINUTES": "minutos",
         "SECONDS": "segundos",
+        "NOW": "agora",
 
         "ERROR": " ❌  Erro.",
         "ERROR_CANT_SEND_MESSAGE": " ❌  Mensagem não enviada.",
@@ -532,6 +544,8 @@
         "INTERFACE_VAL_2FA_LOGGED": " ✅  Logado com sucesso como",
         "INTERFACE_VAL_2FA_WRONG": " ❌  Algo deu errado :(",
         "INTERFACE_VAL_2FA_ERROR": "[Valorant]: Erro na View 2FA:",
+        "INTERFACE_VAL_2FA_ENABLED": "Você tem 2FA ativo!",
+        "INTERFACE_VAL_2FA_SENT": "A Riot enviou um código para",
 
         "VAL_CACHE_VERSION": "[Valorant] Adquirindo versão",
         "VAL_CACHE_WEAPON_SKIN": "[Valorant] Adquirindo skins de armas",
@@ -547,7 +561,7 @@
         "VAL_DB_LOGOUT_ERROR": "[Valorant] Erro de logou:",
         "VAL_DB_LOGOUT_ERROR_KEY": "[Valorant] Erro de logout: KeyError",
 
-        "VAL_DS_EMBED": ["Loja diária de ", "", "Expira "],
+        "VAL_DS_EMBED": ["Loja diária de ", "", "Expira em"],
         "VAL_DS_ENDPOINT_ERROR": "[Valorant] Erro ao adquirir endpoint:",
         "VAL_DS_HOOK_NAME": "Offertas da RinBot",
         "VAL_DS_HOOK_ERROR": "[Valorant] Erro ao adquirir webhook:",
@@ -559,6 +573,12 @@
         "VAL_EP_ERROR": "[Valorant] Erro ao ativar endpoint:",
         "VAL_EP_COOKIES_ERROR": "[Valorant] Cookies expirados",
         "VAL_EP_REQUEST_ERROR": "[Valorant] Solicitação de reposição de dados falha",
+
+        "VAL_AUTH_X_ERROR": "Um erro desconhecido ocorreu, use /login novamente.",
+        "VAL_AUTH_COOKIE_EXPIRED": "Seus cookies expiraram, use /login novamente.",
+        "VAL_AUTH_COOKIE_FAILED": "O login com cookies falhou",
+        "VAL_AUTH_NOT_SUPPORTED": "O login temporário não suporta 2FA.",
+        "VAL_AUTH_NO_TAGLINE": "Este usuário ainda não criou uma tag.",
 
         "FN_DS_GETTING": "[Fortnite] Adquirindo imagens",
         "FN_DS_IMG_GET": "[Fortnite] Pegando imagem de",
@@ -921,7 +941,7 @@
 
         "VALORANT_UPDATED_CACHE": "[Valorant] Cache atualizado",
         "VALORANT_PROVIDE_BOTH": "Providencie um usuário e senha!",
-        "VALORANT_USER_STORE": ["Loja diária de", "", "Expira "],
+        "VALORANT_USER_STORE": ["Loja diária de", "", "Expira em"],
         "VALORANT_LOGIN_NAME": "login",
         "VALORANT_LOGIN_DESC": "Faça login na sua conta Riot",
         "VALORANT_LOGIN_SUCCESS": " ✅  Logado com sucesso como",
@@ -939,9 +959,10 @@
         "VALORANT_CONFIG_NAME": "configurar-usuario",
         "VALORANT_CONFIG_DESC": "Configura o tipo de notificação que você quer receber",
         "VALORANT_CONFIG_SET": " ✅  Configuração salva!",
-        "VALORANT_CONFIG_TYPE_1": "Envia pro meu privado!",
-        "VALORANT_CONFIG_TYPE_2": "Envia pro canal do servidor!",
+        "VALORANT_CONFIG_TYPE1": "Envia pro meu privado!",
+        "VALORANT_CONFIG_TYPE2": "Envia pro canal do servidor!",
         "VALORANT_CONFIG_GUILD_MISCONFIG": " ❌  Esse servidor não tem um canal dedicado configurado. Use DMs.",
+        "VALORANT_NO_LOGIN": " ❌  Você não está logado",
 
         "": ""
     }

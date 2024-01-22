@@ -27,17 +27,6 @@ def data_folder() -> None:
     if not os.path.exists(final_directory):
         os.makedirs(final_directory)
 
-def format_dt(dt: datetime, style: str = None) -> str:  # style 'R' or 'd'
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-
-    if style is None:
-        return f'<t:{int(dt.timestamp())}>'
-    return f'<t:{int(dt.timestamp())}:{style}>'
-
-def format_relative(dt: datetime) -> str:
-    return format_dt(dt, 'R')
-
 class JSON:
     def read(filename: str, force: bool = True) -> Dict:
         try:

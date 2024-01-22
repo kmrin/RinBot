@@ -3,6 +3,9 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple
 from secrets import token_urlsafe
 from rinbot.base.logger import logger
+from rinbot.base.helpers import load_lang
+
+text = load_lang()
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -70,7 +73,8 @@ class Auth:
         self.response = {}
         self._headers = {
             "Accept-Encoding": "deflate, gzip, zstd",
-            "user_agent": Auth.RIOT_CLIENT_USER_AGENT,
+            # "user-agent": Auth.RIOT_CLIENT_USER_AGENT % "rso-auth",
+            "user-agent": Auth.RIOT_CLIENT_USER_AGENT,
             "Cache-Control": "no-cache",
             "Accept": "application/json",}
     
@@ -116,7 +120,6 @@ class Auth:
         return session
     
     async def authenticate(self, username:str, password:str, use_query_response_mode:bool=False) -> Optional[Dict[str, Any]]:
-        local_response = self.local_response()
         if username and password:
             self._cookie_jar.clear()
         
@@ -163,14 +166,14 @@ class Auth:
             cookies['expiry_token'] = int(datetime.timestamp(expiry_token))
             return {'auth': 'response', 'data': {'cookie': cookies, 'access_token': access_token, 'token_id': token_id}}
         elif data["type"] == "multifactor":
-            label_modal = local_response.get('INPUT_2FA_CODE')
+            label_modal = text['INTERFACE_VAL_2FA_LABEL']
             WaitFor2FA = {"auth": "2fa", "cookie": cookies, 'label': label_modal}
             if data['multifactor']['method'] == 'email':
                 WaitFor2FA[
                     'message'
-                ] = f"{local_response.get('2FA_TO_EMAIL', 'Riot sent a code to')} {data['multifactor']['email']}"
+                ] = f"{text['INTERFACE_VAL_2FA_SENT']} {data['multifactor']['email']}"
                 return WaitFor2FA
-            WaitFor2FA['message'] = local_response.get('2FA_ENABLE', 'You have 2FA enabled!')
+            WaitFor2FA['message'] = text['INTERFACE_VAL_2FA_ENABLED']
             return WaitFor2FA
     
     async def get_entitlements_token(self, access_token:str) -> Optional[str]:
@@ -183,7 +186,7 @@ class Auth:
         try:
             entitlements_token = data["entitlements_token"]
         except KeyError:
-            logger.info("Cookies are expired, please do /login again!")
+            logger.info(text['VAL_AUTH_COOKIE_EXPIRED'])
         else:
             return entitlements_token
     
@@ -199,7 +202,7 @@ class Auth:
             name = data["acct"]["game_name"]
             tag = data["acct"]["tag_line"]
         except KeyError:
-            logger.info("This user hasn't created a name or tagline yet.")
+            logger.info(text['VAL_AUTH_NO_TAGLINE'])
         else:
             return puuid, name, tag
     
@@ -215,7 +218,7 @@ class Auth:
         try:
             region = data["affinities"]["live"]
         except KeyError:
-            logger.info("An unknown error occurred, please do /login again.")
+            logger.info(text['VAL_AUTH_X_ERROR'])
         else:
             return region
     
@@ -275,7 +278,7 @@ class Auth:
                 'X-Riot-Entitlements-JWT': entitlements_token,}
             user_data = {'puuid': puuid, 'region': region, 'headers': headers, 'player_name': player_name}
             return user_data
-        logger.info("Temporary login does not support 2FA")
+        logger.info(text['VAL_AUTH_NOT_SUPPORTED'])
     
     async def login_with_cookie(self, cookies:Dict) -> Dict[str, Any]:
         cookie_payload = f"ssid={cookies};" if cookies.startswith("e") else cookies
@@ -292,7 +295,7 @@ class Auth:
             headers=self._headers,)
         self._headers.pop("cookie")
         if r.status != 303:
-            logger.error("Failed to login with cookies")
+            logger.error(text['VAL_AUTH_COOKIE_FAILED'])
         await session.close()
         new_cookies = {'cookie': {}}
         for cookie in r.cookies.items():

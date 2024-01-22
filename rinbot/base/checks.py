@@ -24,19 +24,23 @@ def is_owner() -> Callable[[T], T]:
 def is_admin() -> Callable[[T], T]:
     async def predicate(interaction:Interaction) -> bool:
         query = await get_table("admins")
-        if str(interaction.guild.id) in query.keys():
-            if not str(interaction.user.id) in query[str(interaction.guild.id)]:
+        if interaction.guild:
+            if str(interaction.guild.id) in query.keys():
+                if not str(interaction.user.id) in query[str(interaction.guild.id)]:
+                    raise E.UserNotAdmin
+            else:
                 raise E.UserNotAdmin
         else:
-            raise E.UserNotAdmin
+            raise E.UserNotInGuild
         return True
     return check(predicate)
 
 def not_blacklisted() -> Callable[[T], T]:
     async def predicate(interaction:Interaction) -> bool:
         query = await get_table("blacklist")
-        if str(interaction.guild.id) in query.keys():
-            if str(interaction.user.id) in query[str(interaction.guild.id)]:
-                raise E.UserBlacklisted
+        if interaction.guild:
+            if str(interaction.guild.id) in query.keys():
+                if str(interaction.user.id) in query[str(interaction.guild.id)]:
+                    raise E.UserBlacklisted
         return True
     return check(predicate)

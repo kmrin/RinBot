@@ -11,3 +11,4 @@ class Exceptions:
     class UserBlacklisted(app_commands.CheckFailure): pass
     class UserNotOwner(app_commands.CheckFailure): pass
     class UserNotAdmin(app_commands.CheckFailure): pass
+    class UserNotInGuild(app_commands.CheckFailure): pass

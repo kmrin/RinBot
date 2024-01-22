@@ -4,9 +4,10 @@ The home of general purpose functions used throughout RinBot's code
 """
 
 # Imports
-import os, sys, json, discord, urllib.parse, re, platform, psutil, cpuinfo, GPUtil, datetime, traceback
+import os, sys, json, discord, urllib.parse, re, platform, psutil, cpuinfo, GPUtil, traceback
 from translate import Translator
 from rinbot.base.logger import logger
+from datetime import datetime, timedelta
 
 def format_exception(e:Exception) -> str:
     """
@@ -148,9 +149,28 @@ def format_date(date:str, format:int=0) -> str:
         * format:int = `0` for `DD/MM/YYYY` (default) or `1` for `MM/DD/YYYY`
     """
     try:
-        parsed = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        parsed = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
         return parsed.strftime("%d/%m/%Y" if format == 0 else "%m/%d/%Y")
     except Exception as e: logger.error(f"{format_exception(e)}")
+
+def format_expiration_time(expiration_time):
+    """
+    #### Receives a datetime and returns a string that shows how much time you have from now to the input time
+    - Arguments:
+        * expiration_time:str `Example: "2024-01-22 23:59:44.779790"`\n
+        Can be generated with "datetime.utcnow() + timedelta(seconds=duration)" for example
+    """
+    text = load_lang()
+    current_time = datetime.utcnow()
+    time_difference = expiration_time - current_time
+    hours, remainder = divmod(time_difference.seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+    if time_difference.days > 0:
+        return f"{time_difference.days} {text['DAYS']} {hours} {text['HOURS']}"
+    elif hours > 0:
+        return f"{hours} {text['HOURS']}"
+    else:
+        return text['NOW']
 
 async def get_specs() -> dict:
     """Returns a dict containing the current system specifications

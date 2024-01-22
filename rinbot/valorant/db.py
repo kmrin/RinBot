@@ -86,30 +86,33 @@ class DATABASE:
             return True
     
     async def is_data(self, user_id:int) -> Optional[Dict[str, Any]]:
-        auth = await self.is_login(user_id)
-        puuid = auth['puuid']
-        region = auth['region']
-        username = auth['username']
-        access_token = auth['access_token']
-        entitlements_token = auth['emt']
-        notify_mode = auth['notify_mode']
-        expiry_token = auth['expiry_token']
-        cookie = auth['cookie']
-        notify_channel = auth.get('notify_channel', None)
-        dm_message = auth.get('DM_Message', None)
-        if timestamp_utc() > expiry_token:
-            access_token, entitlements_token = await self.refresh_token(user_id, auth)
-        headers = {'Authorization': f'Bearer {access_token}', 'X-Riot-Entitlements-JWT': entitlements_token}
-        data = dict(
-            puuid=puuid,
-            region=region,
-            headers=headers,
-            player_name=username,
-            notify_mode=notify_mode,
-            cookie=cookie,
-            notify_channel=notify_channel,
-            dm_message=dm_message,)
-        return data
+        try:
+            auth = await self.is_login(user_id)
+            puuid = auth['puuid']
+            region = auth['region']
+            username = auth['username']
+            access_token = auth['access_token']
+            entitlements_token = auth['emt']
+            notify_mode = auth['notify_mode']
+            expiry_token = auth['expiry_token']
+            cookie = auth['cookie']
+            notify_channel = auth.get('notify_channel', None)
+            dm_message = auth.get('DM_Message', None)
+            if timestamp_utc() > expiry_token:
+                access_token, entitlements_token = await self.refresh_token(user_id, auth)
+            headers = {'Authorization': f'Bearer {access_token}', 'X-Riot-Entitlements-JWT': entitlements_token}
+            data = dict(
+                puuid=puuid,
+                region=region,
+                headers=headers,
+                player_name=username,
+                notify_mode=notify_mode,
+                cookie=cookie,
+                notify_channel=notify_channel,
+                dm_message=dm_message,)
+            return data
+        except:
+            return False
     
     async def refresh_token(self, user_id: int, data: Dict) -> Optional[Dict]:
         auth = self.auth

@@ -108,7 +108,7 @@ class Config(Cog, name="config"):
         new_active_state = not daily_channels[str(interaction.guild.id)]["active"]
         daily_channels[str(interaction.guild.id)]["active"] = new_active_state
         await update_table("daily_shop_channels", daily_channels)
-        await respond(interaction, GREEN, message=f"{text['CONFIG_TOGGLE_DAILY_CHANNEL_TOGGLED']} {text['ON'] if new_active_state == True else {text['OFF']}}.")
+        await respond(interaction, GREEN, message=f"{text['CONFIG_TOGGLE_DAILY_CHANNEL_TOGGLED']} {text['ON'] if new_active_state == True else text['OFF']}.")
     
     # Toggles the valorant daily shop channel on and off
     @toggle.command(
@@ -123,7 +123,7 @@ class Config(Cog, name="config"):
         new_active_state = not val[str(interaction.guild.id)]["active"]
         val[str(interaction.guild.id)]["active"] = new_active_state
         await update_table("valorant", val)
-        await respond(interaction, GREEN, message=f"{text['CONFIG_TOGGLE_VAL_CHANNEL_TOGGLED']} {text['ON'] if new_active_state == True else {text['OFF']}}.")
+        await respond(interaction, GREEN, message=f"{text['CONFIG_TOGGLE_VAL_CHANNEL_TOGGLED']} {text['ON'] if new_active_state == True else text['OFF']}.")
 
 # SETUP
 async def setup(bot:Bot):

@@ -4,7 +4,7 @@ made by rin
 """
 
 # Imports
-import os, sys, json, platform, subprocess, asyncio, discord, random, pytz, wavelink
+import os, sys, json, platform, subprocess, asyncio, discord, random, pytz, wavelink, contextlib
 from discord import app_commands
 from discord.ext import tasks
 from discord.ext.commands import Bot
@@ -16,6 +16,9 @@ from rinbot.base.colors import *
 from rinbot.base.interface import MediaControls
 from rinbot.fortnite.daily_shop import show_fn_daily_shop
 from rinbot.valorant.daily_shop import show_val_daily_shop
+from rinbot.valorant import cache as Cache
+from rinbot.valorant.db import DATABASE
+from rinbot.valorant.endpoint import API_ENDPOINT
 from datetime import datetime
 
 # Load text
@@ -223,6 +226,16 @@ async def fortnite_daily_shop_scheduler():
 # Valorant daily shop scheduler
 async def valorant_daily_shop_scheduler():
     logger.info("Valorant daily shop task started")
+    client.val_db = DATABASE()
+    client.val_endpoint = API_ENDPOINT()
+    with contextlib.suppress(Exception):
+        cache = client.val_db.read_cache()
+        version = Cache.get_valorant_version()
+        if version != cache["valorant_version"]:
+            Cache.get_cache()
+            cache["valorant_version"] = version
+            # client.val_db.insert_cache(cache)
+            logger.info(text['VALORANT_UPDATED_CACHE'])
     while True and config["VALORANT_DAILY_SHOP_ENABLED"]:
         time = config["VALORANT_DAILY_SHOP_UPDATE_TIME"].split(":")
         curr_time = datetime.now(utc).strftime("%H:%M:%S")
@@ -277,12 +290,16 @@ async def on_ready() -> None:
     # Make sure all members are registered on the valorant stuff
     logger.info(text['INIT_CHECKING_VALORANT'])
     val = await get_table("valorant")
+    guild_data = {"active": False, "channel_id": 0, "members": {}}
+    member_data = {"active": False, "type": 0}
     for guild in client.guilds:
-        if str(guild.id) not in val.keys:
-            val[str(guild.id)] = {"active": False, "channel_id": 0, "members": {}}
+        if str(guild.id) not in val.keys():
+            val[str(guild.id)] = guild_data
+        guild_members = val[str(guild.id)]["members"]
         for member in guild.members:
-            if str(member.id) not in val[str(guild.id)].keys:
-                val[str(guild.id)]["members"][str(member.id)] = {"active": False, "type": 0}
+             if str(member.id) not in guild_members.keys():
+                 guild_members[str(member.id)] = member_data
+        val[str(guild.id)]["members"] = guild_members
     update = await update_table("valorant", val)
     if update: logger.info(text['INIT_CHECKED_VALORANT'])
     else: logger.error(text['INIT_ERROR_CHECKING_VALORANT'])
@@ -303,9 +320,8 @@ async def on_ready() -> None:
 async def on_guild_join(guild:discord.Guild):
     logger.info(f"{text['INIT_JOINED_GUILD']} '{guild.name}'! ID: {guild.id}")
     joined = await get_table("guilds")
-    for guild in joined:
-        if not guild.id == int(guild):
-            joined.append(str(guild.id))
+    if str(guild.id) not in joined:
+        joined.append(str(guild.id))
     update = await update_table("guilds", joined)
     if update: logger.info(text['INIT_ADDED_NEW_GUILD'])
     else: logger.error(text['INIT_ERROR_ADDING_NEW_GUILD'])
@@ -315,7 +331,8 @@ async def on_guild_join(guild:discord.Guild):
 async def on_guild_remove(guild:discord.Guild):
     logger.info(f"{text['INIT_LEFT_GUILD']} '{guild.name}'. ID: {guild.id}")
     joined = await get_table("guilds")
-    joined.remove(str(guild.id))
+    if str(guild.id) in joined:
+        joined.remove(str(guild.id))
     update = await update_table("guilds", joined)
     if update: logger.info(text['INIT_REMOVED_GUILD'])
     else: logger.error(text['INIT_ERROR_REMOVING_GUILD'])
@@ -422,6 +439,10 @@ async def on_app_command_error(interaction: discord.Interaction, error) -> None:
         else:
             logger.warning(
                 f"{interaction.user} (ID: {interaction.user.id}) {text['INIT_TRIED_COMM_CLASS']} `{ADMIN}` {text['INIT_TRIED_ON_DMS']}, {text['INIT_TRIED_COMM_NOT_IN_CLASS']}")
+    elif isinstance(error, E.UserNotInGuild):
+        embed = discord.Embed(
+            description=f"{text['INIT_NOT_IN_GUILD']}", color=0xE02B2B)
+        await interaction.response.send_message(embed=embed)
     elif isinstance(error, app_commands.MissingPermissions):
         embed = discord.Embed(
             description=f"{text['INIT_USER_NO_PERMS_1']}"
@@ -466,11 +487,7 @@ async def main() -> None:
     
     # Get token and run bot
     bot = await get_table("bot")
-    async with client:
-        try:
-            await client.start(token=bot["token"], reconnect=True)
-        except discord.errors.LoginFailure:
-            logger.critical(text['INIT_INVALID_TOKEN'])
+    await client.start(token=bot["token"], reconnect=True)
     
     # Stop lavalink after bot closes
     logger.info(text['INIT_STOPPING_LAVALINK'])
