@@ -22,7 +22,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 - "Warning" system, which automatically kicks users past a certain amount of warnings.
 - SQL database to store important data.
 - Server moderation tools such as the command `/censor` that clears a certain amount of messages in a text chat.
-- YouTube music playback with search queries and support for playlists.
+- Music playback with search queries and support for playlists. (Youtube, Soudcloud by default, spotify, deezer and others can be enabled on the config files.)
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
 - Rule34 and Danbooru integration if you're into that.
 - Integration with the fnbr Fortnite API
