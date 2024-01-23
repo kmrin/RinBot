@@ -75,11 +75,7 @@ async def _show_channel_shop(client:Bot, guild_id, channel_id, user_id) -> None:
         client.val_db.insert_skin_price(skin_price)
         data = endpoint.store_fetch_storefront()
         embeds = _gen_store_embeds(endpoint.player, data)
-        hook = await _get_webhook(client, channel_id)
-        if hook:
-            await hook.send(content=f"{text['VAL_DS_MENTION']} {user.mention}!", embeds=embeds)
-        else:
-            await channel.send(content=f"{text['VAL_DS_MENTION']} {user.mention}!", embeds=embeds)
+        await channel.send(content=f"{text['VAL_DS_MENTION']} {user.mention}!", embeds=embeds)
     except Exception as e:
         logger.error(f"{text['VAL_DS_ERROR_SENDING_CHANNEL']} {e}")
 

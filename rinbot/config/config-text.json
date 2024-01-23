@@ -94,8 +94,8 @@
         "VAL_AUTH_NOT_SUPPORTED": "Temporary log in does not support 2FA.",
         "VAL_AUTH_NO_TAGLINE": "This user hasn't created a name or tagline yet.",
 
-        "FN_DS_GETTING": "[Fortnite] Getting shop items",
-        "FN_DS_IMG_GET": "[Fortnite] Getting image for",
+        "FN_FS_GETTING": "[Fortnite] Getting shop items",
+        "FN_FS_IMG_GET": "[Fortnite] Getting image for",
         "FN_FS_IMG_GEN": "[Fortnite] Generating composite for",
         "FN_FS_BATCH_GEN": "[Fortnite] Generated image batch for",
         "FN_FS_BATCH_SEND": ["Sent batch", "to channel"],
@@ -580,8 +580,8 @@
         "VAL_AUTH_NOT_SUPPORTED": "O login temporário não suporta 2FA.",
         "VAL_AUTH_NO_TAGLINE": "Este usuário ainda não criou uma tag.",
 
-        "FN_DS_GETTING": "[Fortnite] Adquirindo imagens",
-        "FN_DS_IMG_GET": "[Fortnite] Pegando imagem de",
+        "FN_FS_GETTING": "[Fortnite] Adquirindo imagens",
+        "FN_FS_IMG_GET": "[Fortnite] Pegando imagem de",
         "FN_FS_IMG_GEN": "[Fortnite] Gerando imagem composta para",
         "FN_FS_BATCH_GEN": "[Fortnite] Montes de imagens gerados para",
         "FN_FS_BATCH_SEND": ["Enviei o monte", "pro canal"],
