@@ -25,7 +25,8 @@ She was private code a while back, but I decided to publish at least a "alternat
 - Music playback with search queries and support for playlists. (Youtube, Soudcloud by default, spotify, deezer and others can be enabled on the config files.)
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
 - Rule34 and Danbooru integration if you're into that.
-- Integration with the fnbr Fortnite API
+- Integration with the fnbr Fortnite API to show the fortnite daily shop
+- Integration with the Valorant and Riot API to show your valorant daily shop
 
 ## Economy system
 As of update 1.8, RinBot now has a economy system with oranges as the currency.
