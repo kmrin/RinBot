@@ -325,6 +325,27 @@ async def on_guild_join(guild:discord.Guild):
     update = await update_table("guilds", joined)
     if update: logger.info(text['INIT_ADDED_NEW_GUILD'])
     else: logger.error(text['INIT_ERROR_ADDING_NEW_GUILD'])
+    val = await get_table("valorant")
+    guild_data = {"active": False, "channel_id": 0, "members": {}}
+    member_data = {"active": False, "type": 0}
+    for guild in client.guilds:
+        if str(guild.id) not in val.keys():
+            val[str(guild.id)] = guild_data
+        guild_members = val[str(guild.id)]["members"]
+        for member in guild.members:
+             if str(member.id) not in guild_members.keys():
+                 guild_members[str(member.id)] = member_data
+        val[str(guild.id)]["members"] = guild_members
+    update = await update_table("valorant", val)
+    economy = await get_table("currency")
+    for guild in client.guilds:
+        if str(guild.id) not in economy.keys():
+            economy[str(guild.id)] = {}
+        for member in guild.members:
+            if str(member.id) not in economy[str(guild.id)]:
+                economy[str(guild.id)][str(member.id)] = {"wallet": 500, "messages": 0}
+        logger.info(f"{text['INIT_CURR_GUILD'][0]} {guild.member_count} {text['INIT_CURR_GUILD'][1]} {guild.name} (ID: {guild.id})")
+    update = await update_table("currency", economy)
 
 # Remove guild ID's when leaving
 @client.event
