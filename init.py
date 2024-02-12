@@ -66,31 +66,6 @@ except Exception as e:
     logger.critical(f"{format_exception(e)}")
     sys.exit()
 
-# Bot intents (many)
-intents = discord.Intents.all()
-intents.dm_messages = True
-intents.dm_reactions = True
-intents.dm_typing = True
-intents.guild_messages = True
-intents.guild_reactions = True
-intents.guild_scheduled_events = True
-intents.guild_typing = True
-intents.guilds = True
-intents.integrations = True
-intents.invites = True
-intents.voice_states = True
-intents.webhooks = True
-intents.members = True
-intents.message_content = True
-intents.moderation = True
-intents.presences = True
-intents.emojis_and_stickers = True
-intents.messages = True
-intents.emojis = True
-intents.reactions = True
-intents.typing = True
-intents.bans = True
-
 # Values
 freshstart = True
 message_count = {}
@@ -135,7 +110,7 @@ class RinBot(Bot):
         self.val_endpoint = None
         self.fnds_language = config["FORTNITE_DAILY_SHOP_LANGUAGE"]
         if self.fnds_language not in ["ar", "de", "en", "es", "es-419", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-Hant"]:
-            logger.error(f"{text["INIT_INVALID_FN_LANGUAGE"][0]}{self.fnds_language}{text["INIT_INVALID_FN_LANGUAGE"][1]}")
+            logger.error(f"{text['INIT_INVALID_FN_LANGUAGE'][0]}{self.fnds_language}{text['INIT_INVALID_FN_LANGUAGE'][1]}")
             sys.exit()
     
     async def setup_hook(self) -> None:
