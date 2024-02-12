@@ -1,5 +1,6 @@
-import aiohttp, asyncio, requests, os, discord
+import aiohttp, asyncio, os, discord
 from PIL import Image, ImageFont, ImageDraw
+from datetime import datetime
 from discord import Webhook
 from discord.ext.commands import Bot
 from rinbot.base.logger import logger
@@ -9,65 +10,80 @@ from rinbot.base.colors import *
 
 text = load_lang()
 
-# Downloads the images from the shop
-async def get_shop(api:str) -> dict:
-    logger.info(text['FN_FS_GETTING'])
-    response = requests.get("https://fnbr.co/api/shop", headers={"x-api-key": api})
-    response = response.json()
-    
-    types = ["glider", "outfit", "pickaxe", "bundle", "backpack"]
-    rarities = ["common", "uncommon", "rare", "epic", "legendary", "exotic", "mythic", 
-                "icon_series", "dc_series", "frozen_series", "gaming_legends", "handmade",
-                "lava_series", "marvel_series", "shadow", "slurp", "star_wars", "transcendent"]
+class FortniteAPI():
+    __types__ = ["outfit", "pickaxe", "backpack"]
 
-    items = []
-
-    for i in response["data"]["featured"]:
-        if i["type"] in types and i["rarity"] in rarities:
-            items.append({"name": i["name"], "type": i["type"], "price": i["price"], "rarity": i["rarity"], "image": i["images"]["icon"] if not i["images"]["featured"] else i["images"]["featured"]})
-    logger.info("Items gathered")
+    def __init__(self, language="en"):
+        self.language = language
     
-    async def get_image(url, item_name):
-        logger.info(f"{text['FN_FS_IMG_GET']} {item_name}")
+    async def format_shop(self, data) -> dict:
+        data = data["data"]
+        shop = {"date": None, "count": 0, "entries": []}
+        
+        # Format date
+        date:datetime = datetime.strptime(data["date"], "%Y-%m-%dT%H:%M:%SZ")
+        shop["date"] = date.strftime("%d/%m/%y")
+        
+        # Format and append items to the list
+        for entry in data["featured"]["entries"]:
+            
+            # Skip unwanted items
+            if entry["bundle"]: continue
+            if entry["items"][0]["type"]["value"] not in self.__types__: continue
+            
+            # Format item
+            try:
+                item = {
+                    "name": entry["items"][0]["name"],
+                    "price": entry["finalPrice"],
+                    "rarity": entry["items"][0]["rarity"]["value"],
+                    "image": entry["newDisplayAsset"]["materialInstances"][0]["images"]["Background"]}
+            except KeyError:
+                item["image"] = entry["newDisplayAsset"]["materialInstances"][0]["images"]["OfferImage"]
+            shop["entries"].append(item)
+        
+        # Get num of items
+        shop["count"] = len(shop["entries"])
+
+        return shop
+
+    async def get_image(self, url, item_name):
+        logger.info(f"{text['FN_DS_IMG_GET']} '{item_name}'")
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
-                    with open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/downloaded/{item_name}.png", "wb") as f:
+                    with open(f"{os.path.realpath(os.path.dirname(__file__))}/../cache/fortnite/downloads/{item_name}.webp", "wb") as f:
                         f.write(await response.read())
     
-    async def composite_image(item_name, item_rarity, item_price):
-        logger.info(f"{text['FN_FS_IMG_GEN']} {item_name}")
+    async def composite_image(self, item_name, item_price):
+        logger.info(f"{text['FN_DS_IMG_GEN']} '{item_name}'")
         async def add_name(draw):
-            if len(item_name) > 18: font_size = 55
-            if len(item_name) <= 18: font_size = 75
+            if len(item_name) >= 15: font_size = 55
+            if len(item_name) >= 22: font_size = 40
+            if len(item_name) >= 28: font_size = 30
+            if len(item_name) <= 14: font_size = 75
             font = ImageFont.truetype(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/fonts/fortnite.ttf", font_size)
-            draw.text((333, 585), item_name, fill=(255, 255, 255), anchor="mm", font=font)
+            draw.text((333, 595), item_name, fill=(255, 255, 255), anchor="mm", font=font)
         async def add_currency(draw):
-            font = ImageFont.truetype(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/fonts/fortnite.ttf", 80)
-            draw.text((85, 50), item_price, fill=(255, 255, 255), anchor="lm", font=font)
-
-        # Create new image obj
+            font = ImageFont.truetype(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/fonts/fortnite.ttf", 70)
+            draw.text((85, 55), str(item_price), fill=(255, 255, 255), anchor="lm", font=font)
+        
+        # Create img obj
         image = Image.new("RGBA", (650, 650))
         
         # Load images
-        item_image = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/downloaded/{item_name}.png")
-        rarity_bg = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/borders/{item_rarity}.png")
-        bottom_banner = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/borders/bottom_banner.png")
-        rarity_border = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/borders/{item_rarity}_border.png")
+        item_image = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../cache/fortnite/downloads/{item_name}.webp")
+        bottom_banner = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/composite/bottom_banner.png")
         vbuck = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/composite/vbuck.png")
         
         # Resize all to fit
         item_image = item_image.resize(image.size, Image.LANCZOS)
-        rarity_bg = rarity_bg.resize(image.size, Image.LANCZOS)
-        rarity_border = rarity_border.resize(image.size, Image.LANCZOS)
         bottom_banner = bottom_banner.resize(image.size, Image.LANCZOS)
         vbuck = vbuck.resize((70, 70), Image.LANCZOS)
         _, _, _, vbuck_mask = vbuck.split()
         
-        # Composite base structure together
-        final = Image.alpha_composite(rarity_bg.convert("RGBA"), item_image.convert("RGBA"))
-        final = Image.alpha_composite(final.convert("RGBA"), bottom_banner.convert("RGBA"))
-        final = Image.alpha_composite(final.convert("RGBA"), rarity_border.convert("RGBA"))
+        # Composite base structure
+        final = Image.alpha_composite(item_image.convert("RGBA"), bottom_banner.convert("RGBA"))
         final.paste(vbuck, (15, 15), vbuck_mask)
         
         # Add text
@@ -76,27 +92,44 @@ async def get_shop(api:str) -> dict:
         await add_currency(draw)
         
         # Save
-        final.save(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/images/{item_name}.png")
+        final.save(f"{os.path.realpath(os.path.dirname(__file__))}/../cache/fortnite/composites/{item_name}.png")
         
         # Delete original image
         await asyncio.sleep(0.2)
-        path = f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/downloaded/{item_name}.png"
+        path = f"{os.path.realpath(os.path.dirname(__file__))}/../cache/fortnite/downloads/{item_name}.webp"
         if os.path.isfile(path): os.remove(path)
-    
-    async def generate_images(items):
-        download_tasks = []
-        composite_tasks = []
+
+    async def generate_images(self, items):
+        downloads = []
+        composites = []
         for i in items:
-            download_tasks.append(get_image(i["image"], i["name"]))
-            composite_tasks.append(composite_image(i["name"], i["rarity"], i["price"]))
-        await asyncio.gather(*download_tasks)
-        await asyncio.gather(*composite_tasks)
+            downloads.append(self.get_image(i["image"], i["name"]))
+            composites.append(self.composite_image(i["name"], i["price"]))
+        await asyncio.gather(*downloads)
+        await asyncio.gather(*composites)
     
-    await generate_images(items)
-    return {"date": response["data"]["date"], "count": len(response["data"]["featured"])}
+    async def get_shop(self) -> dict:
+        logger.info(text['FN_DS_GETTING'])
+        shop = None
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://fortnite-api.com/v2/shop/br", params={"language": self.language}) as response:
+                if response.status == 200:
+                    shop = await self.format_shop(await response.json())
+        if not shop: return None
+        try:
+            await self.generate_images(shop["entries"])
+        except Exception as e:
+            img_dir = f"{os.path.realpath(os.path.dirname(__file__))}/../cache/fortnite/downloads/"
+            for f in os.listdir(img_dir):
+                f_path = os.path.join(img_dir, f)
+                if os.path.isfile(f_path):
+                    os.remove(f_path)
+            print(e)
+            return None
+        return shop
 
 # Shows the daily shop
-async def show_fn_daily_shop(client:Bot, key:str) -> None:
+async def show_fn_daily_shop(client:Bot) -> None:
     """
     #### Show Fortnite Daily Shop
     This function iterates through each guild the bot is in
@@ -105,13 +138,14 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
     """
     # Grab shop data
     logger.info(text['DAILY_SHOP_UPDATING'])
-    shop = await get_shop(api=key)
+    api = FortniteAPI(client.fnds_language)
+    shop = await api.get_shop()
     
     # Vals
-    img_dir = f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/images"
+    img_dir = f"{os.path.realpath(os.path.dirname(__file__))}/../cache/fortnite/composites"
     img_files = [f for f in os.listdir(img_dir) if f.endswith(".png")]
     embed = discord.Embed(
-        title=f"{text['DAILY_SHOP_EMBED'][0]} **{format_date(shop['date'])}**",
+        title=f"{text['DAILY_SHOP_EMBED'][0]} **{shop['date']}**",
         description=f"{text['DAILY_SHOP_EMBED'][1]} **{len(img_files)}** {text['DAILY_SHOP_EMBED'][2]} **{shop['count']}** {text['DAILY_SHOP_EMBED'][3]}",
         color=PURPLE)
     
@@ -130,7 +164,7 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
             results = await asyncio.gather(*tasks)
             batch.extend(results)
             batches.append(batch)
-        logger.info(f"{text['FN_FS_BATCH_GEN']} {guild}")
+        logger.info(f"{text['FN_DS_BATCH_GEN']} {guild}")
         return batches
     
     # Sends all batches to their respective channels
@@ -139,7 +173,7 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
         await hook.send(embed=embed)
         for i, batch in enumerate(batches):
             await hook.send(files=batch)
-            logger.info(f"{text['FN_FS_BATCH_SEND'][0]} {i} {text['FN_FS_BATCH_SEND'][1]} {hook.channel.name} (ID: {hook.channel.id})")
+            logger.info(f"{text['FN_DS_BATCH_SEND'][0]} {i} {text['FN_DS_BATCH_SEND'][1]} {hook.channel.name} (ID: {hook.channel.id})")
 
     # Generate the batches
     send_batch_tasks = []
@@ -150,10 +184,10 @@ async def show_fn_daily_shop(client:Bot, key:str) -> None:
                 channel = client.get_channel(shop_channels[str(guild.id)]["channel_id"]) or await client.fetch_channel(shop_channels[str(guild.id)]["channel_id"])
                 channel_hooks = await channel.webhooks()
                 if not channel_hooks:
-                    channel_hook = await channel.create_webhook(name=text['FN_FS_HOOK_NAME'])
+                    channel_hook = await channel.create_webhook(name=text['FN_DS_HOOK_NAME'])
                 else:
                     channel_hook = channel_hooks[0]
-                await channel_hook.edit(name=text['FN_FS_HOOK_NAME'], avatar=await client.user.avatar.read())
+                await channel_hook.edit(name=text['FN_DS_HOOK_NAME'], avatar=await client.user.avatar.read())
                 send_batch_tasks.append(asyncio.create_task(send_batches(channel_hook)))
     await asyncio.gather(*send_batch_tasks)
     

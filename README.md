@@ -68,7 +68,6 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/toggle welcome-channel` | Toggles on and off the welcome channel functionality |
 | `/toggle fortnite-daily-shop-channel` | Toggles on and off the fortnite daily shop functionality |
 | `/toggle valorant-daily-shop-channel` | Toggles on and off the valorant daily shop functionality |
-## NOTE: In order to use the fortnite daily shop function, a user must have a valid fnbr API Key configured under "/rinbot/config/config-rinbot.json"
 
 #### Moderation
 | Command | Description |
@@ -130,6 +129,11 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/orange store` |  Shows the items on the store |
 | `/orange new_role` |  Adds a role item to be bought from the store |
 | `/orange buy` |  Buys an item from the store (by name) |
+
+#### Fortnite
+| Command | Description |
+| - | - |
+| `/fortnite daily-shop` | Shows the fortnite daily shop on the channel |
 
 #### Valorant
 | Command | Description |

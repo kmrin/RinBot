@@ -1,5 +1,5 @@
 """
-RinBot v3.1.0
+RinBot v3.1.1
 made by rin
 """
 
@@ -28,8 +28,8 @@ text = load_lang()
 try:
     folders = [
         "rinbot/cache", "rinbot/cache/fun", "rinbot/cache/chatlog", "rinbot/cache/stablediffusion",
-        "rinbot/assets/images/fortnite/downloaded", "rinbot/assets/images/fortnite/images",
-        "rinbot/cache/lavalink", "rinbot/cache/lavalink/log", "rinbot/cache/valorant"]
+        "rinbot/cache/lavalink", "rinbot/cache/lavalink/log", "rinbot/cache/fortnite", 
+        "rinbot/cache/fortnite/downloads", "rinbot/cache/fortnite/composites", "rinbot/cache/valorant"]
     for folder in folders:
         path = f"{os.path.realpath(os.path.dirname(__file__))}/{folder}"
         if not os.path.exists(path):
@@ -131,6 +131,12 @@ class RinBot(Bot):
         intents.typing = True
         intents.bans = True
         super().__init__(command_prefix=config["PREFIX"], intents=intents)
+        self.val_db = None
+        self.val_endpoint = None
+        self.fnds_language = config["FORTNITE_DAILY_SHOP_LANGUAGE"]
+        if self.fnds_language not in ["ar", "de", "en", "es", "es-419", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-Hant"]:
+            logger.error(f"{text["INIT_INVALID_FN_LANGUAGE"][0]}{self.fnds_language}{text["INIT_INVALID_FN_LANGUAGE"][1]}")
+            sys.exit()
     
     async def setup_hook(self) -> None:
         nodes = [wavelink.Node(uri=config['LAVALINK_ENDPOINT'], password=config['LAVALINK_PASSWORD'])]
@@ -191,8 +197,6 @@ class RinBot(Bot):
 
 # Client
 client = RinBot()
-client.val_db = None
-client.val_endpoint = None
 
 # Will I use AI?
 if config["AI_ENABLED"] and config["AI_CHANNELS"]:
@@ -220,7 +224,7 @@ async def fortnite_daily_shop_scheduler():
         curr_time = datetime.now(utc).strftime("%H:%M:%S")
         target_time = f"{time[0]}:{time[1]}:{time[2]}"
         if curr_time == target_time:
-            await show_fn_daily_shop(client, config["FORTNITE_DAILY_SHOP_FNBR_KEY"])
+            await show_fn_daily_shop(client)
         await asyncio.sleep(1)
 
 # Valorant daily shop scheduler
@@ -409,15 +413,6 @@ async def on_message(message:discord.Message):
 
     except AttributeError:
         pass
-
-# Show executed commands on the log
-@client.event
-async def on_app_command_completion(interaction:discord.Interaction) -> None:
-    comm_name = interaction.command.qualified_name.split(" ")
-    comm = str(comm_name[0])
-    logger.info(f"{text['INIT_COMM_EXECUTED_GUILD'][0]} {comm} {text['INIT_COMM_EXECUTED_GUILD'][1]} (ID: {interaction.guild.id}) {text['INIT_COMM_EXECUTED_GUILD'][2]} {interaction.user} (ID: {interaction.user.id}))"
-                if interaction.guild is not None else
-                f"{text['INIT_COMM_EXECUTED_DMS'][0]} {comm} {text['INIT_COMM_EXECUTED_DMS'][1]} {interaction.user} (ID: {interaction.user.id}) {text['INIT_COMM_EXECUTED_DMS'][2]}")
 
 # What to do when commands go nuh-uh
 @client.tree.error

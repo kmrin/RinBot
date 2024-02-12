@@ -1,5 +1,5 @@
 {
-    "VER": "RinBot v3.1.0 (Release)",
+    "VER": "RinBot v3.1.1 (Release)",
     "PREFIX": "!",
     "LANGUAGE": "en",
     "ACTIVITY_SWITCH_INTERVAL": 5,
@@ -16,7 +16,7 @@
 
     "FORTNITE_DAILY_SHOP_ENABLED": false,
     "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:05:00",
-    "FORTNITE_DAILY_SHOP_FNBR_KEY": "",
+    "FORTNITE_DAILY_SHOP_LANGUAGE": "en",
 
     "VALORANT_DAILY_SHOP_ENABLED": false,
     "VALORANT_DAILY_SHOP_UPDATE_TIME": "00:10:00",

@@ -61,6 +61,9 @@
  `/laranja novo_cargo` Adiciona um item de cargo na loja
  `/laranja comprar` Compra um item da loja
 
+### Fortnite
+ `/fortnite daily-shop` Mostra a loja diária do fortnite no canal
+
 ### Valorant
  `/valorant login` Loga na sua conta da Riot
  `/valorant logout` Desloga da sua conta da Riot e a deleta da base de dados da bot

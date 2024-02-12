@@ -94,12 +94,12 @@
         "VAL_AUTH_NOT_SUPPORTED": "Temporary log in does not support 2FA.",
         "VAL_AUTH_NO_TAGLINE": "This user hasn't created a name or tagline yet.",
 
-        "FN_FS_GETTING": "[Fortnite] Getting shop items",
-        "FN_FS_IMG_GET": "[Fortnite] Getting image for",
-        "FN_FS_IMG_GEN": "[Fortnite] Generating composite for",
-        "FN_FS_BATCH_GEN": "[Fortnite] Generated image batch for",
-        "FN_FS_BATCH_SEND": ["Sent batch", "to channel"],
-        "FN_FS_HOOK_NAME": "RinBot Fortnite Daily Shop",
+        "FN_DS_GETTING": "[Fortnite] Getting shop items",
+        "FN_DS_IMG_GET": "[Fortnite] Getting image for",
+        "FN_DS_IMG_GEN": "[Fortnite] Generating composite for",
+        "FN_DS_BATCH_GEN": "[Fortnite] Generated image batch for",
+        "FN_DS_BATCH_SEND": ["Sent batch", "to channel"],
+        "FN_DS_HOOK_NAME": "RinBot Fortnite Daily Shop",
 
         "INIT_ACTIVITY": [" ✌️  Listening to your commands :3", " 🥰  At your service"],
         "INIT_CREATED_DIRECTORY": "Created directory:",
@@ -159,6 +159,8 @@
         "INIT_WAVELINK_DISCONNECTING": " :wave:  Disconnecting, end of queue.",
         "INIT_WAVELINK_DISCONNECTING_SC": " :wave:  Disconnecting. `Recommended` playback not supported for SoundCloud tracks.",
         
+        "INIT_INVALID_FN_LANGUAGE": ["Invalid fortnite daily shop language selected:", "Supported languages: ar de en es es-419 fr it ja ko pl pt-BR ru tr zh-CN zh-Hant"],
+
         "DAILY_SHOP_UPDATED": "Fortnite daily shop updated",
         "DAILY_SHOP_UPDATING": "Updating fortnite daily shop",
         "DAILY_SHOP_EMBED": ["Fortnite daily shop:", "Showing", "out of", "items."],
@@ -301,7 +303,7 @@
         "GENERAL_RININFO_NAME": "rininfo",
         "GENERAL_RININFO_PROGRAMMER": ["Programmer:", "km.rin :flag_br: :transgender_flag:"],
         "GENERAL_RININFO_PY_VER": "Python Version:",
-        "GENERAL_RININFO_VERSION": ["Version:", "3.1.0"],
+        "GENERAL_RININFO_VERSION": ["Version:", "3.1.1"],
         "GENERAL_SPECS_DESC": "Shows the specs of the system running the bot",
         "GENERAL_SPECS_NAME": "specs",
         "GENERAL_SPECS_SYSTEM": "System",
@@ -458,6 +460,11 @@
         "MUSIC_SCT_NAME": "show_controls",
         "MUSIC_SCT_DESC": "Shows the multimedia controls",
 
+        "FORTNITE_GROUP_NAME": "fortnite",
+        "FORTNITE_GROUP_DESC": "Fortnite commands",
+        "FORTNITE_DAILY_SHOP_NAME": "daily-shop",
+        "FORTNITE_DAILY_SHOP_DESC": "Manually show the current fortnite daily shop",
+
         "VALORANT_UPDATED_CACHE": "[Valorant] Updated cache",
         "VALORANT_PROVIDE_BOTH": "Please provide both username and password!",
         "VALORANT_USER_STORE": ["", "'s Daily store", "Expires in"],
@@ -580,12 +587,12 @@
         "VAL_AUTH_NOT_SUPPORTED": "O login temporário não suporta 2FA.",
         "VAL_AUTH_NO_TAGLINE": "Este usuário ainda não criou uma tag.",
 
-        "FN_FS_GETTING": "[Fortnite] Adquirindo imagens",
-        "FN_FS_IMG_GET": "[Fortnite] Pegando imagem de",
-        "FN_FS_IMG_GEN": "[Fortnite] Gerando imagem composta para",
-        "FN_FS_BATCH_GEN": "[Fortnite] Montes de imagens gerados para",
-        "FN_FS_BATCH_SEND": ["Enviei o monte", "pro canal"],
-        "FN_FS_HOOK_NAME": "Loja diária do Fortnite",
+        "FN_DS_GETTING": "[Fortnite] Adquirindo imagens",
+        "FN_DS_IMG_GET": "[Fortnite] Pegando imagem de",
+        "FN_DS_IMG_GEN": "[Fortnite] Gerando imagem composta para",
+        "FN_DS_BATCH_GEN": "[Fortnite] Montes de imagens gerados para",
+        "FN_DS_BATCH_SEND": ["Enviei o monte", "pro canal"],
+        "FN_DS_HOOK_NAME": "Loja diária do Fortnite",
 
         "INIT_ACTIVITY": [" ✌️  Escutando os seus comandos :3", " 🥰  Ao seu dispor"],
         "INIT_CREATED_DIRECTORY": "Diretório criado:",
@@ -642,6 +649,8 @@
         "INIT_WAVELINK_TRACK_ENDED": ["Música finalizada:", "Em:"],
         "INIT_WAVELINK_DISCONNECTING": " :wave:  Desconectando, fim da fila.",
         "INIT_WAVELINK_DISCONNECTING_SC": " :wave:  Desconectando. `Recomandados` não são suportados pelo SoundCloud.",
+
+        "INIT_INVALID_FN_LANGUAGE": ["Linguagem inválida para a loja diária do fortnite:", "Linguagens suportadas: ar de en es es-419 fr it ja ko pl pt-BR ru tr zh-CN zh-Hant"],
 
         "DAILY_SHOP_UPDATED": "Loja do fortnite atualizada",
         "DAILY_SHOP_UPDATING": "Atualizando a loja do fortnite",
@@ -782,7 +791,7 @@
         "GENERAL_RININFO_NAME": "inforin",
         "GENERAL_RININFO_PROGRAMMER": ["Programadora:", "km.rin :flag_br:"],
         "GENERAL_RININFO_PY_VER": ["Versão do Python:", ""],
-        "GENERAL_RININFO_VERSION": ["Versão:", "3.1.0"],
+        "GENERAL_RININFO_VERSION": ["Versão:", "3.1.1"],
         "GENERAL_SPECS_DESC": "Mostra as especificações técnicas do PC rodando a RinBot",
         "GENERAL_SPECS_NAME": "specs",
         "GENERAL_SPECS_SYSTEM": "Sistema",
@@ -938,6 +947,11 @@
 
         "MUSIC_SCT_NAME": "mostrar_controles",
         "MUSIC_SCT_DESC": "Mostra os controles de multimídia",
+
+        "FORTNITE_GROUP_NAME": "fortnite",
+        "FORTNITE_GROUP_DESC": "Comandos do fortnite",
+        "FORTNITE_DAILY_SHOP_NAME": "loja-diária",
+        "FORTNITE_DAILY_SHOP_DESC": "Mostra a loja diária do fortnite manualmente",
 
         "VALORANT_UPDATED_CACHE": "[Valorant] Cache atualizado",
         "VALORANT_PROVIDE_BOTH": "Providencie um usuário e senha!",

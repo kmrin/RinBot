@@ -61,6 +61,9 @@
  `/orange new_role`  Adds a role item to be bought from the store
  `/orange buy`  Buys an item from the store (by name)
 
+### Fortnite
+ `/fortnite daily-shop` Shows the fortnite daily shop on the channel
+
 ### Valorant
  `/valorant login` Logs into your Riot account
  `/valorant logout` Logs out of your Riot account and deletes it from RinBot's database
