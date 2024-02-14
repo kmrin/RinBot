@@ -16,3 +16,7 @@
 > v3.1.1:
     * Fortnite daily shop API changed from FN-BR to Fortnite-API.com, which adds support for multiple languages and doesn't require an API key
     * Added "/fortnite daily-shop" command to show the daily shop manually
+
+> v3.1.2:
+    * Fixed an issue that caused the /inforin pt-br command to show a list under "Versão do Python"
+    * Added "/fortnite stats" command to show an image with the player's ingame stats (requires Fortnite-API.com API key!)

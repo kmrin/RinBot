@@ -1,5 +1,5 @@
 """
-RinBot v3.1.1
+RinBot v3.1.2
 made by rin
 """
 
@@ -14,7 +14,7 @@ from rinbot.base.helpers import load_lang, format_exception, format_millsec
 from rinbot.base.loader import load_extensions
 from rinbot.base.colors import *
 from rinbot.base.interface import MediaControls
-from rinbot.fortnite.daily_shop import show_fn_daily_shop
+from rinbot.fortnite.api import show_fn_daily_shop, FortniteAPI
 from rinbot.valorant.daily_shop import show_val_daily_shop
 from rinbot.valorant import cache as Cache
 from rinbot.valorant.db import DATABASE
@@ -29,7 +29,8 @@ try:
     folders = [
         "rinbot/cache", "rinbot/cache/fun", "rinbot/cache/chatlog", "rinbot/cache/stablediffusion",
         "rinbot/cache/lavalink", "rinbot/cache/lavalink/log", "rinbot/cache/fortnite", 
-        "rinbot/cache/fortnite/downloads", "rinbot/cache/fortnite/composites", "rinbot/cache/valorant"]
+        "rinbot/cache/fortnite/downloads", "rinbot/cache/fortnite/composites", "rinbot/cache/fortnite/stats",
+        "rinbot/cache/valorant"]
     for folder in folders:
         path = f"{os.path.realpath(os.path.dirname(__file__))}/{folder}"
         if not os.path.exists(path):
@@ -108,10 +109,11 @@ class RinBot(Bot):
         super().__init__(command_prefix=config["PREFIX"], intents=intents)
         self.val_db = None
         self.val_endpoint = None
-        self.fnds_language = config["FORTNITE_DAILY_SHOP_LANGUAGE"]
-        if self.fnds_language not in ["ar", "de", "en", "es", "es-419", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-Hant"]:
-            logger.error(f"{text['INIT_INVALID_FN_LANGUAGE'][0]}{self.fnds_language}{text['INIT_INVALID_FN_LANGUAGE'][1]}")
+        self.fn_language = config["FORTNITE_DAILY_SHOP_LANGUAGE"]
+        if self.fn_language not in ["ar", "de", "en", "es", "es-419", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-Hant"]:
+            logger.error(f"{text['INIT_INVALID_FN_LANGUAGE'][0]}{self.fn_language}{text['INIT_INVALID_FN_LANGUAGE'][1]}")
             sys.exit()
+        self.fortnite_api = FortniteAPI(self.fn_language, config["FORTNITE_API_KEY"])
     
     async def setup_hook(self) -> None:
         nodes = [wavelink.Node(uri=config['LAVALINK_ENDPOINT'], password=config['LAVALINK_PASSWORD'])]
@@ -193,7 +195,7 @@ if config["AI_ENABLED"] and config["AI_CHANNELS"]:
 
 # Fortnite daily shop scheduler
 async def fortnite_daily_shop_scheduler():
-    logger.info(text['INIT_DAILY_SHOP_STARTED'])
+    logger.info(text['INIT_FN_DAILY_SHOP_STARTED'])
     while True and config["FORTNITE_DAILY_SHOP_ENABLED"]:
         time = config["FORTNITE_DAILY_SHOP_UPDATE_TIME"].split(":")
         curr_time = datetime.now(utc).strftime("%H:%M:%S")
@@ -204,7 +206,7 @@ async def fortnite_daily_shop_scheduler():
 
 # Valorant daily shop scheduler
 async def valorant_daily_shop_scheduler():
-    logger.info("Valorant daily shop task started")
+    logger.info(text['INIT_VL_DAILY_SHOP_STARTED'])
     client.val_db = DATABASE()
     client.val_endpoint = API_ENDPOINT()
     with contextlib.suppress(Exception):

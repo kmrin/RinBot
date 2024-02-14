@@ -13,8 +13,13 @@ text = load_lang()
 class FortniteAPI():
     __types__ = ["outfit", "pickaxe", "backpack"]
 
-    def __init__(self, language="en"):
+    def __init__(self, language="en", api_key:str=None):
         self.language = language
+        self.api_key = api_key
+    
+    @staticmethod
+    def format_playtime(mins:int) -> str:
+        return f"{mins // 60:02d}h"
     
     async def format_shop(self, data) -> dict:
         data = data["data"]
@@ -127,6 +132,90 @@ class FortniteAPI():
             print(e)
             return None
         return shop
+    
+    async def composite_stats(self, data):
+        try:
+            try:
+                template = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/composite/stats-{self.language.lower()}.png")
+            except FileNotFoundError:
+                template = Image.open(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/images/fortnite/composite/stats-en.png")
+            
+            font = ImageFont.truetype(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/fonts/fortnite.ttf", size=35)
+            image = template.convert("RGBA")
+            draw = ImageDraw.Draw(image)
+            
+            # Name
+            draw.text((1002, 56), str(data["name"]), fill=(50, 50, 50), anchor="mm", font=font)
+            draw.text((1000, 54), str(data["name"]), fill=(255, 255, 255), anchor="mm", font=font)
+
+            font = ImageFont.truetype(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/fonts/fortnite.ttf", size=25)
+            
+            # Level
+            draw.text((1202, 97), str(data["level"]), fill=(50, 50, 50), anchor="mm", font=font)
+            draw.text((1200, 95), str(data["level"]), fill=(255, 255, 255), anchor="mm", font=font)
+            
+            # Stats
+            font = ImageFont.truetype(f"{os.path.realpath(os.path.dirname(__file__))}/../assets/fonts/fortnite.ttf", size=30)
+
+            positions = {
+                "games": 105, 
+                "wins": 255, 
+                "kills": 455,
+                "deaths": 635,
+                "kpm": 762, 
+                "kd": 862, 
+                "winrate": 980, 
+                "gametime": 1130}
+            heights = {
+                "overall": 190, 
+                "solo": 355, 
+                "duo": 510, 
+                "squad": 665}
+            
+            for type, info in data["stats"].items():
+                for key, val in info.items():
+                    draw.text((positions[key] + 2, heights[type] + 2), str(val), fill=(50, 50, 50), anchor="mm", font=font)
+                    draw.text((positions[key], heights[type]), str(val), fill=(255, 255, 255), anchor="mm", font=font)
+
+            img_path = f"{os.path.realpath(os.path.dirname(__file__))}/../cache/fortnite/stats/{data['name']}.png"
+            image.save(img_path)
+            
+            return img_path
+        except:
+            return None
+
+    async def format_stats(self, stats) -> dict:
+        data = stats["data"]
+        formatted = {
+            "name": data["account"]["name"],
+            "level": data["battlePass"]["level"],
+            "stats": {"overall": {}, "solo": {}, "duo": {}, "squad": {}}}
+        
+        modes = ["overall", "solo", "duo", "squad"]
+        for mode in modes:
+            mode_data = data["stats"]["all"][mode]
+            formatted["stats"][mode]["games"] = mode_data["matches"]
+            formatted["stats"][mode]["wins"] = mode_data["wins"]
+            formatted["stats"][mode]["kills"] = mode_data["kills"]
+            formatted["stats"][mode]["deaths"] = mode_data["deaths"]
+            formatted["stats"][mode]["kpm"] = f'{mode_data["killsPerMatch"]:.2f}'
+            formatted["stats"][mode]["kd"] = f'{mode_data["kd"]:.2f}'
+            formatted["stats"][mode]["winrate"] = f'{mode_data["winRate"]:.2f}'
+            formatted["stats"][mode]["gametime"] = self.format_playtime(mode_data["minutesPlayed"])
+
+        return formatted
+    
+    async def get_stats(self, player:str=None, lifetime:bool=True) -> dict:
+        if not self.api_key: return {"error": "no_api_key"}
+        params = {
+            "name": player, "timeWindow": "lifetime" if lifetime else "season"}
+        async with aiohttp.ClientSession(headers={"Authorization": self.api_key}) as session:
+            async with session.get("https://fortnite-api.com/v2/stats/br/v2", params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return await self.format_stats(data)
+                else:
+                    return await response.json()
 
 # Shows the daily shop
 async def show_fn_daily_shop(client:Bot) -> None:
@@ -138,7 +227,7 @@ async def show_fn_daily_shop(client:Bot) -> None:
     """
     # Grab shop data
     logger.info(text['DAILY_SHOP_UPDATING'])
-    api = FortniteAPI(client.fnds_language)
+    api = FortniteAPI(client.fn_language)
     shop = await api.get_shop()
     
     # Vals

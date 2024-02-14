@@ -134,6 +134,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | Command | Description |
 | - | - |
 | `/fortnite daily-shop` | Shows the fortnite daily shop on the channel |
+| `/fortnite stats` | Shows your fortnite account statistics on the channel |
 
 #### Valorant
 | Command | Description |

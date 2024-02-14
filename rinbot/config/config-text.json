@@ -145,7 +145,8 @@
         "INIT_BOT_NO_PERMS_2": "` permissions, which are necessary to run this command.",
         "INIT_STARTING_LAVALINK": "Starting Lavalink...",
         "INIT_STOPPING_LAVALINK": "Stopping Lavalink...",
-        "INIT_DAILY_SHOP_STARTED": "Daily shop task started",
+        "INIT_FN_DAILY_SHOP_STARTED": "Fortnite daily shop task started",
+        "INIT_VL_DAILY_SHOP_STARTED": "Valorant daily shop task started",
         "INIT_SYNCHING_COMMANDS": "Synching commands",
         "INIT_CHECKING_VALORANT": "Checking valorant data",
         "INIT_CHECKED_VALORANT": "Checked valorant data",
@@ -303,7 +304,7 @@
         "GENERAL_RININFO_NAME": "rininfo",
         "GENERAL_RININFO_PROGRAMMER": ["Programmer:", "km.rin :flag_br: :transgender_flag:"],
         "GENERAL_RININFO_PY_VER": "Python Version:",
-        "GENERAL_RININFO_VERSION": ["Version:", "3.1.1"],
+        "GENERAL_RININFO_VERSION": ["Version:", "3.1.2"],
         "GENERAL_SPECS_DESC": "Shows the specs of the system running the bot",
         "GENERAL_SPECS_NAME": "specs",
         "GENERAL_SPECS_SYSTEM": "System",
@@ -462,8 +463,15 @@
 
         "FORTNITE_GROUP_NAME": "fortnite",
         "FORTNITE_GROUP_DESC": "Fortnite commands",
+
         "FORTNITE_DAILY_SHOP_NAME": "daily-shop",
         "FORTNITE_DAILY_SHOP_DESC": "Manually show the current fortnite daily shop",
+
+        "FORTNITE_STATS_NAME": "stats",
+        "FORTNITE_STATS_DESC": "Shows your fortnite account statistics",
+        "FORTNITE_STATS_ERROR_401": " ❌  This command requires an API key, which is either missing or invalid.",
+        "FORTNITE_STATS_ERROR_404": [" ❌  Player", "not found."],
+        "FORTNITE_STATS_ERROR_IMG": " ❌  Error generating image, sorry >-<",
 
         "VALORANT_UPDATED_CACHE": "[Valorant] Updated cache",
         "VALORANT_PROVIDE_BOTH": "Please provide both username and password!",
@@ -637,7 +645,8 @@
         "INIT_BOT_NO_PERMS_2": "` que são necessárias para rodar este comando.",
         "INIT_STARTING_LAVALINK": "Iniciando Lavalink...",
         "INIT_STOPPING_LAVALINK": "Parando Lavalink...",
-        "INIT_DAILY_SHOP_STARTED": "Tarefa da loja diária iniciada",
+        "INIT_FN_DAILY_SHOP_STARTED": "Tarefa da loja diária do fortnite iniciada",
+        "INIT_VL_DAILY_SHOP_STARTED": "Tarefa da loja diária do valorant iniciada",
         "INIT_SYNCHING_COMMANDS": "Sincronizando comandos",
         "INIT_CHECKING_VALORANT": "Verificando dados do valorant...",
         "INIT_CHECKED_VALORANT": "Verifiquei os dados do valorant!",
@@ -790,8 +799,8 @@
         "GENERAL_RININFO_EMBED_TITLE": " 🍊  Informações da RinBot",
         "GENERAL_RININFO_NAME": "inforin",
         "GENERAL_RININFO_PROGRAMMER": ["Programadora:", "km.rin :flag_br:"],
-        "GENERAL_RININFO_PY_VER": ["Versão do Python:", ""],
-        "GENERAL_RININFO_VERSION": ["Versão:", "3.1.1"],
+        "GENERAL_RININFO_PY_VER": "Versão do Python:",
+        "GENERAL_RININFO_VERSION": ["Versão:", "3.1.2"],
         "GENERAL_SPECS_DESC": "Mostra as especificações técnicas do PC rodando a RinBot",
         "GENERAL_SPECS_NAME": "specs",
         "GENERAL_SPECS_SYSTEM": "Sistema",
@@ -950,8 +959,15 @@
 
         "FORTNITE_GROUP_NAME": "fortnite",
         "FORTNITE_GROUP_DESC": "Comandos do fortnite",
+
         "FORTNITE_DAILY_SHOP_NAME": "loja-diária",
         "FORTNITE_DAILY_SHOP_DESC": "Mostra a loja diária do fortnite manualmente",
+
+        "FORTNITE_STATS_NAME": "stats",
+        "FORTNITE_STATS_DESC": "Mostra as estatisticas da sua conta do fortnite",
+        "FORTNITE_STATS_ERROR_401": " ❌  Esse comando requer uma chave de API, que está inválida ou inexistente.",
+        "FORTNITE_STATS_ERROR_404": [" ❌  Jogador(a)", "não encontrado."],
+        "FORTNITE_STATS_ERROR_IMG": " ❌  Erro ao gerar a imagem, foi mal >-<",
 
         "VALORANT_UPDATED_CACHE": "[Valorant] Cache atualizado",
         "VALORANT_PROVIDE_BOTH": "Providencie um usuário e senha!",

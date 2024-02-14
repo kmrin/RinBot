@@ -62,7 +62,8 @@
  `/laranja comprar` Compra um item da loja
 
 ### Fortnite
- `/fortnite daily-shop` Mostra a loja diária do fortnite no canal
+ `/fortnite daily-shop`  Mostra a loja diária do fortnite no canal
+`/fortnite stats`  Mostra as estatisticas da sua conta do fortnite no canal
 
 ### Valorant
  `/valorant login` Loga na sua conta da Riot

@@ -62,7 +62,8 @@
  `/orange buy`  Buys an item from the store (by name)
 
 ### Fortnite
- `/fortnite daily-shop` Shows the fortnite daily shop on the channel
+ `/fortnite daily-shop`  Shows the fortnite daily shop on the channel
+ `/fortnite stats`  Shows your fortnite account statistics on the channel
 
 ### Valorant
  `/valorant login` Logs into your Riot account
