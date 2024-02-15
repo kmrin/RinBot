@@ -107,8 +107,8 @@ class RinBot(Bot):
         intents.typing = True
         intents.bans = True
         super().__init__(command_prefix=config["PREFIX"], intents=intents)
-        self.val_db = None
-        self.val_endpoint = None
+        self.val_db = DATABASE()
+        self.val_endpoint = API_ENDPOINT()
         self.fn_language = config["FORTNITE_DAILY_SHOP_LANGUAGE"]
         if self.fn_language not in ["ar", "de", "en", "es", "es-419", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-Hant"]:
             logger.error(f"{text['INIT_INVALID_FN_LANGUAGE'][0]}{self.fn_language}{text['INIT_INVALID_FN_LANGUAGE'][1]}")
@@ -207,8 +207,6 @@ async def fortnite_daily_shop_scheduler():
 # Valorant daily shop scheduler
 async def valorant_daily_shop_scheduler():
     logger.info(text['INIT_VL_DAILY_SHOP_STARTED'])
-    client.val_db = DATABASE()
-    client.val_endpoint = API_ENDPOINT()
     with contextlib.suppress(Exception):
         cache = client.val_db.read_cache()
         version = Cache.get_valorant_version()
