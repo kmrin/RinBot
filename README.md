@@ -102,8 +102,19 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/dog` | Shows a random picture, gif or video of a dog |
 | `/pet` | Pets someone :3 |
 | `/fact` | Shows a random useless fact |
-| `/heads-or-tails` |  Plays heads or tails |
-| `/rps` |  Plays Rock Paper Scissors |
+| `/heads-or-tails` | Plays heads or tails |
+| `/rps` | Plays Rock Paper Scissors |
+| `/threats` | Nekobot's threats command
+| `/captcha` | Nekobot's captcha command
+| `/whowouldwin` | Nekobot's captcha command
+| `/deepfry` | Nekobot's deepfry command
+| `/stickbug`| Nekobot's stickbug command
+
+#### Gemini
+| Command | Description |
+| - | - |
+| `/gemini talk` | Starts or continues a conversation with Google's Gemini |
+| `/gemini reset` | Resets your conversation with gemini |
 
 #### Music
 | Command | Description |

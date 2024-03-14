@@ -1,13 +1,17 @@
 import discord
 from rinbot.valorant.useful import GetFormat
 from datetime import datetime, timedelta
-from discord.ext.commands import Bot
 from rinbot.valorant.endpoint import API_ENDPOINT
 from rinbot.base.logger import logger
-from rinbot.base.db_man import *
 from rinbot.base.colors import *
-from rinbot.base.helpers import format_expiration_time
+from rinbot.base.helpers import format_expiration_time, load_lang
 from typing import Dict, List
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from rinbot.base.client import RinBot
+
+text = load_lang()
 
 def _embed(skin:Dict) -> discord.Embed:
     embed = discord.Embed(
@@ -24,7 +28,7 @@ def _gen_store_embeds(player:str, offer:Dict) -> List[discord.Embed]:
     [embeds.append(_embed(data[skin])) for skin in data]
     return embeds
 
-async def _get_endpoint(client, user_id:int) -> API_ENDPOINT:
+async def _get_endpoint(client: "RinBot", user_id:int) -> API_ENDPOINT:
     try:
         data = await client.val_db.is_data(user_id)
         if not data: return False
@@ -35,7 +39,7 @@ async def _get_endpoint(client, user_id:int) -> API_ENDPOINT:
         logger.error(f"{text['VAL_DS_ENDPOINT_ERROR']} {user_id}: {e}")
         return False
 
-async def _get_webhook(client:Bot, channel_id) -> discord.Webhook:
+async def _get_webhook(client: "RinBot", channel_id) -> discord.Webhook:
     try:
         channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
         channel_hooks = await channel.webhooks()
@@ -49,7 +53,7 @@ async def _get_webhook(client:Bot, channel_id) -> discord.Webhook:
         logger.error(f"{text['VAL_DS_HOOK_ERROR']} {e}")
         return False
 
-async def _show_private_shop(client:Bot, user_id, warn=False) -> None:
+async def _show_private_shop(client: "RinBot", user_id, warn=False) -> None:
     try:
         user = client.get_user(user_id) or await client.fetch_user(user_id)
         endpoint:API_ENDPOINT = await _get_endpoint(client, user_id)
@@ -64,7 +68,7 @@ async def _show_private_shop(client:Bot, user_id, warn=False) -> None:
     except Exception as e:
         logger.error(f"{text['VAL_DS_ERROR_SENDING']} {e}")
 
-async def _show_channel_shop(client:Bot, guild_id, channel_id, user_id) -> None:
+async def _show_channel_shop(client: "RinBot", guild_id, channel_id, user_id) -> None:
     try:
         user = client.get_user(user_id) or await client.fetch_user(user_id)
         guild = client.get_guild(guild_id) or await client.fetch_guild(guild_id)
@@ -79,8 +83,8 @@ async def _show_channel_shop(client:Bot, guild_id, channel_id, user_id) -> None:
     except Exception as e:
         logger.error(f"{text['VAL_DS_ERROR_SENDING_CHANNEL']} {e}")
 
-async def show_val_daily_shop(client:Bot) -> None:
-    val = await get_table("valorant")
+async def show_val_daily_shop(client: "RinBot") -> None:
+    val = await client.db.get("valorant")
     for guild_id, guild in val.items():
         active = guild["active"]
         channel_id = guild["channel_id"]

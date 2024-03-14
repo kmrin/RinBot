@@ -1,21 +1,25 @@
 """
-#### Checks
-Checks that run before a command is executed
+#### Checks\n
+Verification steps executed before a command
 """
 
-# Imports
 from discord import Interaction
 from discord.app_commands import check
 from typing import Callable, TypeVar
-from rinbot.base.db_man import *
 from rinbot.base.errors import Exceptions as E
+from rinbot.base.db import OfflineDB
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from rinbot.base.client import RinBot
 
 T = TypeVar("T")
 
-# app_commands checks
+db = OfflineDB()
+
 def is_owner() -> Callable[[T], T]:
     async def predicate(interaction:Interaction) -> bool:
-        query = await get_table("owners")
+        query = await db.get("owners")
         if not str(interaction.user.id) in query:
             raise E.UserNotOwner
         return True
@@ -23,7 +27,7 @@ def is_owner() -> Callable[[T], T]:
 
 def is_admin() -> Callable[[T], T]:
     async def predicate(interaction:Interaction) -> bool:
-        query = await get_table("admins")
+        query = await db.get("admins")
         if interaction.guild:
             if str(interaction.guild.id) in query.keys():
                 if not str(interaction.user.id) in query[str(interaction.guild.id)]:
@@ -37,7 +41,7 @@ def is_admin() -> Callable[[T], T]:
 
 def not_blacklisted() -> Callable[[T], T]:
     async def predicate(interaction:Interaction) -> bool:
-        query = await get_table("blacklist")
+        query = await db.get("blacklist")
         if interaction.guild:
             if str(interaction.guild.id) in query.keys():
                 if str(interaction.user.id) in query[str(interaction.guild.id)]:

@@ -1,31 +1,33 @@
 {
-    "VER": "RinBot v3.1.2 (Release)",
-    "PREFIX": "!",
+    "VER": "RinBot v4.0.0 (Release)",
     "LANGUAGE": "en",
     "ACTIVITY_SWITCH_INTERVAL": 5,
-    
+
+    "LAVALINK_USE_BUILTIN": true,
     "LAVALINK_ENDPOINT": "http://localhost:6969",
     "LAVALINK_PASSWORD": "rinbot",
 
     "RULE34_ENABLED": false,
     
     "BOORU_ENABLED": false,
-    "BOORU_USERNAME": "",
+    "BOORU_USERNAME": null,
     "BOORU_IS_GOLD": false,
-    "BOORU_KEY": "",
+    "BOORU_KEY": null,
 
     "FORTNITE_DAILY_SHOP_ENABLED": false,
-    "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:05:00",
+    "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:00:05",
     "FORTNITE_DAILY_SHOP_LANGUAGE": "en",
     "FORTNITE_API_KEY": null,
 
     "VALORANT_DAILY_SHOP_ENABLED": false,
-    "VALORANT_DAILY_SHOP_UPDATE_TIME": "00:10:00",
+    "VALORANT_DAILY_SHOP_UPDATE_TIME": "00:00:10",
 
     "AI_ENABLED": false,
     "AI_CHANNEL": null,
     "AI_ENDPOINT_KOBOLD": "http://localhost:5001",
-    "AI_ENDPOINT_STABLEDIFFUSION": "http://127.0.0.1:7860",
+    "AI_ENDPOINT_STABLEDIFFUSION": "http://localhost:7860",
+
+    "AI_GEMINI_KEY": null,
 
     "": ""
 }

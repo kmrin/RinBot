@@ -44,6 +44,15 @@
  `/fact` Shows a random useless fact
  `/heads-or-tails`  Plays heads or tails
  `/rps`  Plays Rock Paper Scissors
+ `/threats` Nekobot's threats command
+ `/captcha` Nekobot's captcha command
+ `/whowouldwin` Nekobot's captcha command
+ `/deepfry` Nekobot's deepfry command
+ `/stickbug` Nekobot's stickbug command
+
+### Gemini
+ `/gemini talk` Starts or continues a conversation with Google's Gemini
+ `/gemini reset` Resets your conversation with Gemini
 
 ### Music
  `/play` Plays tracks from various sources on a voice channel

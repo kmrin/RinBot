@@ -2,11 +2,13 @@ import aiohttp, asyncio, os, discord
 from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime
 from discord import Webhook
-from discord.ext.commands import Bot
 from rinbot.base.logger import logger
-from rinbot.base.helpers import load_lang, format_date
-from rinbot.base.db_man import *
+from rinbot.base.helpers import load_lang
 from rinbot.base.colors import *
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from rinbot.base.client import RinBot
 
 text = load_lang()
 
@@ -129,7 +131,6 @@ class FortniteAPI():
                 f_path = os.path.join(img_dir, f)
                 if os.path.isfile(f_path):
                     os.remove(f_path)
-            print(e)
             return None
         return shop
     
@@ -218,13 +219,14 @@ class FortniteAPI():
                     return await response.json()
 
 # Shows the daily shop
-async def show_fn_daily_shop(client:Bot) -> None:
+async def show_fn_daily_shop(client: "RinBot") -> None:
     """
     #### Show Fortnite Daily Shop
     This function iterates through each guild the bot is in
     checks if they have an active channel for the daily shop
     and if so, shows the daily shop on that channel
     """
+    
     # Grab shop data
     logger.info(text['DAILY_SHOP_UPDATING'])
     api = FortniteAPI(client.fn_language)
@@ -267,7 +269,7 @@ async def show_fn_daily_shop(client:Bot) -> None:
     # Generate the batches
     send_batch_tasks = []
     for guild in client.guilds:
-        shop_channels = await get_table("daily_shop_channels")
+        shop_channels = await client.db.get("daily_shop_channels")
         if str(guild.id) in shop_channels:
             if shop_channels[str(guild.id)]["active"]:
                 channel = client.get_channel(shop_channels[str(guild.id)]["channel_id"]) or await client.fetch_channel(shop_channels[str(guild.id)]["channel_id"])

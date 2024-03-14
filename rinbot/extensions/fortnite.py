@@ -1,32 +1,33 @@
 """
-#### RinBot's fortnite command cog
+RinBot's fortnite command cog
 - Commands:
     * /fortnite daily-shop `Manually shows the fortnite daily shop on the channel`
     * /fortnite stats `Shows the player's ingame stats as an image on the channel`
 """
 
-# Imports
 import os, asyncio, discord
 from discord import Interaction
 from discord import app_commands
-from discord.ext.commands import Bot, Cog
+from discord.ext.commands import Cog
 from rinbot.base.helpers import load_lang
 from rinbot.base.responder import respond
+from rinbot.base.logger import logger
 from rinbot.base.checks import *
 from rinbot.base.colors import *
 
-# Load text & config
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from rinbot.base.client import RinBot
+
 text = load_lang()
 
-# Fortnite command cog
 class Fortnite(Cog, name="fortnite"):
-    def __init__(self, bot):
-        self.bot:Bot = bot
+    def __init__(self, bot: "RinBot"):
+        self.bot = bot
     
     # Command groups
-    fortnite_group = app_commands.Group(name=text['FORTNITE_GROUP_NAME'], description=text['FORTNITE_GROUP_DESC'])
+    fortnite_group = app_commands.Group(name=text["FORTNITE_GROUP_NAME"], description=text["FORTNITE_GROUP_DESC"])
     
-    # Daily shop command
     @fortnite_group.command(
         name=text['FORTNITE_DAILY_SHOP_NAME'],
         description=text['FORTNITE_DAILY_SHOP_DESC'])
@@ -71,32 +72,44 @@ class Fortnite(Cog, name="fortnite"):
             channel_hook = await channel.create_webhook(name=text['FN_DS_HOOK_NAME'])
         else:
             channel_hook = channel_hooks[0]
-        await channel_hook.edit(name=text['FN_DS_HOOK_NAME'], avatar=await self.bot.user.avatar.read())
-        
+        try:            
+            await channel_hook.edit(name=text['FN_DS_HOOK_NAME'], avatar=await self.bot.user.avatar.read())        
+        except AttributeError:
+            await channel_hook.edit(name=text['FN_DS_HOOK_NAME'], avatar=await self.bot.user.default_avatar.read())
         await interaction.followup.send(embed=embed)
         await send_batches(channel_hook)
+        
+        for file in os.listdir(img_dir):
+            os.remove(os.path.join(img_dir, file))
     
-    # Player stats command
     @fortnite_group.command(
         name=text['FORTNITE_STATS_NAME'],
         description=text['FORTNITE_STATS_DESC'])
     @not_blacklisted()
     async def player_stats(self, interaction:Interaction, player:str=None) -> None:
         await interaction.response.defer()
+        
         if not player:
             return await respond(interaction, RED, message=text['ERROR_INVALID_PARAMETERS'], response_type=1)
+        
         stats = await self.bot.fortnite_api.get_stats(player)
+        
         if "error" in stats.keys():
             errors = {
                 401: text['FORTNITE_STATS_ERROR_401'],
                 404: f"{text['FORTNITE_STATS_ERROR_404'][0]} `'{player}'` {text['FORTNITE_STATS_ERROR_404'][1]}"}
+            
             return await respond(interaction, RED, message=errors[stats["status"]], response_type=1)
+        
         img_path = await self.bot.fortnite_api.composite_stats(stats)
+        
         if not img_path:
             return await respond(interaction, RED, message=text['FORTNITE_STATS_ERROR_IMG'], response_type=1)
+        
         img = discord.File(img_path, filename=f"{player}.png")
+        
         await interaction.followup.send(file=img)
 
 # SETUP
-async def setup(bot:Bot):
+async def setup(bot: "RinBot"):
     await bot.add_cog(Fortnite(bot))

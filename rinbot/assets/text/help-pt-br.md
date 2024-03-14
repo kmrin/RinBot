@@ -44,6 +44,11 @@
  `/fato` Mostra um fato aleatório
  `/cara-ou-coroa` Joga cara ou coroa
  `/ppt` Joga pedra papel tesoura
+ `/threats`Commando "threats" da Nekobot
+ `/captcha` Commando "captcha" da Nekobot
+ `/whowouldwin` Commando "whowouldwin" da Nekobot
+ `/deepfry` Commando "deepfry" da Nekobot
+ `/stickbug` Commando "stickbug" da Nekobot
 
 ### Music
  `/tocar` Toca músicas de vários lugares diferentes num canal de voz
@@ -53,6 +58,10 @@
  `/recomendado` Liga ou desliga recomendações automáticas
  `/randomizar` Embaralha a fila de músicas
  `/mostrar_controles` Mostra os controles multimídia
+
+### Gemini
+ `/gemini talk` Inicia ou continua uma conversa com a IA da Google Gemini
+ `/gemini reset` Reseta sua conversa com o Gemini
 
 ### Economy
  `/laranja rank` Mostra o rank top 10 dos usuários com mais laranjas na economia

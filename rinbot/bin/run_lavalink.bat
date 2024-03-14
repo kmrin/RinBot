@@ -1,1 +1,0 @@
-java -jar lavalink.jar application.yml

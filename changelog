@@ -1,22 +1,2 @@
-> v3.0.0:
-    * Initial release
-
-> v3.0.1:
-    * Fixed the daily shop.
-    * Fixed "Unknow Interaction" error when using the /play command
-    * Fixed an error that made the player add duplicated tracks due to them having the same name
-    * Fixed /queue clear command
-
-> v3.1.0:
-    * Fixed an issue where commands would not respond if executed on rinbot's DMs
-    * Fixed an issue that caused the "/set welcome-channel" command to not appear
-    * Fixed an issue where english strings appeared in the portuguese language table
-    * Added valorant daily shop functionality
-
-> v3.1.1:
-    * Fortnite daily shop API changed from FN-BR to Fortnite-API.com, which adds support for multiple languages and doesn't require an API key
-    * Added "/fortnite daily-shop" command to show the daily shop manually
-
-> v3.1.2:
-    * Fixed an issue that caused the /inforin pt-br command to show a list under "Versão do Python"
-    * Added "/fortnite stats" command to show an image with the player's ingame stats (requires Fortnite-API.com API key!)
+> v4.0.0:
+	* Initial release

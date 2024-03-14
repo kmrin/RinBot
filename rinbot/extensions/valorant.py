@@ -11,9 +11,8 @@
 # Imports
 import discord
 from discord import app_commands, Interaction
-from discord.ext.commands import Cog, Bot
+from discord.ext.commands import Cog
 from discord.app_commands import Choice
-from discord.utils import MISSING
 from rinbot.valorant.endpoint import API_ENDPOINT
 from rinbot.valorant.useful import GetFormat
 from rinbot.base.helpers import load_lang, format_expiration_time
@@ -24,13 +23,17 @@ from rinbot.base.responder import respond
 from datetime import datetime, timedelta
 from typing import Dict, List
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from rinbot.base.client import RinBot
+
 # Verbose
 text = load_lang()
 
 # Valorant commands cog
 class Valorant(Cog, name="valorant"):
-    def __init__(self, bot) -> None:
-        self.bot:Bot = bot
+    def __init__(self, bot: "RinBot") -> None:
+        self.bot = bot
     
     async def get_endpoint(self, interaction:Interaction, username:str=None, password:str=None) -> API_ENDPOINT:
         user_id = interaction.user.id
@@ -60,7 +63,7 @@ class Valorant(Cog, name="valorant"):
     def get_store_embeds(cls, player:str, offer:Dict) -> List[discord.Embed]:
         data = GetFormat.offer_format(offer)
         duration = data.pop("duration")
-        description = f"{text['VALORANT_USER_STORE'][0]}**{player}**{text['VALORANT_USER_STORE'][1]}\n{text['VALORANT_USER_STORE'][2]}`{format_expiration_time(datetime.utcnow() + timedelta(seconds=duration))}`"
+        description = f"{text['VALORANT_USER_STORE'][0]}**{player}**{text['VALORANT_USER_STORE'][1]}\n{text['VALORANT_USER_STORE'][2]} `{format_expiration_time(datetime.utcnow() + timedelta(seconds=duration))}`"
         embed = discord.Embed(description=description, color=PURPLE)
         embeds = [embed]
         [embeds.append(cls.__embed(data[skin])) for skin in data]
@@ -157,16 +160,19 @@ class Valorant(Cog, name="valorant"):
         except: active = 0
         try: type = type.value
         except: type = 0
-        print(active, type)
-        val = await get_table("valorant")
+        
+        val = await self.bot.db.get("valorant")
+        
         if type == 1:
             if val[str(interaction.guild.id)]["active"] == False:
                 return await respond(interaction, RED, message=text['VALORANT_CONFIG_GUILD_MISCONFIG'])
+        
         val[str(interaction.guild.id)]["members"][str(interaction.user.id)]["active"] = True if active == 0 else False
         val[str(interaction.guild.id)]["members"][str(interaction.user.id)]["type"] = type
-        await update_table("valorant", val)
+        
+        await self.bot.db.update("valorant", val)
         await respond(interaction, GREEN, message=text['VALORANT_CONFIG_SET'])
 
 # SETUP
-async def setup(bot:Bot):
+async def setup(bot: "RinBot"):
     await bot.add_cog(Valorant(bot))

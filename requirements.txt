@@ -23,3 +23,5 @@ python-telegram-bot
 pytz
 wavelink
 certifi
+moviepy
+pylsd-nova==1.2.0

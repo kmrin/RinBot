@@ -37,7 +37,7 @@
         "DBMAN_INVALID_TOKEN": "The token you've provided is invalid, try again.",
         "DBMAN_CHECK_DONE": "Finished checking initial data",
         "DBMAN_TABLE_UPDATED": "Updated database table:",
-        "DBMAN_ERROR_UPDATING_TABLE": "Something went wrong while updating table:",
+        "DBMAN_ERROR_UPDATING_TABLE": "Something went wrong while updating table (mismatch):",
 
         "INTERFACE_FUN_DRAW": "It's a draw!",
         "INTERFACE_FUN_HEADS": "Heads",
@@ -162,13 +162,36 @@
         
         "INIT_INVALID_FN_LANGUAGE": ["Invalid fortnite daily shop language selected:", "Supported languages: ar de en es es-419 fr it ja ko pl pt-BR ru tr zh-CN zh-Hant"],
 
+        "PG_HANDLER_PATH_NOT_EXISTS": "Program path does not exist",
+        "PG_HANDLER_ARGS_NOT_EXISTS": "'args.json' does not exist on program path",
+        "PG_HANDLER_ERROR_RUNNING": "Error running",
+        "PG_HANDLER_NOT_RUNNING": ["No program", "running"],
+        "PG_HANDLER_ERROR_STOPPING": "Error stopping",
+        "PG_HANDLER_STARTED": "Started",
+        "PG_HANDLER_STOPPED": "Stopped",
+
         "DAILY_SHOP_UPDATED": "Fortnite daily shop updated",
         "DAILY_SHOP_UPDATING": "Updating fortnite daily shop",
         "DAILY_SHOP_EMBED": ["Fortnite daily shop:", "Showing", "out of", "items."],
+        "DAILY_SHOP_NO_SHOP": "Tried to get fortnite daily shop, but the API returned None",
 
         "RESPONDER_RESPONSE_SENT": "Response sent:",
 
         "LOADER_EXTENSION_LOADED": "Loaded extension",
+
+        "CLIENT_INVALID_LOG_CHANNEL": "Invalid log channel",
+        "CLIENT_CHANNEL_NOT_FOUND": "Couldn't fetch log channel, check if it exists and if I have permission to see it",
+        "CLIENT_CHANNEL_NOT_TEXT": "Log channel is not a text channel",
+
+        "EXECUTOR_RAN": ["Executor ran", "tasks. Lasting", "second(s)"],
+
+        "EVENTS_ON_READY": "Started!",
+
+        "GEMINI_MSG_NOT_PROVIDED": "Message field empty!",
+        "GEMINI_USER_HISTORY_CREATED": "Created new chat history for user:",
+        "GEMINI_USER_SESSION_CREATED": "Created new chat session for user:",
+        "GEMINI_ERROR_CREATING_SESSION": "An error occurred while generating a new chat session",
+        "GEMINI_RESPONSE_ERROR": "An error occurred while generating a response",
 
         "BOORU_DESC": "Commands for danbooru",
         "BOORU_NAME": "booru",
@@ -195,6 +218,16 @@
         "RULE34_RANDOM_NO_VIDEO": " ❌  Couldn't extract video information, check it through the URL button",
         "RULE34_RANDOM_RESPONSE_ERROR": " ❌  Extract response error",
         "RULE34_ERROR_COMMA_ON_TAG": " ❌  Please separate your tags by space",
+
+        "E621_NAME": "e621",
+        "E621_DESC": "E621 commands",
+        "E621_RANDOM_NAME": "random",
+        "E621_RANDOM_DESC": "Show a random post from e621 using your tags",
+        "E621_RANDOM_TAGS": "Your tags",
+        "E621_RANDOM_FOX": " ❌  Fox doesn't want this here ¯\\_(ツ)_/¯",
+        "E621_RANDOM_NO_TAG": " ❌  Tags empty",
+        "E621_RANDOM_TOO_MANY_TAGS": " ❌  Too many tags! >~<",
+        "E621_RANDOM_NO_RESULT": " ❌  No results found",
 
         "CONFIG_SET_DAILY_SHOP_DESC": "Set a text channel from this server to send the daily fortnite item shop",
         "CONFIG_SET_DAILY_SHOP_NAME": "fortnite-daily-shop-channel",
@@ -287,6 +320,16 @@
         "FUN_RPS_DESC": "Plays rock paper scissors with RinBot",
         "FUN_RPS_NAME": "rps",
 
+        "GEMINI_NAME": "gemini",
+        "GEMINI_DESC": "Google's AI stuff",
+        "GEMINI_TALK_NAME": "talk",
+        "GEMINI_TALK_DESC": "Begin or continue a chat session with Gemini",
+        "GEMINI_TALK_PROMPT_DESC": "Your prompt",
+        "GEMINI_TALK_PRIVATE_DESC": "shhh no one can know",
+        "GEMINI_RESET_NAME": "reset",
+        "GEMINI_RESET_DESC": "Resets your session with gemini",
+        "GEMINI_RESET_SUCCESS": " ✅  Session reset!",
+
         "GENERAL_DM_DESC": "Sends someone a DM",
         "GENERAL_DM_NAME": "dm",
         "GENERAL_DM_USER": "The user to receive the message",
@@ -304,7 +347,7 @@
         "GENERAL_RININFO_NAME": "rininfo",
         "GENERAL_RININFO_PROGRAMMER": ["Programmer:", "km.rin :flag_br: :transgender_flag:"],
         "GENERAL_RININFO_PY_VER": "Python Version:",
-        "GENERAL_RININFO_VERSION": ["Version:", "3.1.2"],
+        "GENERAL_RININFO_VERSION": ["Version:", "4.0.0"],
         "GENERAL_SPECS_DESC": "Shows the specs of the system running the bot",
         "GENERAL_SPECS_NAME": "specs",
         "GENERAL_SPECS_SYSTEM": "System",
@@ -312,6 +355,7 @@
         "GENERAL_TRANSLATE_DESC": "Translates something (Auto -> PT-BR by default)",
         "GENERAL_TRANSLATE_NAME": "translate",
         "GENERAL_TRANSLATE_TEXT": "The text to be translated",
+        "GENERAL_TRANSLATE_FROM_LANG": "The input language (Ex: en, pt-br, hu)",
         "GENERAL_TRANSLATE_TO_LANG": "The output language (PT-BR by default)",
 
         "MODERATION_BAN_NAME": "ban",
@@ -408,6 +452,9 @@
         "OWNER_SHUTDOWN_DESC": "Bye!",
         "OWNER_SHUTDOWN_EMBED_DESC": "Shutting down! Byebye :wave:",
         "OWNER_SHUTDOWN_NAME": "shutdown",
+        "OWNER_RELOAD_EVENT_HANDLER_NAME": "reload-event-handler",
+        "OWNER_RELOAD_EVENT_HANDLER_DESC": "Reloads the event handler cog",
+        "OWNER_RELOAD_EVENT_HANDLER_TEXT": "Attemped to reload event cog",
 
         "MUSIC_NO_PLAYERS": " ❌  No players active.",
 
@@ -661,13 +708,34 @@
 
         "INIT_INVALID_FN_LANGUAGE": ["Linguagem inválida para a loja diária do fortnite:", "Linguagens suportadas: ar de en es es-419 fr it ja ko pl pt-BR ru tr zh-CN zh-Hant"],
 
+        "PG_HANDLER_PATH_NOT_EXISTS": "O caminho do programa não existe",
+        "PG_HANDLER_ARGS_NOT_EXISTS": "'args.json' não existe no caminho do programa",
+        "PG_HANDLER_ERROR_RUNNING": "Erro ao rodar",
+        "PG_HANDLER_NOT_RUNNING": ["Nenhum programa", "rodando"],
+        "PG_HANDLER_ERROR_STOPPING": "Erro ao parar",
+
         "DAILY_SHOP_UPDATED": "Loja do fortnite atualizada",
         "DAILY_SHOP_UPDATING": "Atualizando a loja do fortnite",
         "DAILY_SHOP_EMBED": ["Loja diária do Fortnite:", "Mostrando", "de", "itens."],
+        "DAILY_SHOP_NO_SHOP": "Tentei ler a loja diária do fortnite mas a API não retornou.",
 
         "RESPONDER_RESPONSE_SENT": "Resposta enviada:",
 
         "LOADER_EXTENSION_LOADED": "Carreguei a extensão",
+
+        "CLIENT_INVALID_LOG_CHANNEL": "Canal de logs inválido",
+        "CLIENT_CHANNEL_NOT_FOUND": "Não consegui achar o canal de log, verifique se ele existe e se eu tenho permissões para vê-lo",
+        "CLIENT_CHANNEL_NOT_TEXT": "O canal de logs não é um canal de texto",
+
+        "EXECUTOR_RAN": ["Executor rodou", "tarefas. Durando", "segundo(s)"],
+
+        "EVENTS_ON_READY": "Iniciada!",
+
+        "GEMINI_MSG_NOT_PROVIDED": "Atributo 'message' vazio!",
+        "GEMINI_USER_HISTORY_CREATED": "Novo histórico de mensagens criado para:",
+        "GEMINI_USER_SESSION_CREATED": "Nova sessão de chat criada para:",
+        "GEMINI_ERROR_CREATING_SESSION": "Ocorreu um erro ao gerar uma nova sessão de chat",
+        "GEMINI_RESPONSE_ERROR": "Ocorreu um erro ao gerar a resposta",
 
         "BOORU_DESC": "Comandos para o danbooru",
         "BOORU_NAME": "booru",
@@ -694,6 +762,16 @@
         "RULE34_RANDOM_NO_VIDEO": " ❌  Não consegui extrair informações do vídeo, veja ela através do botão de URL",
         "RULE34_RANDOM_RESPONSE_ERROR": " ❌  Erro na extração de resposta",
         "RULE34_ERROR_COMMA_ON_TAG": " ❌  Por-favor separe tags por espaços.",
+
+        "E621_NAME": "e621",
+        "E621_DESC": "Comandos do e621",
+        "E621_RANDOM_NAME": "random",
+        "E621_RANDOM_DESC": "Mostra um post aleatório do e621 com as suas tags",
+        "E621_RANDOM_TAGS": "Suas tags",
+        "E621_RANDOM_FOX": " ❌  Raposo não gosta de furro ¯\\_(ツ)_/¯",
+        "E621_RANDOM_NO_TAG": " ❌  'tags' vazio",
+        "E621_RANDOM_TOO_MANY_TAGS": " ❌  Tags demais! >~<",
+        "E621_RANDOM_NO_RESULT": " ❌  Nenhum resultado encontrado",
 
         "CONFIG_SET_DAILY_SHOP_DESC": "Define qual canal de texto usar para mostrar a loja diária do fortnite",
         "CONFIG_SET_DAILY_SHOP_NAME": "fortnite-loja-diária",
@@ -783,6 +861,16 @@
         "FUN_RPS_DESC": "Joga pedra papel tesoura com a RinBot",
         "FUN_RPS_NAME": "ppt",
 
+        "GEMINI_NAME": "gemini",
+        "GEMINI_DESC": "IA da google",
+        "GEMINI_TALK_NAME": "falar",
+        "GEMINI_TALK_DESC": "Inicia ou continua uma conversa com o Gemini",
+        "GEMINI_TALK_PROMPT_DESC": "Seu prompt",
+        "GEMINI_TALK_PRIVATE_DESC": "shhh ninguém pode saber",
+        "GEMINI_RESET_NAME": "reset",
+        "GEMINI_RESET_DESC": "Reseta sua sessão do Gemini",
+        "GEMINI_RESET_SUCCESS": " ✅  Sessão resetada!",
+
         "GENERAL_DM_DESC": "Envia uma DM pra alguém",
         "GENERAL_DM_NAME": "dm",
         "GENERAL_DM_USER": "O usuário a receber a mensagem",
@@ -800,7 +888,7 @@
         "GENERAL_RININFO_NAME": "inforin",
         "GENERAL_RININFO_PROGRAMMER": ["Programadora:", "km.rin :flag_br:"],
         "GENERAL_RININFO_PY_VER": "Versão do Python:",
-        "GENERAL_RININFO_VERSION": ["Versão:", "3.1.2"],
+        "GENERAL_RININFO_VERSION": ["Versão:", "4.0.0"],
         "GENERAL_SPECS_DESC": "Mostra as especificações técnicas do PC rodando a RinBot",
         "GENERAL_SPECS_NAME": "specs",
         "GENERAL_SPECS_SYSTEM": "Sistema",
@@ -808,6 +896,7 @@
         "GENERAL_TRANSLATE_DESC": "Traduz algo (Auto -> PT-BR por padrão)",
         "GENERAL_TRANSLATE_NAME": "traduzir",
         "GENERAL_TRANSLATE_TEXT": "O texto a ser traduzido",
+        "GENERAL_TRANSLATE_FROM_LANG": "A lingua de entrada (Ex: en, pt-br, hu)",
         "GENERAL_TRANSLATE_TO_LANG": "A lingua de saída (PT-BR por padrão)",
 
         "MODERATION_BAN_NAME": "ban",
@@ -904,6 +993,9 @@
         "OWNER_SHUTDOWN_DESC": "Tchau!",
         "OWNER_SHUTDOWN_EMBED_DESC": "Desligando! Tchau Tchau :wave:",
         "OWNER_SHUTDOWN_NAME": "desligar",
+        "OWNER_RELOAD_EVENT_HANDLER_NAME": "reload-event-handler",
+        "OWNER_RELOAD_EVENT_HANDLER_DESC": "Reloads the event handler cog",
+        "OWNER_RELOAD_EVENT_HANDLER_TEXT": "Attemped to reload event cog",
 
         "MUSIC_NO_PLAYERS": " ❌  Nenhum player ativo",
 

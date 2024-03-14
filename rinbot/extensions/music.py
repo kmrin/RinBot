@@ -13,21 +13,20 @@
 
 # Imports
 import discord, wavelink
+from typing import cast
 from discord import Interaction
 from discord import app_commands
 from discord.ext.commands import Bot, Cog
 from rinbot.base.interface import VideoSearchView, MediaControls
+from rinbot.base.helpers import load_lang, format_exception, millisec_to_str
 from rinbot.base.responder import respond
-from rinbot.base.helpers import load_lang, format_exception, format_millsec
+from rinbot.base.interface import Paginator
 from rinbot.base.checks import *
 from rinbot.base.colors import *
-from rinbot.base.interface import Paginator
-from typing import cast
 
 # Load text
 text = load_lang()
 
-# "music" command cog
 class Music(Cog, name="music"):
     def __init__(self, bot):
         self.bot:Bot = bot
@@ -41,17 +40,19 @@ class Music(Cog, name="music"):
         description=text['MUSIC_PLAY_DESC'])
     @app_commands.describe(track=text['MUSIC_PLAY_TRACK'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _play_link(self, interaction:Interaction, track:str=None) -> None:
         if not track:
             return await respond(interaction, RED, message=text['ERROR_INVALID_PARAMETERS'])
         
         # Search. Defaults to youtube for non URL based queries
-        tracks:wavelink.Search = await wavelink.Playable.search(track,)
+        tracks: wavelink.Search = await wavelink.Playable.search(track,)
         if not tracks:
             return await respond(interaction, RED, message=f"{text['MUSIC_PLAY_NO_RESULTS']} `{track}`")
         
         # Summon player
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
         if not player:
             try:
                 player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
@@ -80,16 +81,21 @@ class Music(Cog, name="music"):
             added:int = await player.queue.put_wait(tracks)
             await respond(interaction, PURPLE, message=f"{text['MUSIC_PLAY_ADDED'][0]} `{added}` {text['MUSIC_PLAY_ADDED'][1]} **{tracks.name}** {text['MUSIC_PLAY_ADDED'][2]}")
         else:
+            # multiple single tracks, ask player to choose
             if len(tracks) > 1:
                 player.results = []
                 view = VideoSearchView(tracks, player)
+                
                 await respond(interaction, PURPLE, message=f"{text['MUSIC_PLAY_SEARCH_RESULTS']} `{track}`:", view=view)
                 await view.wait()
+                
                 if not player.results:
                     await player.disconnect()
                     return await respond(interaction, RED, message=text['MUSIC_PLAY_TIMEOUT'], response_type=1)
                 for track in player.results:
                     await player.queue.put_wait(track)
+            
+            # single track
             else:
                 await respond(interaction, PURPLE, message=f"{text['MUSIC_PLAY_ADDED'][0]} `{tracks[0].title}` {text['MUSIC_PLAY_ADDED'][2]}")
                 await player.queue.put_wait(tracks[0])
@@ -103,37 +109,47 @@ class Music(Cog, name="music"):
         name=text['MUSIC_QUEUE_SHOW_NAME'],
         description=text['MUSIC_QUEUE_SHOW_DESC'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _queue_show(self, interaction:Interaction) -> None:
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
         if not player:
             return await respond(interaction, RED, message=text['MUSIC_NO_PLAYERS'])
+        
         queue = player.queue
+        
         if len(queue) == 0:
             return await respond(interaction, RED, message=text['MUSIC_QUEUE_SHOW_EMPTY'])
+        
         total = 0
         individual = []
+        
         for i in queue:
             if i.length:
                 total += i.length
-                individual.append(format_millsec(i.length))
+                individual.append(millisec_to_str(i.length))
             else:
                 individual.append("N/A")
+        
         message = [f"**{i+1}.** `[{individual[i]}]` - {track.title}"
                 for i, track in enumerate(queue)]
         message = "\n".join(message)
+        
         if len(queue) > 15:
             lines = message.split("\n")
             chunks = [lines[i:i+15] for i in range(0, len(lines), 15)]
             embed = discord.Embed(title=text['MUSIC_QUEUE_SHOW_CURRENT'], color=PURPLE)
             embed.description="\n".join(chunks[0])
-            embed.set_footer(text=f"{text['MUSIC_QUEUE_SHOW_RUNTIME']} {format_millsec(total)}")
+            embed.set_footer(text=f"{text['MUSIC_QUEUE_SHOW_RUNTIME']} {millisec_to_str(total)}")
             view = Paginator(embed, chunks)
             await respond(interaction, message=embed, view=view)
+        
         else:
             embed = discord.Embed(
                 title=text['MUSIC_QUEUE_SHOW_CURRENT'],
                 description=f"{message}", color=PURPLE)
-            embed.set_footer(text=f"{text['MUSIC_QUEUE_SHOW_RUNTIME']} {format_millsec(total)}")
+            embed.set_footer(text=f"{text['MUSIC_QUEUE_SHOW_RUNTIME']} {millisec_to_str(total)}")
             await respond(interaction, message=embed)
     
     # Clears the queue
@@ -142,19 +158,26 @@ class Music(Cog, name="music"):
         description=text['MUSIC_QUEUE_CLEAR_DESC'])
     @app_commands.describe(id=text['MUSIC_QUEUE_CLEAR_ID'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _queue_clear(self, interaction:Interaction, id:str=None) -> None:
         if id:
             if not id.isnumeric():
                 return await respond(interaction, RED, message=text['MUSIC_QUEUE_CLEAR_NO_NUM'])
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
         if not player:
             return await respond(interaction, RED, message=text['MUSIC_NO_PLAYERS'])
+        
         queue = player.queue
+        
         if len(queue) == 0:
             return await respond(interaction, RED, message=text['MUSIC_QUEUE_CLEAR_ALREADY'])
+        
         try:
             if id:
-                track:wavelink.Playable = queue[int(id)-1]
+                track: wavelink.Playable = queue[int(id)-1]
                 await queue.delete(int(id)-1)
                 await respond(interaction, GREEN, message=f"{text['MUSIC_QUEUE_CLEAR_REMOVED'][0]} `{track.title}` {text['MUSIC_QUEUE_CLEAR_REMOVED'][1]}")
             else:
@@ -168,19 +191,27 @@ class Music(Cog, name="music"):
         name=text['MUSIC_NIGHTCORE_NAME'],
         description=text['MUSIC_NIGHTCORE_DESC'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _nightcore(self, interaction:Interaction) -> None:
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
         if not player:
             return await respond(interaction, RED, message=text['MUSIC_NO_PLAYERS'])
+        
         if not player.nightcore:
             player.nightcore = True
-            filters:wavelink.Filters = player.filters
-            filters.timescale.set(pitch=1.5, speed=1.5, rate=1)
+            
+            filters: wavelink.Filters = player.filters
+            filters.timescale.set(pitch=1.3, speed=1.3, rate=1)
+            
             await player.set_filters(filters)
             await respond(interaction, GREEN, message=text['MUSIC_NIGHTCORE_ACTIVE'])
         else:
             player.nightcore = False
+            
             await player.set_filters()
+            
             await respond(interaction, GREEN, message=text['MUSIC_NIGHTCORE_INNACTIVE'])
     
     # Toggles the recommended tracks feature on and off
@@ -188,13 +219,18 @@ class Music(Cog, name="music"):
         name=text['MUSIC_REC_NAME'],
         description=text['MUSIC_REC_DESC'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _recommended(self, interaction:Interaction) -> None:
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
         if not player:
             return await respond(interaction, RED, message=text['MUSIC_NO_PLAYERS'])
+        
         if player.autoplay.name == "partial":
             player.autoplay = wavelink.AutoPlayMode.enabled
             await respond(interaction, PURPLE, message=f"{text['MUSIC_REC_TOGGLE'][0]} {text['MUSIC_REC_TOGGLE'][1]}")
+        
         elif player.autoplay.name == "enabled":
             player.autoplay = wavelink.AutoPlayMode.partial
             await respond(interaction, PURPLE, message=f"{text['MUSIC_REC_TOGGLE'][0]} {text['MUSIC_REC_TOGGLE'][2]}!")
@@ -204,11 +240,16 @@ class Music(Cog, name="music"):
         name=text['MUSIC_SHUFFLE_NAME'],
         description=text['MUSIC_SHUFFLE_DESC'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _shuffle(self, interaction:Interaction) -> None:
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
         if not player:
             return await respond(interaction, RED, message=text['MUSIC_NO_PLAYERS'])
+        
         player.queue.shuffle()
+        
         await respond(interaction, PURPLE, message=text['MUSIC_SHUFFLE_SHUFFLED'])
     
     # Controls the player's volume
@@ -216,16 +257,23 @@ class Music(Cog, name="music"):
         name=text['MUSIC_VOLUME_NAME'],
         description=text['MUSIC_VOLUME_DESC'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _volume(self, interaction:Interaction, volume:str=None) -> None:
         if not volume:
             return await respond(interaction, RED, message=f"{text['ERROR_INVALID_PARAMETERS']}")
+        
         if not volume.isnumeric():
             return await respond(interaction, RED, message=text['MUSIC_VOLUME_INVALID'])
+        
         if int(volume) < 0 or int(volume) > 100:
             return await respond(interaction, RED, message=text['MUSIC_VOLUME_INVALID'])
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
         if not player:
             return await respond(interaction, RED, message=text['MUSIC_NO_PLAYERS'])
+        
         await player.set_volume(int(volume))
         await respond(interaction, GREEN, message=f"{text['MUSIC_VOLUME_CHANGED']} `{volume}`")
 
@@ -234,8 +282,11 @@ class Music(Cog, name="music"):
         name=text['MUSIC_SCT_NAME'],
         description=text['MUSIC_SCT_DESC'])
     @not_blacklisted()
+    # @is_admin()
+    # @is_owner()
     async def _show_ct(self, interaction:Interaction):
-        player:wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        player: wavelink.Player = cast(wavelink.Player, interaction.user.guild.voice_client)
+        
         if not player:
             return await respond(interaction, RED, message=text['MUSIC_NO_PLAYERS'])
         
