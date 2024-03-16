@@ -5,7 +5,7 @@
 import random, asyncio, discord, contextlib
 from discord.ext import tasks
 from datetime import datetime
-from rinbot.fortnite.api import show_fn_daily_shop
+from rinbot.fortnite.daily_shop import show_fn_daily_shop
 from rinbot.valorant.daily_shop import show_val_daily_shop
 from rinbot.valorant import cache as Cache
 from rinbot.base.helpers import load_config, load_lang

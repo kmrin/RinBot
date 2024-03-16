@@ -8,6 +8,7 @@ requests
 translate
 yt_dlp
 aiohttp
+torch
 transformers
 websocket
 bs4

@@ -1,5 +1,5 @@
 {
-    "VER": "RinBot v4.0.0 (Release)",
+    "VER": "RinBot v4.0.1 (Release)",
     "LANGUAGE": "en",
     "ACTIVITY_SWITCH_INTERVAL": 5,
 
@@ -24,6 +24,7 @@
 
     "AI_ENABLED": false,
     "AI_CHANNEL": null,
+	"AI_NAME": "RinBot",
     "AI_ENDPOINT_KOBOLD": "http://localhost:5001",
     "AI_ENDPOINT_STABLEDIFFUSION": "http://localhost:7860",
 

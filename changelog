@@ -1,2 +1,7 @@
 > v4.0.0:
 	* Initial release
+
+> v4.0.1:
+	* Fixed the fortnite daily shop
+	* The "/fortnite stats" command now has a "season" flag which when set, show the player's current season stats only
+	* Added kobold support back, which was missing since version 2.1.0, oops!
