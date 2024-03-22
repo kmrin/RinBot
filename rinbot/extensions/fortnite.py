@@ -40,7 +40,7 @@ class Fortnite(Cog, name="fortnite"):
     @fortnite_group.command(
         name=text['FORTNITE_STATS_NAME'],
         description=text['FORTNITE_STATS_DESC'])
-    @app_commands.choices(rating=[Choice(name=text["YES"], value="yes")])
+    @app_commands.choices(season=[Choice(name=text["YES"], value="yes")])
     @not_blacklisted()
     async def player_stats(self, interaction:Interaction, player:str=None, season:Choice[str]="no") -> None:
         await interaction.response.defer()
