@@ -6,7 +6,6 @@ pillow
 langchain
 requests
 translate
-yt_dlp
 aiohttp
 torch
 transformers

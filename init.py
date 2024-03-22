@@ -1,5 +1,5 @@
 """
-RinBot v4.0.1
+RinBot v4.0.2
 made by rin
 """
 

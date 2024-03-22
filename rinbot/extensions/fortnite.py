@@ -40,15 +40,15 @@ class Fortnite(Cog, name="fortnite"):
     @fortnite_group.command(
         name=text['FORTNITE_STATS_NAME'],
         description=text['FORTNITE_STATS_DESC'])
-    @app_commands.choices(rating=[Choice(name=text["YES"], value=1)])
+    @app_commands.choices(rating=[Choice(name=text["YES"], value="yes")])
     @not_blacklisted()
-    async def player_stats(self, interaction:Interaction, player:str=None, season:Choice[str]=0) -> None:
+    async def player_stats(self, interaction:Interaction, player:str=None, season:Choice[str]="no") -> None:
         await interaction.response.defer()
         
         if not player:
             return await respond(interaction, RED, message=text['ERROR_INVALID_PARAMETERS'], response_type=1)
         
-        data = await self.bot.fortnite_api.get_stats(player, False if season == 0 else True)
+        data = await self.bot.fortnite_api.get_stats(player, False if season == "no" else True)
         
         stats = data[0]
         img_path = data[1]
