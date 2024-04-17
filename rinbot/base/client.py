@@ -8,10 +8,12 @@ import discord
 import wavelink
 
 from discord.ext.commands import Bot
+from typing import Dict
 
 from rinbot.fortnite.api import FortniteAPI
 from rinbot.valorant.endpoint import API_ENDPOINT
 from rinbot.valorant.db import DATABASE
+from rinbot.music.player import Player
 
 from .db import DBTable, DBManager
 from .events import EventHandler
@@ -36,6 +38,8 @@ class RinBot(Bot):
             help_command=None
         )
         
+        self.tts_clients: Dict[int, discord.VoiceClient] = {}
+        self.music_clients: Dict[int, Player] = {}
         self.utc = pytz.utc
         self.db = DBManager()
         self.task_handler = TaskHandler(self)
@@ -150,6 +154,13 @@ class RinBot(Bot):
         """
         Stop sequence
         """
+        
+        # Check for voice states and disconnect them
+        for player in self.music_clients.values():
+            await player.disconnect()
+        
+        for tts in self.tts_clients.values():
+            await tts.disconnect()
         
         # Kill all running programs
         await self.program_handler.stop_all()

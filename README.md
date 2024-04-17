@@ -139,6 +139,16 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/orange create-role` |  Adds a role item to be bought from the store |
 | `/orange buy` |  Buys an item from the store (by name) |
 
+#### TTS
+| Command | Description |
+| - | - |
+| `/tts connect` |  Connects a TTS instance to your channel |
+| `/tts disconnect` |  Disconnects the TTS instance from your channel |
+| `/tts channel` |  Sets the TTS channel to the channel the command has been invoked on |
+| `/tts language` |  Sets the TTS language |
+| `/tts say-user` |  Toggles if the TTS should say the name of the user or not |
+| `/tts active` |  Toggles the TTS on and off |
+
 #### Fortnite
 | Command | Description |
 | - | - |

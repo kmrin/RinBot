@@ -33,6 +33,7 @@ class DBTable(Enum):
     HISTORY_INDIVIDUAL = 'history_individual'
     OWNERS = 'owners'
     STORE = 'store'
+    TTS = 'tts'
     VALORANT = 'valorant'
     WARNS = 'warns'
     WELCOME_CHANNELS = 'welcome_channels'
@@ -371,12 +372,33 @@ class DBManager:
         except Exception as e:
             log_exception(e)
 
+    async def check_tts(self, bot: 'RinBot'):
+        try:
+            logger.info(text['CHECKING_TTS'])
+            
+            for guild in bot.guilds:
+                query = await self.get(DBTable.TTS, condition=f'guild_id={guild.id}')
+                
+                if not query:
+                    await self.put(
+                        DBTable.TTS,
+                        {
+                            'guild_id': guild.id,
+                            'language': 'en'
+                        }
+                    )
+            
+            logger.info(text['CHECKED_TTS'])
+        except Exception as e:
+            log_exception(e)
+
     async def check_all(self, bot: 'RinBot'):
         await self.check_guilds(bot)
         await self.check_welcome_channels(bot)
         await self.check_economy(bot)
         await self.check_daily_shop(bot)
         await self.check_valorant(bot)
+        await self.check_tts(bot)
 
 # TEST
 async def do_test():

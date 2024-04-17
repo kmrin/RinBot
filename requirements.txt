@@ -8,6 +8,7 @@ contextvars
 discord
 gputil
 google-generativeai
+gtts
 moviepy
 numpy
 opencv-python

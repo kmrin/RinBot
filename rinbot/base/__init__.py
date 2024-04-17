@@ -11,7 +11,7 @@ from .events import EventHandler
 from .exception_handler import log_exception
 from .extension_loader import load_extensions
 from .get_os_path import get_os_path
-from .helpers import get_specs, get_expiration_time, remove_nl, is_hex, hex_to_int, meg_to_gig, translate, ms_to_str, is_url
+from .helpers import get_specs, get_expiration_time, remove_nl, is_hex, hex_to_int, meg_to_gig, translate, ms_to_str, is_url, gen_random_string
 from .intents import gen_intents
 from .interface import Paginator, ButtonChoice, RockPaperScissorsView, Valorant2FAView, VideoSearchView, MediaControls
 from .json_loader import get_conf, get_lang

@@ -14,6 +14,7 @@ class Path:
     instance = get_os_path('../instance')
     schema = get_os_path('config/database/schema.sql')
     tracebacks = get_os_path('../instance/logs/tracebacks')
+    tts = get_os_path('../instance/tts')
     verbose = get_os_path('config/localization/{lang}.json')
 
     @classmethod

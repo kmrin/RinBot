@@ -66,4 +66,11 @@ CREATE TABLE IF NOT EXISTS "welcome_channels" (
 	"channel_id"	INTEGER,
 	"custom_msg"    TEXT
 );
+CREATE TABLE IF NOT EXISTS "tts" (
+	"guild_id"	INTEGER,
+	"active"	INTEGER DEFAULT 0,
+	"channel_id"	INTEGER,
+	"say_user"	INTEGER DEFAULT 0,
+	"language"	TEXT
+);
 COMMIT;

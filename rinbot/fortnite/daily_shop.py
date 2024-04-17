@@ -53,6 +53,16 @@ async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) ->
             return batches
 
         async def send_batches_channel(channel: discord.TextChannel):
+            
+            if not me.guild_permissions.send_messages:
+                logger.error(text['FN_DS_BATCH_NO_SEND_MESSAGES_PERM'].format(
+                    guild=channel.guild
+                ))
+            if not me.guild_permissions.attach_files:
+                logger.error(text['FN_DS_BATCH_NO_ATTACH_FILES_PERM'].format(
+                    guild=channel.guild
+                ))
+            
             batches = await generate_batches(channel.guild.name)
 
             await channel.send(embed=embed)
@@ -65,6 +75,17 @@ async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) ->
                 ))
 
         async def send_batches_interaction(ctx: Interaction) -> None:
+            me = ctx.guild.get_member(client.user.id) or await ctx.guild.fetch_member(client.user.id)
+            
+            if not me.guild_permissions.send_messages:
+                logger.error(text['FN_DS_BATCH_NO_SEND_MESSAGES_PERM'].format(
+                    guild=ctx.guild
+                ))
+            if not me.guild_permissions.attach_files:
+                logger.error(text['FN_DS_BATCH_NO_ATTACH_FILES_PERM'].format(
+                    guild=ctx.guild
+                ))
+            
             batches = await generate_batches(ctx.guild.name)
 
             await ctx.followup.send(embed=embed)

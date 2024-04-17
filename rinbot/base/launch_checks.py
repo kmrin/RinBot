@@ -34,7 +34,8 @@ def check_cache() -> None:
         '../instance/logs',
         '../instance/logs/tracebacks',
         '../instance/logs/lavalink',
-        '../instance/logs/bot'
+        '../instance/logs/bot',
+        '../instance/tts'
     ]
     
     for folder in folders:

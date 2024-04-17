@@ -133,6 +133,12 @@ class Music(Cog, name="music"):
     @not_blacklisted()
     async def _play_single(self, interaction: Interaction, track: str, search_for_playlist: Choice[int]=0) -> None:
         try:
+            if interaction.guild.id in self.bot.tts_clients.keys():
+                return await respond(interaction, Colour.RED, text['MUSIC_PLAY_TTS_ACTIVE'])
+            
+            if interaction.guild.id in self.bot.music_clients.keys():
+                return await respond(interaction, Colour.RED, text['MUSIC_PLAY_PLAYER_ACTIVE'])
+            
             playables = []
             through_view = False
             
@@ -141,10 +147,12 @@ class Music(Cog, name="music"):
             if not player:
                 try:
                     player = await interaction.user.voice.channel.connect(cls=Player)
+                    self.bot.music_clients[interaction.guild.id] = player
                 except AttributeError:
                     return await respond(interaction, Colour.RED, text['MUSIC_PLAY_NOT_CONNECTED'])
                 except Exception as e:
                     log_exception(e)
+                    return
             
             player.autoplay = wavelink.AutoPlayMode.partial
 

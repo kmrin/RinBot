@@ -69,6 +69,14 @@
  `/laranja novo-cargo` Adiciona um item de cargo na loja
  `/laranja comprar` Compra um item da loja
 
+### TTS
+ `/tts connect`  Conecta uma instância do TTS no seu canal de voz
+ `/tts disconnect`  Desconecta o TTS do seu canal de voz
+ `/tts channel`  Configura o canal de TTS como o canal onde o comando foi invocado
+ `/tts language`  Configura o idioma do TTS
+ `/tts say-user`  Liga e desliga a funcionalidade do TTS de dizer o nome do usuário
+ `/tts active`  Liga e desliga o TTS
+
 ### Fortnite
  `/fortnite loja-diaria`  Mostra a loja diária do fortnite no canal
 `/fortnite stats`  Mostra as estatisticas da sua conta do fortnite no canal

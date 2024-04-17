@@ -2,6 +2,8 @@
 Event handler cog
 """
 
+import os
+import asyncio
 import discord
 import platform
 import wavelink
@@ -10,7 +12,10 @@ from discord.ext.commands import Cog
 from discord import app_commands, Interaction
 from datetime import datetime
 from typing import TYPE_CHECKING
+from gtts import gTTS
 
+from .helpers import gen_random_string
+from .get_os_path import get_os_path
 from .colours import Colour
 from .db import DBTable
 from .exception_handler import log_exception
@@ -135,14 +140,52 @@ class EventHandler(Cog):
             for mt in em:
                 author_msg_times[aid].remove(mt)
 
-            if not len(author_msg_times[aid]) > max_msg_window:
-                query = await self.bot.db.get(DBTable.CURRENCY,
-                    condition=f"guild_id={message.guild.id} AND user_id={message.author.id}"
-                )
+            # Only do any action if user isn't spaming
+            if len(author_msg_times[aid]) > max_msg_window:
+                return
+            
+            # TTS
+            query = await self.bot.db.get(DBTable.TTS, condition=f'guild_id={message.guild.id}')
+            
+            if query and message.content and len(message.content) <= 100:
+                if message.guild.id in self.bot.tts_clients.keys():
+                    voice = self.bot.tts_clients[message.guild.id]
+                    
+                    active = query[0][1]
+                    channel = query[0][2]
+                    say_user = query[0][3]
+                    language = query[0][4]
+                    
+                    if active == 1 and channel:
+                        channel = self.bot.get_channel(channel) or await self.bot.fetch_channel(channel)
+                        msg = message.content
+                        
+                        if say_user:
+                            msg = f'{message.author.name}: ' + message.content
+                        
+                        tts = gTTS(text=msg, lang=language)
+                        tts.save(get_os_path(f'../instance/tts/{message.guild.id}_{gen_random_string(8)}.mp4'))
+                
+                    for audio in os.listdir(get_os_path(f'../instance/tts')):
+                        # Prevent playing TTS files from other guilds
+                        if str(message.guild.id) not in audio:
+                            continue
+                        
+                        audio_path = os.path.join(get_os_path('../instance/tts'), audio)
+                        
+                        voice.play(discord.FFmpegPCMAudio(audio_path))
+                        
+                        while voice.is_playing():
+                            await asyncio.sleep(0.5)
+                        
+                        os.remove(audio_path)
+            
+            # Currency
+            query = await self.bot.db.get(DBTable.CURRENCY,
+                condition=f"guild_id={message.guild.id} AND user_id={message.author.id}"
+            )
 
-                if not query:
-                    return
-
+            if not query:
                 wallet = query[0][2]
                 messages = query[0][3]
 

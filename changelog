@@ -1,2 +1,7 @@
 > v5.0.0 'Aurora':
-	* Initial release
+    * Initial relase
+
+> v5.1.0 'Aurora-1.1':
+    * Added TTS functionality
+    * Bot now checks for connected voice states and properly disconnects from them before closing
+    * Added permission checks to the fortnite daily shop

@@ -2,6 +2,8 @@
 General purpose helper functions
 """
 
+import random
+import string
 import psutil
 import GPUtil
 import cpuinfo
@@ -166,6 +168,20 @@ def ms_to_str(ms: int) -> str:
         return f"{h:02d}:{m:02d}:{s:02d}" if h > 0 else f"{m:02d}:{s:02d}"
     except Exception as e:
         log_exception(e)
+
+def gen_random_string(length: int) -> str:
+    """
+    Generates a random string of a given length
+
+    Args:
+        length (int): How long the string is
+
+    Returns:
+        str: The string
+    """
+    
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
 
 def translate(text: str, from_lang: str, to_lang: str="pt-br") -> str:
     """
