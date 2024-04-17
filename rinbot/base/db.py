@@ -1,297 +1,416 @@
 """
-#### Database manager\n
-Contains functions that add, remove or modify contents inside RinBot's database
+Database Manager
 """
 
-import os, sys, json, aiosqlite
-from typing import Literal
-from rinbot.base.helpers import load_lang, check_token, format_exception, get_path
-from rinbot.base.logger import logger
+import os
+import sys
+import aiosqlite
 
-from typing import TYPE_CHECKING
+from typing import Union, Iterable, Dict, TYPE_CHECKING
+from aiosqlite.cursor import Cursor
+from sqlite3 import Row
+from enum import Enum
+
+from .exception_handler import log_exception
+from .json_loader import get_lang
+from .launch_checks import check_cache, check_token
+from .logger import logger
+from .paths import Path
+
 if TYPE_CHECKING:
-    from rinbot.base.client import RinBot
+    from client import RinBot
 
-text = load_lang()
+text = get_lang()
 
-DB_DIR = get_path("database")
-DB_PATH = get_path("database/sqlite.db")
-
-# Check if schema file is present
-if not os.path.isfile(f"{DB_DIR}/schema.sql"):
-    logger.critical(text["DBMAN_SCHEMA_NOT_FOUND"])
-    sys.exit()
+class DBTable(Enum):
+    ADMINS = 'admins'
+    BLACKLIST = 'blacklist'
+    BOT = 'bot'
+    CURRENCY = 'currency'
+    DAILY_SHOP_CHANNELS = 'daily_shop_channels'
+    GUILDS = 'guilds'
+    HISTORY_GUILDS = 'history_guilds'
+    HISTORY_INDIVIDUAL = 'history_individual'
+    OWNERS = 'owners'
+    STORE = 'store'
+    VALORANT = 'valorant'
+    WARNS = 'warns'
+    WELCOME_CHANNELS = 'welcome_channels'
 
 class DBManager:
-    def __init__(self, bot: "RinBot"):
-        self.bot = bot
+    """
+    Database Manager
     
-    async def connect(self) -> aiosqlite.core.Connection:
+    - Data manipulation functions:
+        * get
+        * put
+        * update
+        * delete
+    """
+    
+    def __init__(self) -> None:
+        # Make sure cache dirs exists in case of db usage in odd places
+        check_cache()
+        
+        if not os.path.isfile(Path.schema):
+            logger.critical(text['DB_ERROR_NO_SCHEMA'])
+            sys.exit()
+    
+    @staticmethod
+    async def __connect() -> aiosqlite.core.Connection:
         """
-        #### Starts a connection with the database
-        - returns:
-            * aiosqlite.core.Connection
+        Attempts a connection to the database and returns it
+
+        Returns:
+            aiosqlite.core.Connection: Connection
         """
         
         try:
-            db = await aiosqlite.connect(DB_PATH)
-            with open(f"{DB_DIR}/schema.sql") as sc:
+            db = await aiosqlite.connect(Path.database)
+            with open(Path.schema) as sc:
                 await db.executescript(sc.read())
                 return db
         except Exception as e:
-            logger.error(format_exception(e))
+            log_exception(e)
+    
+    async def get(self, table: DBTable, condition: str=None) -> Iterable[Row]:
+        """
+        Retrieves data from the database
+
+        Args:
+            table (DBTable): The database table
+            condition (str, optional): SQL query condition (if any). Defaults to None.
+
+        Returns:
+            Iterable[Row]: Example of "bot" table: "[('token',)]"
+        """
+
+        conn = await self.__connect()
+
+        try:
+            cursor: Cursor = await conn.cursor()
+
+            await cursor.execute(
+                f'SELECT * FROM {table.value} WHERE {condition}'
+                if condition else
+                f'SELECT * FROM {table.value}'
+            )
+
+            rows = await cursor.fetchall()
+            return rows
+        except Exception as e:
+            log_exception(e)
+        finally:
+            await conn.close()
+    
+    async def put(self, table: DBTable, data: Dict[str, Union[str, int]]) -> bool:
+        """
+        Puts data into the database
+
+        Args:
+            table (DBTable): The database table
+            data (Dict[str, Union[str, int]]): The data as a dict where the keys are the columns and the values are the rows
+        
+        Returns:
+            bool: True if successful else False
+        """
+
+        conn = await self.__connect()
+
+        try:
+            cursor: Cursor = await conn.cursor()
+
+            placeholders = ", ".join(['?'] * len(data))
+            columns = ", ".join(data.keys())
+            values = tuple(data.values())
+
+            await cursor.execute(
+                f"INSERT INTO {table.value} ({columns}) VALUES ({placeholders})",
+                values
+            )
+
+            await conn.commit()
+
+            await cursor.execute(
+                f"SELECT * FROM {table.value} WHERE rowid=last_insert_rowid()"
+            )
+
+            inserted = await cursor.fetchone()
+
+            if inserted != values:
+                return False
+
+            return True
+        except Exception as e:
+            log_exception(e)
+        finally:
+            await conn.close()
+    
+    async def update(self, table: DBTable, data: Dict[str, Union[str, int]], condition: str=None, from_msg_event: bool=False) -> bool:
+        """
+        Updates an existing row on the database
+
+        Args:
+            table (DBTable): The database table
+            data (Dict[str, Union[str, int]]):The data as a dict where the keys are the columns and the values are the rows
+            condition (str, optional): SQL query condition (if any). Defaults to None.
+            from_msg_event (bool, optional): If the update is coming from the on_message() bot event. Defaults to False.
+
+        Returns:
+            bool: True if the transaction was a success, else False
+        """
+
+        conn = await self.__connect()
+
+        try:
+            cursor: Cursor = await conn.cursor()
+
+            set_clause = ", ".join([f'{key} = ?' for key in data.keys()])
+            values = tuple(data.values())
+
+            await cursor.execute(
+                f'UPDATE {table.value} SET {set_clause} WHERE {condition}'
+                if condition else
+                f'UPDATE {table.value} SET {set_clause}',
+                values
+            )
+
+            await conn.commit()
+
+            if not cursor.rowcount > 0:
+                if not from_msg_event:
+                    logger.error(text['DB_ERROR_UPDATING'].format(tb=table.value))
+                return False
+
+            if not from_msg_event:
+                logger.info(text['DB_UPDATED'].format(tb=table.value))
+
+            return True
+        except Exception as e:
+            log_exception(e)
+        finally:
+            await conn.close()
+    
+    async def delete(self, table: DBTable, condition: str=None) -> bool:
+        """
+        Deletes rows from the database based on a condition
+
+        Args:
+            table (DBTable): The database table
+            condition (str, optional): The condition to identify the rows to be deleted. Defaults to None.
+
+        Returns:
+            bool: True if the transaction was successful, else False
+        """
+
+        conn = await self.__connect()
+
+        try:
+            cursor: Cursor = await conn.cursor()
+
+            await cursor.execute(
+                f'DELETE FROM {table.value} WHERE {condition}'
+                if condition else
+                f'DELETE FROM {table.value}'
+            )
+
+            await conn.commit()
+
+            if not cursor.rowcount > 0:
+                return False
+
+            return True
+        except Exception as e:
+            log_exception(e)
+        finally:
+            await conn.close()
     
     async def setup(self):
         """
-        #### Goes through rinbot's initial setup\n
+        Goes through rinbot's initial setup
 
-        Can be triggered once by a fresh database start\n
+        Can be triggered once by a fresh database start
 
         Inserts the following data into the "bot" table:
-            data: dict = `{"token": <bot token>}`
-
+            "token" = <bot token>
         Inserts the following data into the "owners" table:
-            data: list = `[<owner id>]`
-        :return:
+            "user_id" = <owner id>
         """
-        
-        conn = await self.connect()
-        
+
         try:
-            logger.info(text["DBMAN_CHECK_START"])
+            logger.info(text['DB_CHECK_START'])
 
-            query = await conn.execute("SELECT data FROM owners")
-            result = await query.fetchone()
-
-            owners = json.loads(result[0])
+            owners = await self.get(DBTable.OWNERS)
 
             if not owners:
                 valid_id = False
 
-                logger.warning(text["DBMAN_NO_OWNERS"])
-                logger.info(text["DBMAN_NO_OWNERS_INST"])
+                logger.warning(text['DB_NO_OWNERS'])
+                logger.info(text['DB_NO_OWNERS_INST'])
 
                 while not valid_id:
-                    id = input(text["DBMAN_ASK_ID"])
-                    if id.isnumeric():
-                        query = await self.update("owners", [str(id)])
+                    user_id = input(text['DB_ASK_ID'])
+
+                    if user_id.isnumeric():
+                        query = await self.put(DBTable.OWNERS, {'user_id': int(user_id)})
+
                         if not query:
-                            logger.critical(text["DBMAN_DB_ERROR"])
+                            logger.critical(text['DB_DB_ERROR'])
                             sys.exit()
-                        else:
-                            valid_id = True
+
+                        valid_id = True
                     else:
-                        logger.error(text["DBMAN_INVALID_ID"])
+                        logger.error(text['DB_INVALID_ID'])
 
-            query = await conn.execute("SELECT data FROM bot")
-            result = await query.fetchone()
+            bot = await self.get(DBTable.BOT)
 
-            bot = json.loads(result[0])
-
-            if not bot["token"]:
+            if not bot:
                 valid_token = False
+
                 while not valid_token:
-                    logger.warning(text["DBMAN_NO_TOKEN"])
-                    logger.info(text["DBMAN_NO_TOKEN_INST"])
+                    logger.warning(text['DB_NO_TOKEN'])
+                    logger.info(text['DB_NO_TOKEN_INST'])
 
-                    token = input(text['DBMAN_ASK_TOKEN'])
+                    token = input(text['DB_ASK_TOKEN'])
 
-                    logger.info(text["DBMAN_CHECKING_TOKEN"])
+                    logger.info(text['DB_CHECKING_TOKEN'])
+
                     if await check_token(token):
-                        bot["token"] = token
-                        query = await self.update("bot", bot)
+                        query = await self.put(DBTable.BOT, {'token': token})
+
                         if not query:
-                            logger.critical(text["DBMAN_DB_ERROR"])
+                            logger.critical(text['DB_DB_ERROR'])
                             sys.exit()
-                        else:
-                            valid_token = True
+
+                        valid_token = True
                     else:
-                        logger.error(text["DBMAN_INVALID_TOKEN"])
-            logger.info(text["DBMAN_CHECK_DONE"])
+                        logger.error(text['DB_INVALID_TOKEN'])
         except Exception as e:
-            logger.error(f"{format_exception(e)}")
-        finally:
-            await conn.close()
+            log_exception(e)
     
-    async def populate(self):
-        """
-        #### Populates RinBot's DB with base data 
-        """
-        
-        conn = await self.connect()
-        base = {
-            "bot": {"token": False}, "owners": [], "admins": {}, "blacklist": {},
-            "guilds": [], "warns": {}, "currency": {}, "histories": {},
-            "welcome_channels": {}, "daily_shop_channels": {}, "store": {}, "valorant": {}}
-
+    async def check_guilds(self, bot: 'RinBot'):
         try:
-            for table, data in base.items():
-                query = await conn.execute(f"SELECT data FROM {table}")
-                is_present = await query.fetchone()
-                if not is_present:
-                    await conn.execute(f"INSERT INTO {table}(DATA) VALUES(?)",
-                                       (json.dumps(data, ensure_ascii=False, indent=4),))
-                    await conn.commit()
-        except Exception as e:
-            logger.error(format_exception(e))
-        finally:
-            await conn.close()
-    
-    async def get(self, table: Literal[
-        "bot", "owners", "admins", "blacklist", "guilds", "warns", "currency",
-        "histories", "welcome_channels", "daily_shop_channels", "store", "valorant"
-    ]) -> dict | list | None:
-        """
-        #### Reads a table on the database and returns it's data\n
-        """
-        
-        conn = await self.connect()
+            logger.info(text['CHECKING_GUILDS'])
 
+            query = await self.get(DBTable.GUILDS)
+
+            db_joined = {row[0] for row in query}
+            bot_joined = {guild.id for guild in bot.guilds}
+
+            missing = bot_joined - db_joined
+            extra = db_joined - bot_joined
+
+            for guild in missing:
+                await self.put(DBTable.GUILDS, {'guild_id': guild})
+            for guild in extra:
+                await self.delete(DBTable.GUILDS, condition=f'guild_id={guild}')
+
+            logger.info(text['CHECKED_GUILDS'])
+        except Exception as e:
+            log_exception(e)
+
+    async def check_welcome_channels(self, bot: 'RinBot'):
         try:
-            async with conn.execute(f"SELECT data FROM {table}") as cursor:
-                result = await cursor.fetchone()
-                if result:
-                    return json.loads(result[0])
-                else:
-                    return None
-        except Exception as e:
-            logger.error(format_exception(e))
-        finally:
-            await conn.close()
-    
-    async def update(self, table: Literal[
-        "bot", "owners", "admins", "blacklist", "guilds", "warns", "currency",
-        "histories", "welcome_channels", "daily_shop_channels", "store", "valorant"
-    ], data: dict | list, from_msg: bool=False) -> bool:
-        """
-        Updates a table on the database with the provided data\n
-        The data needs to be in JSON format, either a dict or a list\n
-        This function will then make a comparison to see if the data on the db\n
-        equals the data provided, if so, the data was updated successfully (True) else False
-        :return: bool
-        """
-        
-        conn = await self.connect()
+            logger.info(text['CHECKING_WELCOME_CHANNELS'])
 
+            query = await self.get(DBTable.WELCOME_CHANNELS)
+            in_db = {row[0] for row in query}
+
+            for guild in bot.guilds:
+                if guild.id not in in_db:
+                    await self.put(DBTable.WELCOME_CHANNELS, {'guild_id': guild.id})
+
+            logger.info(text['CHECKED_WELCOME_CHANNELS'])
+        except Exception as e:
+            log_exception(e)
+
+    async def check_economy(self, bot: 'RinBot'):
         try:
-            await conn.execute(f"UPDATE {table} SET data=?",
-                               (json.dumps(data, ensure_ascii=False, indent=4),))
-            await conn.commit()
+            logger.info(text['CHECKING_ECONOMY'])
 
-            current = await self.get(table)
-            if current == data:
-                if not from_msg:
-                    logger.info(f"{text['DBMAN_TABLE_UPDATED']} '{table}'")
-                return True
-            else:
-                logger.error(f"{text['DBMAN_ERROR_UPDATING_TABLE']} '{table}'")
-                return False
+            for guild in bot.guilds:
+                member_ids = [member.id for member in guild.members]
+
+                for member_id in member_ids:
+                    query = await self.get(DBTable.CURRENCY, condition=f'guild_id={guild.id} AND user_id={member_id}')
+
+                    if not query:
+                        await self.put(DBTable.CURRENCY, {'guild_id': guild.id, 'user_id': member_id})
+
+            logger.info(text['CHECKED_ECONOMY'])
         except Exception as e:
-            logger.error(format_exception(e))
-        finally:
-            await conn.close()
-    
-    async def startup(self):
-        """
-        #### Executes the necessary functions to get the db ready
-        """
-        
-        await self.populate()
-        await self.setup()
-    
-    async def check_guilds(self):
-        logger.info(text["INIT_CHECKING_GUILDS"])
+            log_exception(e)
 
-        joined = await self.get("guilds")
-
-        for guild in self.bot.guilds:
-            if str(guild.id) not in joined:
-                joined.append(str(guild.id))
-
-        update = await self.update("guilds", joined)
-        if update:
-            logger.info(text["INIT_CHECKED_GUILDS"])
-        else:
-            logger.error(text["INIT_ERROR_CHECKING_GUILDS"])
-
-    async def check_economy(self):
-        logger.info(text["INIT_CHECKING_ECONOMY"])
-
-        economy = await self.get("currency")
-
-        for guild in self.bot.guilds:
-            if str(guild.id) not in economy.keys():
-                economy[str(guild.id)] = {}
-
-            for member in guild.members:
-                if str(member.id) not in economy[str(guild.id)]:
-                    economy[str(guild.id)][str(member.id)] = {"wallet": 500, "messages": 0}
-
-            logger.info(f"{text['INIT_CURR_GUILD'][0]} {guild.member_count} {text['INIT_CURR_GUILD'][1]} {guild.name} (ID: {guild.id})")
-
-            update = await self.update("currency", economy)
-            if update:
-                logger.info(text["INIT_CHECKED_ECONOMY"])
-            else:
-                logger.error(text["INIT_ERROR_CHECKING_ECONOMY"])
-
-    async def check_valorant(self):
-        logger.info(text["INIT_CHECKING_VALORANT"])
-
-        val = await self.get("valorant")
-
-        for guild in self.bot.guilds:
-            guild_id = str(guild.id)
-            if guild_id not in val.keys():
-                val[guild_id] = {"active": False, "channel_id": 0, "members": {}}
-
-            for member in guild.members:
-                member_id = str(member.id)
-                if member_id not in val[guild_id]["members"].keys():
-                    val[guild_id]["members"][member_id] = {"active": False, "type": 0}
-
-        update = await self.update("valorant", val)
-        if update:
-            logger.info(text['INIT_CHECKED_VALORANT'])
-        else:
-            logger.error(text['INIT_ERROR_CHECKING_VALORANT'])
-    
-    async def check_all(self):
-        await self.check_economy()
-        await self.check_guilds()
-        await self.check_valorant()
-
-class OfflineDB:
-    def __init__(self):
-        pass
-    
-    async def connect(self) -> aiosqlite.core.Connection:
+    async def check_daily_shop(self, bot: 'RinBot'):
         try:
-            db = await aiosqlite.connect(DB_PATH)
-            with open(f"{DB_DIR}/schema.sql") as sc:
-                await db.executescript(sc.read())
-                return db
-        except Exception as e:
-            logger.error(format_exception(e))
-    
-    async def get(self, table: Literal[
-        "bot", "owners", "admins", "blacklist", "guilds", "warns", "currency",
-        "histories", "welcome_channels", "daily_shop_channels", "store", "valorant"
-    ]) -> dict | list | None:
-        """
-        #### Reads a table on the database and returns it's data\n
-        """
-        
-        conn = await self.connect()
+            logger.info(text['CHECKING_DAILY'])
 
-        try:
-            async with conn.execute(f"SELECT data FROM {table}") as cursor:
-                result = await cursor.fetchone()
-                if result:
-                    return json.loads(result[0])
-                else:
-                    return None
+            for guild in bot.guilds:
+                query = await self.get(DBTable.DAILY_SHOP_CHANNELS, condition=f'guild_id={guild.id}')
+                if not query:
+                    await self.put(DBTable.DAILY_SHOP_CHANNELS, {'guild_id': guild.id})
+
+            logger.info(text['CHECKED_DAILY'])
         except Exception as e:
-            logger.error(format_exception(e))
-        finally:
-            await conn.close()
+            log_exception(e)
+
+    async def check_valorant(self, bot: 'RinBot'):
+        try:
+            logger.info(text['CHECKING_VALORANT'])
+
+            for guild in bot.guilds:
+                member_ids = [member.id for member in guild.members]
+
+                for member_id in member_ids:
+                    query = await self.get(DBTable.VALORANT, condition=f'user_id={member_id}')
+
+                    if not query:
+                        await self.put(DBTable.VALORANT, {'user_id': member_id})
+
+            logger.info(text['CHECKED_VALORANT'])
+        except Exception as e:
+            log_exception(e)
+
+    async def check_all(self, bot: 'RinBot'):
+        await self.check_guilds(bot)
+        await self.check_welcome_channels(bot)
+        await self.check_economy(bot)
+        await self.check_daily_shop(bot)
+        await self.check_valorant(bot)
+
+# TEST
+async def do_test():
+    db = DBManager()
+    
+    await db.setup()
+    
+    print("\nAdding admins")
+    await db.put(DBTable.ADMINS, {
+        'guild_id': 1234, 'user_id': 1234})
+    await db.put(DBTable.ADMINS, {
+        'guild_id': 5678, 'user_id': 1234})
+    await db.put(DBTable.ADMINS, {
+        'guild_id': 1234, 'user_id': 5678})
+    
+    print("\nShowing current admins")
+    admins = await db.get(DBTable.ADMINS)
+    print(admins)
+
+    print("\nRemoving an admin")
+    await db.delete(DBTable.ADMINS, "guild_id=1234 AND user_id=5678")
+
+    print("\nShowing current admins")
+    admins = await db.get(DBTable.ADMINS)
+    print(admins)
+
+    print("\nUpdating an admin's ID")
+    await db.update(DBTable.ADMINS, data={'user_id': 9012}, condition='guild_id=5678')
+
+    print("\nShowing current admins")
+    admins = await db.get(DBTable.ADMINS)
+    print(admins)
+
+if __name__ == '__main__':
+    import asyncio
+    
+    asyncio.run(do_test())

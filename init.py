@@ -1,17 +1,19 @@
 """
-RinBot v4.0.2
-made by rin
+RinBot v5.0.0 'Aurora'
+
+made by rin (https://github.com/kmrin, km.rin on https://discord.gg)
 """
 
 import asyncio
-from rinbot.base.client import RinBot
+from rinbot.base import RinBot
 
 async def main() -> None:
+    # Load client
     client = RinBot()
     
     # Start
     await client.init()
 
 # RUN
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())

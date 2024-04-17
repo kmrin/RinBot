@@ -1,11 +1,13 @@
 import discord, os
-from rinbot.base.helpers import load_config
+from rinbot.base.logger import logger
+from rinbot.base.client import RinBot
+from rinbot.base.json_loader import get_conf
 from rinbot.kobold.custom_memory import CustomBufferWindowMemory
 from langchain.prompts.prompt import PromptTemplate
-from langchain.chains import ConversationChain
+from langchain.chains.conversation.base import ConversationChain
 from discord.ext import commands
 
-config = load_config()
+config = get_conf()
 
 CHAT_HISTORY_LINE_LIMIT = 15
 CHAR_NAME = config["AI_NAME"]
@@ -20,7 +22,7 @@ def embedder(msg):
 
 # Black magic
 class Chatbot:
-    def __init__(self, bot):
+    def __init__(self, bot: RinBot):
         self.bot = bot
         self.prompt = None
         self.endpoint = bot.endpoint
@@ -67,7 +69,7 @@ class Chatbot:
                 name = message[0]
                 channel_ids = str(message[1])
                 message = message[2]
-                self.bot.logger.info(f"{name}: {message}")
+                logger.info(f"{name}: {message}")
                 await self.add_history(name, channel_ids, message)
         return self.histories[channel_id]
 
@@ -94,7 +96,7 @@ class Chatbot:
         name = message.author.display_name
         memory = await self.get_memory_for_channel(str(channel_id))
         stop_sequence = await self.get_stop_sequence_for_channel(channel_id, name)
-        self.bot.logger.info(f"[AI]-[INFO]: Stop sequences: {stop_sequence}")
+        logger.info(f"[AI]-[INFO]: Stop sequences: {stop_sequence}")
         formatted_message = f"{name}: {message_content}"
         MAIN_TEMPLATE = f"""
             {{history}}
@@ -121,12 +123,12 @@ class Chatbot:
     async def add_history(self, name, channel_id, message_content) -> None:
         memory = await self.get_memory_for_channel(str(channel_id))
         formatted_message = f"{name}: {message_content}"
-        self.bot.logger.info(f"[AI]-[INFO]: Adding message to memory: {formatted_message}")
+        logger.info(f"[AI]-[INFO]: Adding message to memory: {formatted_message}")
         memory.add_input_only(formatted_message)
         return None
 
 class ChatbotCog(commands.Cog, name="chatbot"):
-    def __init__(self, bot):
+    def __init__(self, bot: RinBot):
         self.bot = bot
         self.chatlog_dir = bot.chatlog_dir
         self.chatbot = Chatbot(bot)
@@ -134,7 +136,7 @@ class ChatbotCog(commands.Cog, name="chatbot"):
             os.makedirs(self.chatlog_dir)
 
     @commands.hybrid_command(name="chat")
-    async def chat(self, message, message_content) -> None:
+    async def chat(self, message: discord.Message, message_content) -> None:
         if message.guild:
             server_name = message.channel.name
         else:
@@ -151,5 +153,5 @@ class ChatbotCog(commands.Cog, name="chatbot"):
         return response
 
 # SETUP
-async def setup(bot):
+async def setup(bot: RinBot):
     await bot.add_cog(ChatbotCog(bot))

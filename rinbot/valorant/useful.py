@@ -1,15 +1,16 @@
 from __future__ import annotations
 import contextlib, json, os, uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, Optional
 from .local import ValorantTranslator
 from .resources import get_item_type
+from rinbot.base.get_os_path import get_os_path
 
 VLR_locale = ValorantTranslator()
 
 current_season_id = '99ac9283-4dd3-5248-2e01-8baf778affb4'
 current_season_end = datetime(2022, 8, 24, 17, 0, 0)
-final_directory = f"{os.path.realpath(os.path.dirname(__file__))}/../cache/valorant/"
+final_directory = get_os_path('../instance/cache/valorant/')
 
 def is_valid_uuid(value: str) -> bool:
     try:
@@ -30,7 +31,7 @@ def data_folder() -> None:
 class JSON:
     def read(filename: str, force: bool = True) -> Dict:
         try:
-            with open(final_directory + filename + ".json", "r", encoding='utf-8') as json_file:
+            with open(final_directory + r'\\' + filename + ".json", "r", encoding='utf-8') as json_file:
                 data = json.load(json_file)
         except (FileNotFoundError, KeyError):
             from .cache import create_json
@@ -41,7 +42,7 @@ class JSON:
 
     def save(filename: str, data: Dict) -> None:
         try:
-            with open(final_directory + filename + ".json", 'w', encoding='utf-8') as json_file:
+            with open(final_directory + r'\\' + filename + ".json", 'w', encoding='utf-8') as json_file:
                 json.dump(data, json_file, indent=2, ensure_ascii=False)
         except (FileNotFoundError, KeyError):
             from .cache import create_json
@@ -143,7 +144,7 @@ class GetItems:
         return bundle
 
 class GetFormat:
-    def offer_format(data: Dict) -> Dict:
+    def offer_format(data: Dict, language: str) -> Dict:
         offer_list = data["SkinsPanelLayout"]["SingleItemOffers"]
         duration = data["SkinsPanelLayout"]["SingleItemOffersRemainingDurationInSeconds"]
 
@@ -152,7 +153,7 @@ class GetFormat:
 
         for uuid in offer_list:
             skin = GetItems.get_skin(uuid)
-            name, icon = skin['names'][str(VLR_locale)], skin['icon']
+            name, icon = skin['names']['en-US' if language == 'en' else language], skin['icon']
 
             price = GetItems.get_skin_price(uuid)
             tier_icon = GetItems.get_skin_tier_icon(uuid)

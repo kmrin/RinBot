@@ -25,9 +25,6 @@
  `/avisos mostrar` Mostra os avisos de um usuário
  `/avisos adicionar` Adiciona um aviso a um usuário
  `/avisos remover` Remove um aviso de um usuário pela sua ID (número do aviso)
- `/banir` Bane um membro da guilda
- `/kickar` Kicka um membro da guilda
- `/nick` Muda o nick de um membro da guilda
 
 ### Owner
  `/desligar`  Desliga a bot
@@ -36,6 +33,7 @@
  `/extensão carregar` Carrega uma extensão da bot
  `/extensão descarregar` Descarrega uma extensão da bot
  `/extensão recarregar` Recarrega uma extensão da bot
+ `/recarregar-gerenciador-de-eventos` Recarrega o gerenciador de eventos
 
 ### Fun
  `/gato` Mostra uma foto ou gif de um gato
@@ -50,6 +48,10 @@
  `/deepfry` Commando "deepfry" da Nekobot
  `/stickbug` Commando "stickbug" da Nekobot
 
+### Gemini
+ `/gemini talk` Inicia ou continua uma conversa com a IA da Google Gemini
+ `/gemini reset` Reseta sua conversa com o Gemini
+
 ### Music
  `/tocar` Toca músicas de vários lugares diferentes num canal de voz
  `/fila mostrar` Mostra a fila de músicas atual
@@ -57,21 +59,18 @@
  `/nightcore` Liga ou desliga o efeito nightcore
  `/recomendado` Liga ou desliga recomendações automáticas
  `/randomizar` Embaralha a fila de músicas
+ `/volume` Altera o volume do player entre 0 a 100
  `/mostrar_controles` Mostra os controles multimídia
-
-### Gemini
- `/gemini talk` Inicia ou continua uma conversa com a IA da Google Gemini
- `/gemini reset` Reseta sua conversa com o Gemini
 
 ### Economy
  `/laranja rank` Mostra o rank top 10 dos usuários com mais laranjas na economia
  `/laranja transferir` Transfere laranjas entre usuários
  `/laranja loja` Mostra itens da loja
- `/laranja novo_cargo` Adiciona um item de cargo na loja
+ `/laranja novo-cargo` Adiciona um item de cargo na loja
  `/laranja comprar` Compra um item da loja
 
 ### Fortnite
- `/fortnite daily-shop`  Mostra a loja diária do fortnite no canal
+ `/fortnite loja-diaria`  Mostra a loja diária do fortnite no canal
 `/fortnite stats`  Mostra as estatisticas da sua conta do fortnite no canal
 
 ### Valorant

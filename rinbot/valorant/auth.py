@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple
 from secrets import token_urlsafe
 from rinbot.base.logger import logger
-from rinbot.base.helpers import load_lang
+from rinbot.base.helpers import get_lang
 
-text = load_lang()
+text = get_lang()
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -20,7 +20,7 @@ def _extract_tokens_from_uri(url: str) -> Optional[Tuple[str, Any]]:
         token_id = url.split("id_token=")[1].split("&")[0]
         return access_token, token_id
     except IndexError:
-        logger.error("[Valorant] Invalid cookies")
+        logger.error(text['VAL_INVALID_COOKIES'])
 
 class Auth:
     RIOT_CLIENT_USER_AGENT = token_urlsafe(111)
@@ -158,7 +158,7 @@ class Auth:
         await session.close()
         
         if data["type"] == "response":
-            expiry_token = datetime.now() + timedelta(hours=1)
+            # expiry_token = datetime.now() + timedelta(hours=1)
             response = _extract_tokens(data)
             access_token = response[0]
             token_id = response[1]

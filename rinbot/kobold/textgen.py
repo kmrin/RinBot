@@ -94,7 +94,7 @@ class TextGen(LLM):
             url = f"{self.model_url}/api/v1/generate"
             params = self._get_parameters(stop)
             params["stopping_strings"] = params.pop(
-                "stop")  # TODO: Renomear 'stop' pra 'stopping_strings'
+                "stop")
             request = params.copy()
             request["prompt"] = prompt
             response = requests.post(url, json=request)
@@ -118,7 +118,7 @@ class TextGen(LLM):
                 "The `websocket-client` package is required for streaming.")
         params = {**self._get_parameters(stop), **kwargs}
         params["stopping_strings"] = params.pop(
-            "stop")  # TODO: Rename 'stop' to 'stopping_strings'
+            "stop")
         url = f"{self.model_url}/api/v1/stream"
         request = params.copy()
         request["prompt"] = prompt

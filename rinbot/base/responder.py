@@ -1,77 +1,105 @@
 """
-#### RinBot's Responder\n
-Automatically determines the context type (ctx or interaction) and
-sends an embed, view or both to the channel
+Responder
 """
 
 import discord
+
 from discord import Interaction
 from discord.ext.commands import Context
-from rinbot.base.helpers import load_lang, format_exception
-from rinbot.base.logger import logger
+from typing import Literal, Union
 
-text = load_lang()
+from .exception_handler import log_exception
+from .json_loader import get_lang
+from .logger import logger
 
-async def respond(context: Context | Interaction, color=None, title=None, message=None, view=None, response_type=0):
+text = get_lang()
+
+async def respond(
+    context: Union[Context, Interaction],
+    colour: int=None,
+    message: Union[str, discord.Embed]=None,
+    title: str=None,
+    view: discord.ui.View=None,
+    hidden: bool=False,
+    response_type: Literal[0, 1, 2]=0
+) -> None:
     """
-    #### Responds to the current context or interaction with an embed or view
-    - context: `discord.Interaction or Context object`
-    - color: `HEX color value for embed (optional)`
-    - message: `str message for embed description`
-    - title: `str title for embed title (optional)`
-    - view: `A view for the interaction (optional)`
-    - response_type:
-        * default = `0 (uses response.send_message)`
-        * followup = `1 (uses followup.send)`
-        * channel = `2 (uses channel.send)`
-    #### NOTE: If a ready embed is sent through the message argument,
-    #### that embed will be parsed directly and the other embed arguments will be ignored.
+    Respond to the current context or interaction with an embed or view
+
+    Args:
+        context (Union[Context, Interaction]): discord.Interaction or discord.ext.commands.Context obj
+        colour (int, optional): HEX colour value for embed. Defaults to None.
+        message (Union[str, discord.Embed], optional): Message for embed description. Defaults to None.
+        title (str, optional): Title for embed title. Defaults to None.
+        view (discord.ui.View, optional): A view for the interaction. Defaults to None.
+        hidden (bool, optional): False = normal message (default), True = ephemeral message. Defaults to False.
+        response_type (Literal[0, 1, 2], optional): 0 = send_message, 1 = followup.send, 2 = channel.send. Defaults to 0.
     """
-
-    async def _send_response(context, embed=None, view=None, response_type=0):
-        if isinstance(context, Interaction):
-            if response_type == 0:
-                if not view:
-                    await context.response.send_message(embed=embed)
+    
+    async def __send(ctx, embed=None, interface=None):
+        try:
+            if isinstance(ctx, Interaction):
+                if response_type == 0:
+                    if not interface:
+                        await ctx.response.send_message(embed=embed, ephemeral=hidden)
+                    else:
+                        await ctx.response.send_message(embed=embed, view=interface, ephemeral=hidden)
+                elif response_type == 1:
+                    if not interface:
+                        await ctx.followup.send(embed=embed, ephemeral=hidden)
+                    else:
+                        await ctx.followup.send(embed=embed, view=interface, ephemeral=hidden)
+                elif response_type == 2:
+                    if not interface:
+                        await ctx.channel.send(embed=embed)
+                    else:
+                        await ctx.channel.send(embed=embed, view=interface)
+            elif isinstance(ctx, Context):
+                if not interface:
+                    await ctx.send(embed=embed, ephemeral=hidden)
                 else:
-                    await context.response.send_message(embed=embed, view=view)
-            elif response_type == 1:
-                if not view:
-                    await context.followup.send(embed=embed)
-                else:
-                    await context.followup.send(embed=embed, view=view)
-            elif response_type == 2:
-                if not view:
-                    await context.channel.send(embed=embed)
-                else:
-                    await context.channel.send(embed=embed, view=view)
-        elif isinstance(context, Context):
-            if not view:
-                await context.send(embed=embed)
-            else:
-                await context.send(embed=embed, view=view)
-
+                    await ctx.send(embed=embed, view=interface, ephemeral=hidden)
+        except Exception as e:
+            log_exception(e)
+    
     try:
         if not isinstance(message, discord.Embed):
             embed = (
-                discord.Embed(description=message, color=color) if message and not title
-                else discord.Embed(title=title, color=color) if title and not message
-                else discord.Embed(title=title, description=message, color=color) if message and title
+                discord.Embed(description=message, colour=colour) if message and not title
+                else discord.Embed(title=title, colour=colour) if title and not message
+                else discord.Embed(title=title, description=message, colour=colour) if message and title
                 else None)
         else:
             embed = message
 
+        if isinstance(context, Context):
+            author = context.author
+        elif isinstance(context, Interaction):
+            author = context.user
+        
         if embed and not view:
-            await _send_response(context, embed, response_type=response_type)
+            await __send(context, embed=embed)
             logger.info(
-                f"{text['RESPONDER_RESPONSE_SENT']} (Embed) | GUILD ID {context.guild.id} | MSG: {embed.description}")
+                text['RESPONDER_SENT'].format(
+                    type="(Embed)",
+                    guild_id=context.guild.id if context.guild else author.id,
+                    msg=embed.description if embed.description else embed.title
+                ))
         elif not embed and view:
-            await _send_response(context, view=view, response_type=response_type)
-            logger.info(f"{text['RESPONDER_RESPONSE_SENT']} (View) | GUILD ID {context.guild.id}")
-        elif embed and view:
-            await _send_response(context, embed, view, response_type)
+            await __send(context, interface=view)
             logger.info(
-                f"{text['RESPONDER_RESPONSE_SENT']} (Embed + View) | GUILD ID {context.guild.id} | MSG: {embed.description}")
-
+                text['RESPONDER_SENT'].format(
+                    type="(View)",
+                    guild_id=context.guild.id if context.guild else author.id,
+                    msg=None
+                ))
+        elif embed and view:
+            await __send(context, embed=embed, interface=view)
+            logger.info(
+                text['RESPONDER_SENT'].format(
+                    type="(Embed + View)",
+                    guild_id=context.guild.id if context.guild else author.id,
+                    msg=embed.description if embed.description else embed.title
+                ))
     except Exception as e:
-        logger.error(f"{format_exception(e)}")
+        log_exception(e)

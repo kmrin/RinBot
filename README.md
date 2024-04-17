@@ -25,7 +25,7 @@ She was private code a while back, but I decided to publish at least a "alternat
 - Music playback with search queries and support for playlists. (Youtube, Soudcloud by default, spotify, deezer and others can be enabled on the config files.)
 - Little games like "Rock, Paper Scissors" and "Heads or Tails".
 - Rule34 and Danbooru integration if you're into that.
-- Integration with the fnbr Fortnite API to show the fortnite daily shop
+- Integration with the FortniteAPI to show the fortnite daily shop
 - Integration with the Valorant and Riot API to show your valorant daily shop
 
 ## Economy system
@@ -81,9 +81,6 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/warnings show` | Shows a user's warnings |
 | `/warnings add` | Adds a warning to a user |
 | `/warnings remove` | Removes a warning from a user by it's warn ID |
-| `/ban` | Bans a user from the guild |
-| `/kick` | Kicks a user from the guild |
-| `/nick` | Changes a user's nickname on the guild |
 
 #### Owner
 | Command | Description |
@@ -94,6 +91,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/extension load` | Loads a bot extension |
 | `/extension unload` | Unloads a bot extension |
 | `/extension reload` | Reloads a bot extension |
+| `/reload-event-handler` | Reloads the event handler cog |
 
 #### Fun
 | Command | Description |
@@ -125,7 +123,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/nightcore` | Toggles a nightcore effect on and off |
 | `/recommended` | Toggles the autoplay of recommended tracks on and off |
 | `/shuffle` | Shuffles the current queue |
-| `/volume` | Changes the player's volume |
+| `/volume` | Changes the player's volume from 0 to 100 |
 | `/show_controls` | Shows the multimedia control buttons |
 
 ## NOTE: In order to use track sources like spotify, deezer, etc, make sure to open the "application.yml" lavalink config file and setup LavaSrc properly, by default RinBot does not provide any access tokens for those sources for obvious reasons. If you leave everything untouched, only Youtube, YoutubeMusic and SoundCloud will work.
@@ -138,7 +136,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/orange rank` |  Shows the top 10 members with the most oranges |
 | `/orange transfer` |  Transfer oranges between users |
 | `/orange store` |  Shows the items on the store |
-| `/orange new_role` |  Adds a role item to be bought from the store |
+| `/orange create-role` |  Adds a role item to be bought from the store |
 | `/orange buy` |  Buys an item from the store (by name) |
 
 #### Fortnite
@@ -174,8 +172,8 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 
 ## AI (Kobold and StableDiffusion)
 #### To integrate RinBot with your running instance of Kobold / StableDiffusion or both, follow these steps:
-- Open `/rinbot/config/config-rinbot.json` and set the `AI_ENABLED` variable to `true` (this will make the bot load the necessary ai extensions located inside the `ai` folder)
-- Still inside `/rinbot/config/config-rinbot.json`, change the `AI_ENDPOINT_KOBOLD` value to whatever URL:PORT you're using to access Kobold, the one already present is the default and should probably work if you're running the language model localy, same thing goes for stablediffusion, through the `AI_ENDPOINT_STABLEDIFFUSION` value.
+- Open `/rinbot/config/config.json` and set the `AI_ENABLED` variable to `true` (this will make the bot load the necessary ai extensions located inside the `kobold/cogs` folder)
+- Still inside `/rinbot/config/config.json`, change the `AI_ENDPOINT_KOBOLD` value to whatever URL:PORT you're using to access Kobold, the one already present is the default and should probably work if you're running the language model localy, same thing goes for stablediffusion, through the `AI_ENDPOINT_STABLEDIFFUSION` value.
 - Next, copy the ID of a empty / new discord text chat from your server, and paste it on the `AI_CHANNEL` value. This will make the bot behave like a "chatGPT", but on your discord server!
 - To use StableDiffusion, make sure to open the webui with the `-api` flag, or else the bot won't be able to use it
 
@@ -183,5 +181,5 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 #### It's easy:
 - Download and install python
 - Download the latest release or clone this repository
-- Open a command line inside RinBot's directory and run `pip install -r requirements.txt`
+- Open a command line inside RinBot's directory and run `pip install -r requirements.txt` or create a venv
 - Run the `init.py` file and follow the start-up instructions

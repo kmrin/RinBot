@@ -1,0 +1,60 @@
+{
+    "VERSION": "v5.0.0 'Aurora'",
+    "PREFIX": "!",
+    "LANGUAGE": "en",
+    "ACTIVITY_SWITCH_INTERVAL": 10,
+
+    "WARNING_AUTO_KICK_ENABLED": true,
+    "WARNING_AUTO_KICK_LIMIT": 6,
+
+    "LAVALINK_USE_BUILTIN": true,
+    "LAVALINK_ENDPOINT": "http://localhost:6969",
+    "LAVALINK_PASSWORD": "rinbot",
+
+    "RULE34_ENABLED": false,
+
+    "BOORU_ENABLED": false,
+    "BOORU_USERNAME": null,
+    "BOORU_IS_GOLD": false,
+    "BOORU_KEY": null,
+
+    "FORTNITE_DAILY_SHOP_ENABLED": false,
+    "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:00:10",
+    "FORTNITE_DAILY_SHOP_LANGUAGE": "en",
+    "FORTNITE_API_KEY": null,
+
+    "VALORANT_DAILY_SHOP_ENABLED": false,
+    "VALORANT_DAILY_SHOP_UPDATE_TIME": "00:00:10",
+
+    "AI_ENABLED": false,
+    "AI_CHANNEL": null,
+    "AI_NAME": "RinBot",
+    "AI_ENDPOINT_KOBOLD": "http://localhost:5001",
+    "AI_ENDPOINT_STABLEDIFFUSION": "http://localhost:7860",
+
+    "AI_GEMINI_KEY": null,
+
+    "INTENTS": {
+        "dm_messages": true,
+        "dm_typing": true,
+        "guild_messages": true,
+        "guild_typing": true,
+        "guilds": true,
+        "integrations": true,
+        "voice_states": true,
+        "webhooks": true,
+        "members": true,
+        "message_content": true,
+        "moderation": true,
+        "presences": true,
+        "messages": true,
+        "typing": true,
+        "bans": true
+    },
+
+    "PROGRAMS": [
+        "lavalink"
+    ],
+
+    "": ""
+}

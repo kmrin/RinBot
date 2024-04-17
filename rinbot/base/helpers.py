@@ -1,196 +1,35 @@
 """
-RinBot's helper functions\n
-General purpose functions used throughout rinbot's code
+General purpose helper functions
 """
 
-import os, re, sys, json, traceback, discord, cpuinfo, GPUtil, subprocess, platform, psutil
+import psutil
+import GPUtil
+import cpuinfo
+import platform
+import urllib.parse
+
+from typing import Dict, List
 from datetime import datetime
-from typing import Dict, List, Any
 from translate import Translator
-from rinbot.base.logger import logger
 
-VERBOSE_PATH = f"{os.path.realpath(os.path.dirname(__file__))}/../config/config-text.json"
-CONFIG_PATH = f"{os.path.realpath(os.path.dirname(__file__))}/../config/config-rinbot.json"
+from .exception_handler import log_exception
+from .json_loader import get_lang
 
-def get_path(path: str) -> str:
+def get_specs() -> Dict[str, str]:
     """
-    #### Returns a system realpath from the path given
-    Starts at "rinbot/"
-    """
-    
-    return f"{os.path.realpath(os.path.dirname(__file__))}/../{path}"
+    Returns a dict containing the current system specifications
 
-def format_exception(e: Exception) -> str:
+    Returns:
+        Dict[str, str]: ['os', 'cpu', 'ram', 'gpu']
     """
-    #### Formats an exception into a simple understandable string
-    - Parameters:
-        * e: The exception
-    - Returns:
-        * str: `"<exception name> [<file> | <line>] -> Message"`
-    """
-    
-    trace = traceback.extract_tb(e.__traceback__)
-    path, line, _, _ = trace[-1]
-    path = os.path.basename(path)
-    return f"{type(e).__name__} [{path} | {line}] -> {str(e)}"
 
-def load_config() -> Dict[str, Any]:
-    """
-    #### Loads rinbot's config file
-    - Returns:
-        * dict: `"config_key": "config_value"`
-    """
-    
-    if not os.path.isfile(CONFIG_PATH):
-        logger.critical("[helpers.py]: Config file not found")
-        sys.exit()
-    
-    try:
-        with open(CONFIG_PATH, encoding="utf-8") as c:
-            return json.load(c)
-    except Exception as e:
-        logger.critical(format_exception(e))
-        sys.exit()
-
-def load_lang() -> Dict[str, List[str] | str]:
-    """
-    #### Loads rinbot's text with the language specified on the config file
-    - Returns:
-        * dict: `"text_key": "str" or list of "str"`
-    """
-    
-    if not os.path.isfile(VERBOSE_PATH):
-        logger.critical("[helpers.py]: Verbose file not found")
-        sys.exit()
-    
-    conf = load_config()
-    try:
-        with open(VERBOSE_PATH, encoding="utf-8") as v:
-            verbose = json.load(v)
-            try:
-                return verbose[conf["LANGUAGE"]]
-            except KeyError:
-                logger.warning(verbose["en"]["HELPERS_WARNING_EN_FALLBACK"])
-                return verbose["en"]
-    except Exception as e:
-        logger.critical(format_exception(e))
-        sys.exit()
-
-def millisec_to_str(time: int) -> str:
-    """
-    #### Formats milliseconds into a HH:MM:SS or MM:SS time format
-    """
-    
-    try:
-        seconds = time // 1000
-        h, remainder = divmod(seconds, 3600)
-        m, s = divmod(remainder, 60)
-        return f"{h:02d}:{m:02d}:{s:02d}" if h > 0 else f"{m:02d}:{s:02d}"
-    except Exception as e:
-        logger.error(format_exception(e))
-
-def format_date(date:str, format:int=0) -> str:
-    """
-    #### Formats a datecode into DD/MM/YYYY or MM/DD/YYYY
-    - Arguments:
-        * date:str = `Datecode. Example: "%Y-%m-%dT%H:%M:%S.%fZ"`
-        * format:int = `0` for `DD/MM/YYYY` (default) or `1` for `MM/DD/YYYY`
-    """
-    try:
-        parsed = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
-        return parsed.strftime("%d/%m/%Y" if format == 0 else "%m/%d/%Y")
-    except Exception as e: logger.error(f"{format_exception(e)}")
-
-def format_expiration_time(expiration_time):
-    """
-    #### Receives a datetime and returns a string that shows how much time you have from now to the input time
-    - Arguments:
-        * expiration_time:str `Example: "2024-01-22 23:59:44.779790"`\n
-        Can be generated with "datetime.utcnow() + timedelta(seconds=duration)" for example
-    """
-    text = load_lang()
-    current_time = datetime.utcnow()
-    time_difference = expiration_time - current_time
-    hours, remainder = divmod(time_difference.seconds, 3600)
-    minutes, _ = divmod(remainder, 60)
-    if time_difference.days > 0:
-        return f"{time_difference.days} {text['DAYS']} {hours} {text['HOURS']}"
-    elif hours > 0:
-        return f"{hours} {text['HOURS']}"
-    else:
-        return text['NOW']
-
-def remove_nl(list: list) -> list:
-    """
-    #### Removes newlines from a list of strings
-    """
-    
-    try:
-        nl = []
-        for i in list:
-            i = i.strip("\n")
-            if not i == "":
-                nl.append(i)
-        return nl
-    except Exception as e:
-        logger.error(format_exception(e))
-
-def meg_to_gig(m: int) -> float:
-    """
-    #### Converts a value in megabytes to gigabytes
-    """
-    
-    try:
-        g = m / 1024
-        return float(f"{g:.1f}")
-    except Exception as e:
-        logger.error(format_exception(e))
-
-def is_hex_color(value) -> bool:
-    """
-    #### Checks if a HEX value is a valid color
-    """
-    
-    try:
-        pattern = r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
-        return bool(re.match(pattern, value))
-    except Exception as e:
-        logger.error(f"{format_exception(e)}")
-
-def hex_to_int(value) -> int:
-    """
-    #### Converts a HEX value to a integer value
-    """
-    
-    try:
-        return int(value[1:], 16)
-    except Exception as e:
-        logger.error(format_exception(e))
-
-def translate(text: str, from_lang: str, to_lang: str="pt-br") -> str:
-    """
-    #### Translates a string into another language\n
-    `Auto -> PT-BR by default`
-    """
-    
-    try:
-        translator = Translator(from_lang=from_lang, to_lang=to_lang)
-        return translator.translate(text)
-    except Exception as e:
-        logger.error(format_exception(e))
-
-def get_specs() -> dict:
-    """
-    #### Returns a dict containing the current system specifications
-    :return: `{"os", "cpu", "ram", "gpu"}`
-    """
-    
-    text = load_lang()
+    text = get_lang()
     sys_info = {}
 
     try:
         gpu_list = GPUtil.getGPUs()
         gpu_info: GPUtil.GPU = gpu_list[0]
+
         sys_info["gpu"] = f"{gpu_info.name} ({meg_to_gig(gpu_info.memoryTotal)}GB)"
     except:
         sys_info["gpu"] = f"{text['HELPERS_NO_GPU']}"
@@ -201,107 +40,148 @@ def get_specs() -> dict:
 
     return sys_info
 
-def gen_intents():
+def get_expiration_time(expiration_time: datetime) -> str:
     """
-    #### Returns rinbot's intents
-    """
-    
-    intents = discord.Intents.all()
-    intents.dm_messages = True
-    intents.dm_reactions = True
-    intents.dm_typing = True
-    intents.guild_messages = True
-    intents.guild_reactions = True
-    intents.guild_scheduled_events = True
-    intents.guild_typing = True
-    intents.guilds = True
-    intents.integrations = True
-    intents.invites = True
-    intents.voice_states = True
-    intents.webhooks = True
-    intents.members = True
-    intents.message_content = True
-    intents.moderation = True
-    intents.presences = True
-    intents.emojis_and_stickers = True
-    intents.messages = True
-    intents.emojis = True
-    intents.reactions = True
-    intents.typing = True
-    intents.bans = True
-    return intents
+    Receives a datetime and returns a string that shows how much time you have from now to the input time
 
-def check_cache():
-    """
-    #### A check ran at startup to make sure all cache dirs exist
+    Args:
+        expiration_time (datetime): Example '2024-01-22 23:59:44.779790'
+
+    Returns:
+        str: Expiration time
     """
     
-    text = load_lang()
-    folders = [
-        "cache", "cache/fun", "cache/chatlog", "cache/stablediffusion",
-        "cache/lavalink", "cache/lavalink/log", "cache/fortnite",
-        "cache/fortnite/downloads", "cache/fortnite/composites", "cache/fortnite/stats",
-        "cache/valorant", "cache/stickbug", "logs", "logs/lavalink"]
-    
+    text = get_lang()
+    current_time = datetime.utcnow()
+    time_difference = expiration_time - current_time
+    hours, remainder = divmod(time_difference.seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+
+    if time_difference.days > 0:
+        return f"{time_difference.days} {text['DAYS']} {hours} {text['HOURS']}"
+    elif hours > 0:
+        return f"{hours} {text['HOURS']}"
+    else:
+        return text['NOW']
+
+def remove_nl(your_list: List[str]) -> List:
+    """
+    Removes newlines from a list of strings
+
+    Args:
+        your_list (list): Your list containing newlines
+
+    Returns:
+        list: The list without newlines
+    """
+
     try:
-        for folder in folders:
-            path = f"{os.path.realpath(os.path.dirname(__file__))}/../{folder}"
-            if not os.path.exists(path):
-                os.makedirs(path)
-                if "logs" in path and not "lavalink" in path:
-                    os.remove(f"{path}/a.log")
-                logger.info(f"{text['INIT_CREATED_DIRECTORY']} '{folder}'")
+        return [x.strip() for x in your_list]
     except Exception as e:
-        logger.critical(format_exception(e))
-        sys.exit()
+        log_exception(e)
 
-def check_java():
-    """
-    #### A check ran at startup to make sure the correct version of java is installed 
-    """
-    
-    text = load_lang()
-    
+def is_url(url: str) -> bool:
     try:
-        output = subprocess.check_output("java -version", stderr=subprocess.STDOUT, shell=True, text=True)
-        lines = output.split("\n")
-        
-        for line in lines:
-            if "version" in line.lower():
-                ver = line.split()[2]
-                ver = int("".join(c for c in ver if c.isdigit() or c == ".").split(".")[0])
-                
-                try:
-                    if not ver >= 17:
-                        logger.error(f"{text['INIT_INVALID_JAVA_VERSION']}: {ver}")
-                        sys.exit()
-                except:
-                    logger.error(text["INIT_INVALID_JAVA_VERSION"])
-                    sys.exit()
+        result = urllib.parse.urlparse(url)
+        return all([result.scheme, result.netloc])
     except:
-        logger.critical(text["INIT_JAVA_NOT_FOUND"])
-        sys.exit()
+        return False
 
-async def check_token(token: str) -> bool:
+def is_hex(value: str) -> bool:
     """
-    #### A check ran during setup to verify if the user provided token is valid or not
-    - Parameters:
-        * token: `str`
-    - Returns:
-        * bool: `True if valid | False if invalid`
+    Checks if your HEX value is valid
+
+    Args:
+        value (str): The value (Ex.: 0xFFFFF)
+
+    Returns:
+        bool: Converted int value
+    """
+
+    try:
+        if value.startswith("0x") or value.startswith("0X"):
+            value = value[2:]
+        
+        elif value.startswith("#"):
+            value = value[1:]
+
+        if len(value) != 6:
+            return False
+
+        if not all(c in "0123456789abcdefABCDEF" for c in value):
+            return False
+
+        return True
+    except Exception as e:
+        log_exception(e)
+
+def hex_to_int(value: str) -> int:
+    """
+    Converts a HEX value to an integer
+
+    Args:
+        value (str): The hex value (Ex.: 0xFFFFF)
+
+    Returns:
+        int: Converted int value
     """
     
     try:
-        dummy = discord.Client(intents=discord.Intents.default())
-        
-        @dummy.event
-        async def on_ready(): await dummy.close()
-        
-        await dummy.start(token)
-        
-        return True
-    except discord.LoginFailure:
-        return False
+        return int(value[1:], 16)
     except Exception as e:
-        logger.critical(format_exception(e))
-        sys.exit()
+        log_exception(e)
+
+def meg_to_gig(m: int) -> float:
+    """
+    Converts a value in megabytes to gigabytes
+
+    Args:
+        m (int): Number in megabyes
+
+    Returns:
+        float: Floating point number in gigabytes (one decimal)
+    """
+
+    try:
+        g = m / 1024
+        return float(f"{g:.1f}")
+    except Exception as e:
+        log_exception(e)
+
+def ms_to_str(ms: int) -> str:
+    """
+    Formats milliseconds into a HH:MM:SS format
+
+    Args:
+        ms (int): Quantity in milliseconds
+
+    Returns:
+        str: HH:MM:SS or MM:SS format
+    """
+    
+    try:
+        seconds = ms // 1000
+        h, remainder = divmod(seconds, 3600)
+        m, s = divmod(remainder, 60)
+        return f"{h:02d}:{m:02d}:{s:02d}" if h > 0 else f"{m:02d}:{s:02d}"
+    except Exception as e:
+        log_exception(e)
+
+def translate(text: str, from_lang: str, to_lang: str="pt-br") -> str:
+    """
+    Translates a string from one language to another
+
+    Args:
+        text (str): The text to be translated
+        from_lang (str): The language input (Ex.: 'en', 'pt-br', 'hu')
+        to_lang (str, optional): The language output. Defaults to 'pt-br'.
+
+    Returns:
+        str: The translated string (hopefuly)
+    """
+
+    try:
+        translator = Translator(from_lang=from_lang, to_lang=to_lang)
+        return translator.translate(text)
+    except Exception as e:
+        log_exception(e)

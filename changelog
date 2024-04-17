@@ -1,12 +1,2 @@
-> v4.0.0:
+> v5.0.0 'Aurora':
 	* Initial release
-
-> v4.0.1:
-	* Fixed the fortnite daily shop
-	* The "/fortnite stats" command now has a "season" flag which when set, show the player's current season stats only
-	* Added kobold support back, which was missing since version 2.1.0, oops!
-
-> v4.0.2:
-    * Fixed an issue on the fortnite extension that caused it to not load
-    * Fixed an issue that caused the program manager to not load programs if the bot's language was set to "pt-br"
-    * Removed "yt-dlp" from project requirements as it uses lavalink for media

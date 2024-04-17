@@ -2,98 +2,129 @@ import discord
 from rinbot.valorant.useful import GetFormat
 from datetime import datetime, timedelta
 from rinbot.valorant.endpoint import API_ENDPOINT
-from rinbot.base.logger import logger
-from rinbot.base.colors import *
-from rinbot.base.helpers import format_expiration_time, load_lang
-from typing import Dict, List
+from rinbot.base.db import DBTable
+from rinbot.base.colours import Colour
+from rinbot.base.helpers import get_expiration_time
+from rinbot.base.json_loader import get_lang, get_conf
+from rinbot.base.exception_handler import log_exception
+from typing import Union, Dict, List
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from rinbot.base.client import RinBot
 
-text = load_lang()
+conf = get_conf()
+text = get_lang()
 
 def _embed(skin:Dict) -> discord.Embed:
-    embed = discord.Embed(
-        description=f"**{skin['name']}**\n{skin['price']}", color=PURPLE)
-    embed.set_thumbnail(url=skin['icon'])
-    return embed
+    try:
+        embed = discord.Embed(
+            description=f"**{skin['name']}**\n{skin['price']}", colour=Colour.PURPLE)
+        embed.set_thumbnail(url=skin['icon'])
+        return embed
+    except Exception as e:
+        log_exception(e)
 
 def _gen_store_embeds(player:str, offer:Dict) -> List[discord.Embed]:
-    data = GetFormat.offer_format(offer)
-    duration = data.pop("duration")
-    description = f"{text['VAL_DS_EMBED'][0]}**{player}**{text['VAL_DS_EMBED'][1]}\n{text['VAL_DS_EMBED'][2]} `{format_expiration_time(datetime.utcnow() + timedelta(seconds=duration))}`"
-    embed = discord.Embed(description=description, color=PURPLE)
-    embeds = [embed]
-    [embeds.append(_embed(data[skin])) for skin in data]
-    return embeds
+    try:
+        data = GetFormat.offer_format(offer, conf['LANGUAGE'])
+        duration = data.pop("duration")
 
-async def _get_endpoint(client: "RinBot", user_id:int) -> API_ENDPOINT:
+        description = text['VAL_DS_EMBED'].format(
+            player=player,
+            time=get_expiration_time(datetime.utcnow() + timedelta(seconds=duration))
+        )
+
+        embed = discord.Embed(description=description, colour=Colour.PURPLE)
+        embeds = [embed]
+
+        [embeds.append(_embed(data[skin])) for skin in data]
+
+        return embeds
+    except Exception as e:
+        log_exception(e)
+
+async def _get_endpoint(client: "RinBot", user_id:int) -> Union[API_ENDPOINT, bool]:
     try:
         data = await client.val_db.is_data(user_id)
-        if not data: return False
+
+        if not data:
+            return False
+
         endpoint = client.val_endpoint
         endpoint.activate(data)
+
         return endpoint
     except Exception as e:
-        logger.error(f"{text['VAL_DS_ENDPOINT_ERROR']} {user_id}: {e}")
+        log_exception(e)
         return False
 
-async def _get_webhook(client: "RinBot", channel_id) -> discord.Webhook:
+async def _show_private_shop(client: "RinBot", user, warn=False) -> None:
     try:
-        channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
-        channel_hooks = await channel.webhooks()
-        if not channel_hooks:
-            channel_hook = await channel.create_webhook(name=text['VAL_DS_HOOK_NAME'])
-        else:
-            channel_hook = channel_hooks[0]
-        await channel_hook.edit(name=text['VAL_DS_HOOK_NAME'], avatar=await client.user.avatar.read())
-        return channel_hook
-    except Exception as e:
-        logger.error(f"{text['VAL_DS_HOOK_ERROR']} {e}")
-        return False
+        endpoint:API_ENDPOINT = await _get_endpoint(client, user.id)
 
-async def _show_private_shop(client: "RinBot", user_id, warn=False) -> None:
-    try:
-        user = client.get_user(user_id) or await client.fetch_user(user_id)
-        endpoint:API_ENDPOINT = await _get_endpoint(client, user_id)
-        if not endpoint: return
+        if not endpoint:
+            return
         skin_price = endpoint.store_fetch_offers()
+
         client.val_db.insert_skin_price(skin_price)
+
         data = endpoint.store_fetch_storefront()
         embeds = _gen_store_embeds(endpoint.player, data)
+
         await user.send(embeds=embeds)
+
         if warn:
             await user.send(text['VAL_DS_CHANNEL_ERROR'])
     except Exception as e:
-        logger.error(f"{text['VAL_DS_ERROR_SENDING']} {e}")
+        log_exception(e)
 
-async def _show_channel_shop(client: "RinBot", guild_id, channel_id, user_id) -> None:
+async def _show_channel_shop(client: "RinBot", channel, user) -> None:
     try:
-        user = client.get_user(user_id) or await client.fetch_user(user_id)
-        guild = client.get_guild(guild_id) or await client.fetch_guild(guild_id)
-        channel = guild.get_channel(channel_id) or await guild.fetch_channel(channel_id)
-        endpoint:API_ENDPOINT = await _get_endpoint(client, user_id)
-        if not endpoint: return
+        endpoint: API_ENDPOINT = await _get_endpoint(client, user.id)
+
+        if not endpoint:
+            return
+
         skin_price = endpoint.store_fetch_offers()
         client.val_db.insert_skin_price(skin_price)
         data = endpoint.store_fetch_storefront()
         embeds = _gen_store_embeds(endpoint.player, data)
+
         await channel.send(content=f"{text['VAL_DS_MENTION']} {user.mention}!", embeds=embeds)
     except Exception as e:
-        logger.error(f"{text['VAL_DS_ERROR_SENDING_CHANNEL']} {e}")
+        log_exception(e)
 
 async def show_val_daily_shop(client: "RinBot") -> None:
-    val = await client.db.get("valorant")
-    for guild_id, guild in val.items():
-        active = guild["active"]
-        channel_id = guild["channel_id"]
-        members = guild["members"]
-        for member_id, member in members.items():
-            if member["active"] and member["type"] == 0:
-                await _show_private_shop(client, int(member_id))
-            elif member["active"] and member["type"] == 1:
-                if active: 
-                    await _show_channel_shop(client, int(guild_id), int(channel_id), int(member_id))
-                else:
-                    await _show_private_shop(client, int(member_id), True)
+    try:
+        val = await client.db.get(DBTable.VALORANT)
+
+        for row in val:
+            if row[1] != 1:
+                continue
+
+            user = client.get_user(row[0]) or await client.fetch_user(row[0])
+            guild = client.get_guild(row[3] or await client.fetch_guild(row[3]))
+
+            if not user or not guild:
+                continue
+
+            if row[2] == 0:    # Private type
+                await _show_private_shop(client, user)
+            elif row[2] == 1:  # Channel type
+                ds = await client.db.get(DBTable.DAILY_SHOP_CHANNELS,
+                    condition=f"guild_id={guild.id}")
+
+                if ds[0][3] != 1:
+                    await _show_private_shop(client, user, True)
+                    continue
+
+                channel = guild.get_channel(ds[0][4]) or await guild.fetch_channel(ds[0][4])
+
+                if not channel:
+                    await _show_private_shop(client, user, True)
+                    continue
+
+                await _show_channel_shop(client, channel, user)
+    except Exception as e:
+        log_exception(e)

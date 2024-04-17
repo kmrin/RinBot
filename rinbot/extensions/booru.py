@@ -4,36 +4,39 @@ RinBot's booru command cog
     * /booru-random `Shows a random picture from danbooru with the given tags and rating`
 """
 
-from __future__ import unicode_literals
-import random, discord
-from random import randint
-from discord import app_commands
+import random
+import discord
+
+from discord import app_commands, Interaction
 from discord.ext.commands import Cog
-from discord.app_commands.models import Choice
+from discord.app_commands import Choice
+
 from rinbot.booru import Danbooru
-from rinbot.base.helpers import load_config, load_lang, format_exception
-from rinbot.base.responder import respond
-from rinbot.base.client import RinBot
-from rinbot.base.checks import *
-from rinbot.base.colors import *
+from rinbot.base import log_exception
+from rinbot.base import respond
+from rinbot.base import RinBot
+from rinbot.base import Colour
+from rinbot.base import conf
+from rinbot.base import text
 
-config = load_config()
-text = load_lang()
+# from rinbot.base import is_owner
+# from rinbot.base import is_admin
+from rinbot.base import not_blacklisted
 
-UNAME = config["BOORU_USERNAME"]
-API = config["BOORU_KEY"]
-IS_GOLD = config["BOORU_IS_GOLD"]
+UNAME = conf['BOORU_USERNAME']
+API = conf['BOORU_KEY']
+IS_GOLD = conf['BOORU_IS_GOLD']
 
 class Booru(Cog, name="booru"):
     def __init__(self, bot: RinBot):
         self.bot = bot
+        self.client = Danbooru("danbooru", username=UNAME, api_key=API)
     
-    # Command groups
-    booru = app_commands.Group(name=text["BOORU_NAME"], description=text["BOORU_DESC"])
-    
+    booru = app_commands.Group(name=text['BOORU_NAME'], description=text['BOORU_DESC'])
+
     @booru.command(
-        name=text["BOORU_RANDOM_NAME"],
-        description=text["BOORU_RANDOM_DESC"])
+        name=text['BOORU_RANDOM_NAME'],
+        description=text['BOORU_RANDOM_DESC'])
     @app_commands.choices(
         rating=[
             Choice(name=f"{text['BOORU_RANDOM_RATING_G']}", value="g"),
@@ -42,42 +45,48 @@ class Booru(Cog, name="booru"):
     @not_blacklisted()
     # @is_admin()
     # @is_owner()
-    async def _booru_random(self, interaction: discord.Interaction, rating: Choice[str]=None, tags: str=None) -> None:
-        # If a rating is not provided
-        if not rating:
-            return await respond(interaction, RED, message=text["BOORU_RANDOM_NO_RAT"])
+    async def _booru_random(self, interaction: Interaction, rating: Choice[str], tags: str=None) -> None:
+        request_tags = f'rating:{rating.value}'
         
-        # Split tags and check how many are there
-        tag_count = tags.split(" ")
-        if len(tag_count) >=3 and not IS_GOLD:
-            return await respond(interaction, RED, message=text["BOORU_RANDOM_MAX_API"])
-        elif len(tag_count) >= 6:
-            return await respond(interaction, RED, text["BOORU_RANDOM_MAX_API_GOLD"])
+        if tags:
+            chars = [',', '.', '|', '  ']
+            for char in chars:
+                if char in tags:
+                    return await respond(interaction, Colour.RED, text['BOORU_RANDOM_INVALID_TAGS'])
+            
+            tag_count = tags.split(' ')
         
-        # Do the thing
+            if len(tag_count) >= 3 and not IS_GOLD:
+                return await respond(interaction, Colour.RED, text['BOORU_RANDOM_MAX_API'])
+            elif len(tag_count) >= 6:
+                return await respond(interaction, Colour.RED, text['BOORU_RANDOM_MAX_API_GOLD'])
+
+            request_tags = request_tags + ' ' + tags
+        
         await interaction.response.defer()
         
         try:
+            posts = self.client.post_list(
+                limit=100,
+                tags=request_tags
+            )
+            
+            post = random.choice(posts)
+            
             try:
-                client = Danbooru("danbooru", username=UNAME, api_key=API)
-                posts = client.post_list(tags=f"rating:{rating.value}"
-                                         if not tags else tags, pages=randint(1, 1000), limit=1000)
-                post = random.choice(posts)
-                
-                try:
-                    url = post["file_url"]
-                except:
-                    url = post["source"]
-                
-                embed = discord.Embed(color=PURPLE)
-                embed.set_image(url=url)
-                
-                await respond(interaction, message=embed, response_type=1)
-            except IndexError:
-                return await respond(interaction, RED, message=text["BOORU_RANDOM_EMPTY_RESPONSE"], response_type=1)
+                url = post['file_url']
+            except:
+                url = post['source']
+            
+            embed = discord.Embed(colour=Colour.PURPLE)
+            embed.set_image(url=url)
+            
+            await respond(interaction, message=embed, response_type=1)
+        except IndexError:
+            await respond(interaction, Colour.RED, text['BOORU_RANDOM_NO_RESULTS'], response_type=1)
         except Exception as e:
-           e = format_exception(e)
-           return await respond(interaction, RED, text["BOORU_RANDOM_API_ERROR"], e, response_type=1)
+            e = log_exception(e)
+            return await respond(interaction, Colour.RED, text['BOORU_RANDOM_API_ERROR'].format(e=e), response_type=1)
 
 # SETUP
 async def setup(bot: RinBot):

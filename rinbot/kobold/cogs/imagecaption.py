@@ -3,10 +3,11 @@ from discord.ext import commands
 from PIL import Image
 from io import BytesIO
 from transformers import BlipForConditionalGeneration, BlipProcessor
-from rinbot.base.checks import *
+from rinbot.base.client import RinBot
+from rinbot.base.command_checks import not_blacklisted
 
 class ImageCaption(commands.Cog, name='image_caption'):
-    def __init__(self, bot):
+    def __init__(self, bot: RinBot):
         self.bot = bot
         self.processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
         self.model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base",
@@ -48,5 +49,5 @@ class ImageCaption(commands.Cog, name='image_caption'):
         return caption
 
 # SETUP
-async def setup(bot):
+async def setup(bot: RinBot):
     await bot.add_cog(ImageCaption(bot))

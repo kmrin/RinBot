@@ -1,9 +1,8 @@
-from rinbot.base.helpers import load_config, load_lang, format_exception
-from rinbot.base.logger import logger
 import google.generativeai as genai
 
-config = load_config()
-text = load_lang()
+from rinbot.base import log_exception
+from rinbot.base import logger
+from rinbot.base import text, conf
 
 safety = [
     {
@@ -28,17 +27,14 @@ safety = [
     },
 ]
 
-genai.configure(api_key=config["AI_GEMINI_KEY"])
+genai.configure(api_key=conf["AI_GEMINI_KEY"])
 
 model = genai.GenerativeModel("gemini-pro", safety_settings=safety)
 
 histories = {}
 sessions = {}
 
-def message(user="default", msg=None) -> str:
-    if not msg:
-        return text["GEMINI_MSG_NOT_PROVIDED"]
-    
+def message(user="default", msg: str=None) -> str:    
     if user not in histories.keys():
         histories[user] = []
         logger.info(f"{text['GEMINI_USER_HISTORY_CREATED']} {user}")
@@ -48,8 +44,7 @@ def message(user="default", msg=None) -> str:
             sessions[user] = model.start_chat(history=histories[user])
             logger.info(f"{text['GEMINI_USER_SESSION_CREATED']} {user}")
         except Exception as e:
-            e = format_exception(e)
-            logger.error(f"{text['GEMINI_ERROR_CREATING_SESSION']} (user: {user}): {e}")
+            log_exception(e)
             return text["GEMINI_ERROR_CREATING_SESSION"]
     
     chat: genai.ChatSession = sessions[user]
@@ -59,8 +54,7 @@ def message(user="default", msg=None) -> str:
         histories[user] = chat.history
         return response.text
     except Exception as e:
-        e = format_exception(e)
-        logger.error(f"{text['GEMINI_RESPONSE_ERROR']}: {e}")
+        log_exception(e)
         return text["GEMINI_RESPONSE_ERROR"]
 
 def reset(user):

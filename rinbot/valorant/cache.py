@@ -2,13 +2,14 @@ from __future__ import annotations
 import json, os, requests
 from typing import Dict, Optional
 from rinbot.base.logger import logger
-from rinbot.base.helpers import load_lang
+from rinbot.base.get_os_path import get_os_path
+from rinbot.base.json_loader import get_lang
 from .useful import JSON
 
-text = load_lang()
+text = get_lang()
 
 def create_json(filename:str, formats=None) -> None:
-    file_path = f"{os.path.realpath(os.path.dirname(__file__))}/../cache/valorant/{filename}.json"
+    file_path = get_os_path(f"../instance/cache/valorant/{filename}.json")
     file_dir = os.path.dirname(file_path)
     os.makedirs(file_dir, exist_ok=True)
     if not formats: formats = {}

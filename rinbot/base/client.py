@@ -1,98 +1,154 @@
 """
-#### RinBot's client (discord.ext.commands.Bot)
+RinBot's client (discord.ext.commands.Bot)
 """
 
-import sys, pytz, discord, wavelink
-# from typing import Literal
-# from discord.channel import TextChannel
-from discord.ext.commands import Bot
-from rinbot.fortnite.api import FortniteAPI
-from rinbot.valorant.db import DATABASE
-from rinbot.valorant.endpoint import API_ENDPOINT
-from rinbot.base.helpers import load_lang, load_config, gen_intents, format_exception, check_cache, check_java
-from rinbot.base.loader import load_extensions
-from rinbot.base.programs import ProgramHandler
-from rinbot.base.events import EventHandler
-from rinbot.base.tasks import TaskHandler
-from rinbot.base.db import DBManager
-from rinbot.base.logger import logger
-from rinbot.base.colors import *
+import sys
+import pytz
+import discord
+import wavelink
 
-config = load_config()
-text = load_lang()
+from discord.ext.commands import Bot
+
+from rinbot.fortnite.api import FortniteAPI
+from rinbot.valorant.endpoint import API_ENDPOINT
+from rinbot.valorant.db import DATABASE
+
+from .db import DBTable, DBManager
+from .events import EventHandler
+from .exception_handler import log_exception
+from .extension_loader import load_extensions
+from .get_os_path import get_os_path
+from .intents import gen_intents
+from .json_loader import get_conf, get_lang
+from .launch_checks import check_cache, check_java
+from .logger import logger
+from .program_handler import ProgramHandler
+from .tasks import TaskHandler
+
+conf = get_conf()
+text = get_lang()
 
 class RinBot(Bot):
-    def __init__(self):
-        super().__init__(command_prefix="!", intents=gen_intents())
+    def __init__(self) -> None:
+        super().__init__(
+            command_prefix=conf['PREFIX'],
+            intents=gen_intents(),
+            help_command=None
+        )
         
         self.utc = pytz.utc
-        
-        self.db = DBManager(self)
+        self.db = DBManager()
         self.task_handler = TaskHandler(self)
-        self.program_handler = ProgramHandler(self)
+        self.program_handler = ProgramHandler()
+
+        self.fn_key = conf["FORTNITE_API_KEY"]
+        self.fn_language = conf["FORTNITE_DAILY_SHOP_LANGUAGE"]
+        if self.fn_language not in [
+            "ar", "de", "en", "es", "es-419", "fr", "it", 
+            "ja", "ko", "pl", "pt-BR", "ru", "tr","zh-CN", 
+            "zh-Hant"
+        ]:
+            logger.warning(text['CLIENT_INVALID_FORTNITE_LANGUAGE'])
+            self.fn_language = 'en'
         
-        self.fn_language = config["FORTNITE_DAILY_SHOP_LANGUAGE"]
-        if self.fn_language not in ["ar", "de", "en", "es", "es-419", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-Hant"]:
-            logger.error(f"{text['INIT_INVALID_FN_LANGUAGE'][0]}{self.fn_language}{text['INIT_INVALID_FN_LANGUAGE'][1]}")
-            sys.exit()
-        self.fortnite_api = FortniteAPI(self.fn_language, config["FORTNITE_API_KEY"])
+        self.fortnite_api = FortniteAPI(self.fn_language, self.fn_key)
         
         self.val_db = DATABASE()
         self.val_endpoint = API_ENDPOINT()
         
         # Will I use AI?
-        if config["AI_ENABLED"] and config["AI_CHANNELS"]:
+        if conf['AI_ENABLED'] and conf['AI_CHANNELS']:
             from langchain.llms.koboldai import KoboldApiLLM
+
+            self.endpoint = str(conf['AI_ENDPOINT_KOBOLD'])
             
-            # AI specific settings
-            self.endpoint = str(config["AI_ENDPOINT_KOBOLD"])
-            if len(self.endpoint.split("/api")) > 0:
-                self.endpoint = self.endpoint.split("/api")[0]
-            self.chatlog_dir = "cache/chatlog"
+            if len(self.endpoint.split('/api')) > 0:
+                self.endpoint = self.endpoint.split('/api')[0]
+            
+            self.chatlog_dir = get_os_path('../instance/cache/chatlog')
             self.endpoint_connected = False
-            self.channel_id = config["AI_CHANNEL"]
+            self.channel_id = conf['AI_CHANNEL']
             self.num_lines_to_keep = 15
-            self.guild_ids = [int(x) for x in config["AI_CHANNEL"].split(",")]
+            self.guild_ids = [int(x) for x in conf['AI_CHANNELS'].split(',')]
             self.debug = True
-            self.char_name = "RinBot"
-            self.endpoint_type = "Kobold"
+            self.char_name = 'RinBot'
+            self.endpoint_type = 'Kobold'
             self.llm = KoboldApiLLM(endpoint=self.endpoint, max_length=800)
     
-    async def init(self):
+    async def __recovery_loop(self):
+        reset = input(text['FAILURE_LOGIN_INST'])
+        
+        if reset.lower() == 'y' or reset.lower() == 'yes':
+            logger.info(text['FAILURE_LOGIN_YES'])
+            
+            await self.db.delete(DBTable.BOT)
+            await self.db.setup()
+            
+            logger.info(text['FAILURE_LOGIN_SETUP_COMPLETE'])
+            await self.init(from_recovery=True)
+        
+        elif reset.lower() == 'n' or reset.lower() == 'no':
+            logger.info(text['FAILURE_LOGIN_NO'])
+            await self.stop()
+            
+            sys.exit()
+        else:
+            await self.__recovery_loop()
+    
+    async def init(self, from_recovery: bool=False):
         """
-        #### Bot startup sequence
+        Startup sequence
         """
         
-        # Checks
-        check_cache()
-        check_java()
-        
-        # Load events cog
-        await self.add_cog(EventHandler(self))
-        
-        # Initialise db
-        await self.db.startup()
-        
-        # Load all extensions
-        await load_extensions(self)
-        
-        # Run lavalink
-        if config["LAVALINK_USE_BUILTIN"]:
-            await self.program_handler.run("lavalink")
+        if not from_recovery:
+            # Checks
+            check_cache()
+            check_java()
+            
+            # Start db
+            await self.db.setup()
+            
+            # Load events cog
+            await self.add_cog(EventHandler(self))
+            
+            # Load all extensions
+            await load_extensions(self)
+            
+            # Run necessary programs
+            for program in conf['PROGRAMS']:
+                if program == 'lavalink' and not conf['LAVALINK_USE_BUILTIN']:
+                    continue
+                
+                await self.program_handler.start(program)
         
         # Log in to discord and build internal cache
         try:
-            bot = await self.db.get("bot")
-            await self.start(token=bot["token"], reconnect=True)
+            query = await self.db.get(DBTable.BOT)
+            token = ''
+            
+            if not query:
+                logger.critical(text['FAILURE_NO_TOKEN'])
+                sys.exit()
+            
+            for row in query:
+                token = row[0]
+                break
+            
+            await self.start(token)
+            
+        except discord.LoginFailure:
+            logger.critical(text['FAILURE_LOGIN'])
+            await self.__recovery_loop()
+            
         except (KeyboardInterrupt, SystemExit):
-            if config["LAVALINK_USE_BUILTIN"]:
-                await self.program_handler.stop("lavalink")
+            await self.stop()
+            
         except Exception as e:
-            logger.error(format_exception(e))
-    
+            log_exception(e)
+
     async def stop(self):
         """
-        #### Bot stop sequence
+        Stop sequence
         """
         
         # Kill all running programs
@@ -102,28 +158,11 @@ class RinBot(Bot):
         await self.close()
     
     async def setup_hook(self) -> None:
-        nodes = [wavelink.Node(uri=config["LAVALINK_ENDPOINT"], password=config["LAVALINK_PASSWORD"])]
-        await wavelink.Pool.connect(nodes=nodes, client=self, cache_capacity=None)
-    
-    """ async def log(self, type: Literal["info", "warning", "error", "critical"], message:str):        
-        colors = {"info": GREEN, "warning": YELLOW, "error": RED, "critical": PURPLE}
-
-        if type == "info": logger.info(message)
-        elif type == "warning": logger.warning(message)
-        elif type == "error": logger.error(message)
-        elif type == "critical": logger.critical(message)
-
-        if not self.is_ready():
-            return
-
-        channel = self.get_channel(int(config["LOG_CHANNEL"])) or await self.fetch_channel(int(config["LOG_CHANNEL"]))
-
-        if not channel:
-            return
-
-        if not isinstance(channel, TextChannel):
-            logger.error(text["CLIENT_CHANNEL_NOT_TEXT"])
-            return
-
-        embed = discord.Embed(description=f"> {message}", color=colors[type])
-        await channel.send(embed=embed) """
+        nodes = [
+            wavelink.Node(
+                uri=conf['LAVALINK_ENDPOINT'],
+                password=conf['LAVALINK_PASSWORD']
+            )
+        ]
+        
+        await wavelink.Pool.connect(nodes=nodes, client=self)

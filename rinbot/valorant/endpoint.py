@@ -3,9 +3,9 @@ import json, requests, urllib3
 from typing import Any, Dict, Mapping
 from .resources import base_endpoint, base_endpoint_glz, base_endpoint_shared, region_shard_override, shard_region_override
 from rinbot.base.logger import logger
-from rinbot.base.helpers import load_lang
+from rinbot.base.helpers import log_exception, get_lang
 
-text = load_lang()
+text = get_lang()
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -27,7 +27,7 @@ class API_ENDPOINT:
             self.__format_region()
             self.__build_urls()
         except Exception as e:
-            logger.error(text['VAL_EP_ERROR'])
+            log_exception(e)
 
     def fetch(self, endpoint:str="/", url:str="pd", errors:Dict={}) -> Dict:
         endpoint_url = getattr(self, url)
@@ -88,13 +88,6 @@ class API_ENDPOINT:
         """
         data = self.fetch(endpoint=f"/store/v1/entitlements/{self.puuid}/{item_type}", url="pd")
         return data
-    
-    def __get_live_season(self) -> str:
-        content = self.fetch_content()
-        season_id = [season["ID"] for season in content["Seasons"] if season["IsActive"] and season["Type"] == "act"]
-        if not season_id:
-            return self.fetch_player_mmr()["LatestCompetitiveUpdate"]["SeasonID"]
-        return season_id[0]
 
     def __check_puuid(self, puuid: str) -> str:
         return self.puuid if puuid is None else puuid

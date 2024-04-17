@@ -1,38 +1,38 @@
 """
-#### RinBot's economy command cog
+RinBot's economy command cog
+
 - commands:
     * /orange rank `Shows the Top 10 server leaderboard for the users with most oranges`
     * /orange transfer `Transfer oranges from you and someone else`
     * /orange store `Shows what items that guild has to offer at the store`
-    * /orange create_role `Creates a role to be sold on the server's store`
+    * /orange create-role `Creates a role to be sold on the server's store`
     * /orange buy `Buys an item from the guild's store`
 """
 
 import discord
-from discord import app_commands
+
+from discord import app_commands, Interaction
 from discord.ext.commands import Cog
-from rinbot.base.helpers import load_lang, is_hex_color, hex_to_int, format_exception
-from rinbot.base.responder import respond
-from rinbot.base.client import RinBot
-from rinbot.base.checks import *
-from rinbot.base.colors import *
 
-text = load_lang()
+from rinbot.base import log_exception, is_hex, hex_to_int
+from rinbot.base import DBTable
+from rinbot.base import respond
+from rinbot.base import RinBot
+from rinbot.base import Colour
+from rinbot.base import text
 
-class Economy(Cog, name="economy"):
-    def __init__(self, bot: RinBot):
+# from rinbot.base import is_owner
+from rinbot.base import is_admin
+from rinbot.base import not_blacklisted
+
+class Economy(Cog, name='economy'):
+    def __init__(self, bot: RinBot) -> None:
         self.bot = bot
-        self.store = None
-
-    async def update_store(self):
-        self.store = await self.bot.db.get("store")
-
-        if not self.store:
-            self.store = {}
-
-    # Command groups
-    orange = app_commands.Group(name=text['ECONOMY_ORANGE_NAME'], description=text['ECONOMY_ORANGE_DESC'])
-
+    
+    orange = app_commands.Group(
+        name=text['ECONOMY_ORANGE_NAME'], description=text['ECONOMY_ORANGE_DESC']
+    )
+    
     @orange.command(
         name=text['ECONOMY_RANK_NAME'],
         description=text['ECONOMY_RANK_DESC'])
@@ -40,42 +40,48 @@ class Economy(Cog, name="economy"):
     # @is_admin()
     # @is_owner()
     async def _orange_rank(self, interaction: Interaction) -> None:
-        await self.update_store()
-
-        economy = await self.bot.db.get("currency")
-        flattened = [(member_id, data["wallet"]) for member_id, data in economy[str(interaction.guild.id)].items()]
-        sorted_data = sorted(flattened, key=lambda x: x[1], reverse=True)
-        users = []
-
-        for user in sorted_data[:10]:
-            u = await self.bot.fetch_user(user[0])
-            users.append(u.name)
-
-        rank_data = [f"{i}. {item[1]}🍊 - `{users[i - 1]}`"
-                     for i, item in enumerate(sorted_data[:10], start=1)]
-        message = "\n".join(rank_data)
-
-        embed = discord.Embed(
-            title=text['ECONOMY_RANK_TOP_10'],
-            description=f"{message}", color=YELLOW)
-        embed.set_footer(text=text['ECONOMY_BANK'])
-
-        await respond(interaction, message=embed)
-
+        currency = await self.bot.db.get(DBTable.CURRENCY,
+            condition=f'guild_id={interaction.guild.id}')
+        
+        try:
+            flattened = [(row[1], row[2]) for row in currency]
+            sorted_data = sorted(flattened, key=lambda x: x[1], reverse=True)
+            users = []
+            
+            for user in sorted_data[:10]:
+                u = self.bot.get_user(user[0] or await self.bot.fetch_user(user[0]))
+                users.append(u.name)
+            
+            rank_data = [
+                f'{i}. {item[1]}{text["ECONOMY_CURR_ICON"]} - `{users[i-1]}`'
+                for i, item in enumerate(sorted_data[:10], start=1)
+            ]
+            message = '\n'.join(rank_data)
+            
+            embed = discord.Embed(
+                title=text['ECONOMY_RANK_TOP_10'],
+                description=f'{message}',
+                colour=Colour.YELLOW
+            )
+            embed.set_footer(text=text['ECONOMY_BANK'])
+            
+            await respond(interaction, message=embed)
+        except Exception as e:
+            log_exception(e)
+    
     @orange.command(
         name=text['ECONOMY_TRANSFER_NAME'],
         description=text['ECONOMY_TRANSFER_DESC'])
     @not_blacklisted()
     # @is_admin()
     # @is_owner()
-    async def _orange_move(self, interaction: Interaction, member: discord.Member = None, value: str = None) -> None:
-        if not member or not value or not value.isnumeric():
-            return await respond(interaction, RED, message=text['ERROR_INVALID_PARAMETERS'])
-
-        embed = await self.move_currency(interaction, interaction.user, member, value)
-
-        await interaction.response.send_message(embed=embed)
-
+    async def _orange_move(self, interaction: Interaction, member: discord.Member, value: int) -> None:
+        if member == interaction.user:
+            return await respond(interaction, Colour.RED, text['ECONOMY_TRANSFER_SAME_USER'])
+        
+        embed = await self.__move_currency(interaction, interaction.user, member, value)
+        await respond(interaction, message=embed, hidden=True)
+    
     @orange.command(
         name=text['ECONOMY_STORE_NAME'],
         description=text['ECONOMY_STORE_DESC'])
@@ -83,161 +89,200 @@ class Economy(Cog, name="economy"):
     # @is_admin()
     # @is_owner()
     async def _orange_store(self, interaction: Interaction) -> None:
-        await self.update_store()
-
-        if str(interaction.guild.id) in self.store:
-            items = []
-            for item in self.store[str(interaction.guild.id)].values():
-                items.append(f"**{item['name']}** - `{item['price']}`{text['ECONOMY_CURR_ICON']}")
-
-            data = [f"{item}" for item in items]
-            data = "\n".join(data)
-
-            embed = discord.Embed(
-                title=text['ECONOMY_STORE_EMBED_TITLE'],
-                description=f"{data}", color=YELLOW)
-        else:
-            embed = discord.Embed(
-                description=text['ECONOMY_STORE_NO_ITEMS'],
-                color=RED)
-
-        await respond(interaction, message=embed)
-
-    @orange.command(
-        name=text['ECONOMY_ROLE_NAME'],
-        description=text['ECONOMY_ROLE_DESC'])
-    @app_commands.describe(colour=text['ECONOMY_ROLE_COLOR'])
-    @not_blacklisted()
-    @is_admin()
-    # @is_owner()
-    async def _orange_create_new_role(self, interaction: Interaction, name: str = None, colour: str = None,
-                                      price: str = None) -> None:
-        await self.update_store()
-
-        if not name or not colour or not price or not price.isnumeric():
-            return await respond(interaction, RED, message=text['ERROR_INVALID_PARAMETERS'])
-        if not is_hex_color(colour):
-            return await respond(interaction, RED, message=text['ECONOMY_ROLE_INVALID_COLOR'])
-
-        colour = hex_to_int(colour)
-
         try:
-            await interaction.guild.create_role(name=name, colour=colour)
+            store = await self.bot.db.get(DBTable.STORE,
+                condition=f'guild_id={interaction.guild.id}')
+            
+            if not store:
+                return await respond(interaction, Colour.RED, text['ECONOMY_STORE_NO_ITEMS'])
+            
+            items = []
+            
+            for row in store:
+                items.append(f'**{row[2]}** - `{row[3]}`{text["ECONOMY_CURR_ICON"]}')
+            
+            data = [f'{item}' for item in items]
+            data = '\n'.join(data)
+            
+            await respond(interaction, Colour.YELLOW, f'{data}', text['ECONOMY_STORE_EMBED_TITLE'].format(
+                guild=interaction.guild.name
+            ), hidden=True)
         except Exception as e:
-            return await respond(interaction, RED, text['ECONOMY_ROLE_CREATION_ERROR'], f"{format_exception(e)}")
-
-        roles = interaction.guild.roles
-        roles_f = {}
-        for i in roles:
-            roles_f[i.name] = i.id
-
-        if name in roles_f:
-            new_role = interaction.guild.get_role(int(roles_f[name]))
-        else:
-            return
-        if interaction.guild.id not in self.store:
-            self.store[str(interaction.guild.id)] = {}
-
-        self.store[str(interaction.guild.id)][name] = {
-            "id": new_role.id, "name": new_role.name,
-            "type": "role", "price": int(price)}
-
-        await self.bot.db.update("store", self.store)
-
-        await respond(interaction, GREEN, text['ECONOMY_ROLE_CREATION_FINISHED'],
-                      f"{name} {text['ECONOMY_ROLE_CREATION_FINISHED_DESC']}")
-
+            log_exception(e)
+    
     @orange.command(
         name=text['ECONOMY_BUY_NAME'],
         description=text['ECONOMY_BUY_DESC'])
     @not_blacklisted()
     # @is_admin()
     # @is_owner()
-    async def _orange_buy(self, interaction: Interaction, item: str = None) -> None:
-        await self.update_store()
-        if not item:
-            return await respond(interaction, RED, message=text['ERROR_INVALID_PARAMETERS'])
-        if str(interaction.guild.id) not in self.store.keys():
-            return await respond(interaction, RED, message=text['ECONOMY_STORE_NO_ITEMS'])
-
-        member = interaction.guild.get_member(interaction.user.id) or await interaction.guild.fetch_member(interaction.user.id)
-        for store_item in self.store[str(interaction.guild.id)].values():
-            if store_item["name"].lower() == item.lower() or str(store_item["id"]) == item:
-                if store_item["type"] == "role":
-                    await self.buy_role(interaction, member, store_item)
-                else:
-                    await respond(interaction, RED,
-                                  message=f"{text['ECONOMY_BUY_INVALID_TYPE']} `{store_item['type']}`")
+    async def _orange_buy(self, interaction: Interaction, item: str) -> None:
+        try:
+            item = await self.bot.db.get(DBTable.STORE,
+                condition=f'guild_id={interaction.guild.id} AND name="{item}"')
+            
+            if not item:
+                return await respond(interaction, Colour.RED, text['ECONOMY_BUY_INVALID_ITEM'], hidden=True)
+            
+            member = interaction.guild.get_member(interaction.user.id) or await interaction.guild.fetch_member(interaction.user.id)
+            
+            await self.__buy_item(interaction, member, item[0])
+        except Exception as e:
+            log_exception(e)
+    
+    @orange.command(
+        name=text['ECONOMY_ROLE_NAME'],
+        description=text['ECONOMY_ROLE_DESC'])
+    @app_commands.describe(colour=text['ECONOMY_ROLE_COLOUR'])
+    @not_blacklisted()
+    @is_admin()
+    # @is_owner()
+    async def _orange_create_new_role(self, interaction: Interaction, name: str, colour: str, price: int) -> None:
+        try:
+            if not is_hex(colour):
+                return await respond(interaction, Colour.RED, text['ECONOMY_ROLE_INVALID_COLOUR'], hidden=True)
+            
+            colour = hex_to_int(colour)
+            
+            try:
+                await interaction.guild.create_role(name=name, colour=colour)
+            except Exception as e:
+                e = log_exception(e)
+                return await respond(interaction, Colour.RED, f"{text['ECONOMY_ROLE_CREATION_ERROR']}: {e}", hidden=True)
+            
+            roles = interaction.guild.roles
+            roles_f = {}
+            for i in roles:
+                roles_f[i.name] = i.id
+            
+            if name in roles_f.keys():
+                new_role = interaction.guild.get_role(roles_f[name])
             else:
-                await respond(interaction, RED, message=f"{text['ECONOMY_BUY_INVALID_ITEM']}")
-
-    # Functions to buy specific item types from the store
-    async def buy_role(self, interaction: Interaction, member: discord.Member, item):
-        role = discord.utils.get(interaction.guild.roles, id=int(item["id"]))
-        if not role:
-            return await respond(interaction, RED, message=text['ECONOMY_BUY_NO_ROLE'])
-
-        transaction = await self.remove_currency(interaction, member, int(item["price"]))
-        if not transaction[0]:
+                return await respond(interaction, Colour.RED, text['ECONOMY_ROLE_CREATION_ERROR'])
+            
+            data = {
+                'guild_id': interaction.guild.id,
+                'id': new_role.id,
+                'name': name,
+                'price': price,
+                'type': 0  # Role type
+            }
+            
+            await self.bot.db.put(DBTable.STORE, data)
+            
+            await respond(interaction, Colour.GREEN, text['ECONOMY_ROLE_CREATION_SUCCESS'].format(
+                role=name
+            ), hidden=True)
+        except Exception as e:
+            log_exception(e)
+    
+    async def __buy_item(self, interaction: Interaction, member: discord.Member, item):
+        try:            
+            item_id = item[1]
+            name = item[2]
+            price = item[3]
+            item_type = item[4]
+            
+            # Role type
+            if item_type == 0:
+                role = discord.utils.get(interaction.guild.roles, id=int(item_id))
+                user_roles = interaction.user.roles
+                for user_role in user_roles:
+                    if user_role.id == role.id:
+                        return await respond(interaction, Colour.RED, text['ECONOMY_ALREADY_HAS_ITEM'])
+                if not role:
+                    return await respond(interaction, Colour.RED, text['ECONOMY_BUY_NO_ROLE'], hidden=True)
+            
+            transaction = await self.__remove_currency(interaction, member, price)
+            
+            if not transaction[0]:
+                embed = discord.Embed(
+                    title = text['ECONOMY_ERROR_NOT_ENOUGH'],
+                    description=text['ECONOMY_CURR_BALANCE'].format(wallet=transaction[1]),
+                    colour=Colour.RED
+                )
+                
+                return await respond(interaction, message=embed, hidden=True)
+            
+            await member.add_roles(role)
+            
             embed = discord.Embed(
-                title=text['ECONOMY_ERROR_NOT_ENOUGH'],
-                description=f"{text['ECONOMY_CURR_BALANCE'][0]} {transaction[1]['wallet']}{text['ECONOMY_CURR_BALANCE'][1]}",
-                color=RED)
-            return await respond(interaction, message=embed)
+                title=text['ECONOMY_BUY_SUCCESS'],
+                description=text['ECONOMY_BUY_SUCCESS_EMBED'].format(
+                    role=name,
+                    price=price,
+                    balance=transaction[1]
+                ),
+                colour=Colour.GREEN
+            )
+            embed.set_footer(text=text['ECONOMY_BANK'])
+            
+            await respond(interaction, message=embed, hidden=True)
+        except Exception as e:
+            log_exception(e)
+    
+    async def __move_currency(self, interaction: Interaction, sender: discord.Member, receiver: discord.Member, value: int) -> discord.Embed:
+        try:
+            sender_data = await self.bot.db.get(DBTable.CURRENCY,
+                condition=f"guild_id={interaction.guild.id} AND user_id={sender.id}")
+            receiver_data = await self.bot.db.get(DBTable.CURRENCY,
+                condition=f"guild_id={interaction.guild.id} AND user_id={receiver.id}")
+            
+            sender_wallet = sender_data[0][2]
+            receiver_wallet = receiver_data[0][2]
+            
+            if sender_wallet < value:
+                embed = discord.Embed(
+                    title=text['ECONOMY_ERROR_NOT_ENOUGH'],
+                    description=text['ECONOMY_CURR_BALANCE'].format(wallet=sender_wallet),
+                    colour=Colour.RED
+                )
+            else:
+                sender_wallet -= int(value)
+                receiver_wallet += int(value)
 
-        await member.add_roles(role)
+                await self.bot.db.update(
+                    DBTable.CURRENCY, {"wallet": sender_wallet},
+                    condition=f"guild_id={interaction.guild.id} AND user_id={sender.id}")
+                await self.bot.db.update(
+                    DBTable.CURRENCY, {"wallet": receiver_wallet},
+                    condition=f"guild_id={interaction.guild.id} AND user_id={receiver.id}")
+                
+                embed = discord.Embed(
+                    title=text['ECONOMY_TRANSFER_SUCCESS'],
+                    description=text['ECONOMY_TRANSFER_EMBED'].format(
+                        value=f'{value}{text["ECONOMY_CURR_ICON"]}',
+                        receiver=receiver.name,
+                        wallet=f'{sender_wallet}{text["ECONOMY_CURR_ICON"]}'
+                    ),
+                    colour=Colour.GREEN
+                )
+                
+            embed.set_footer(text=text['ECONOMY_BANK'])
+            
+            return embed
+        except Exception as e:
+            log_exception(e)
+    
+    async def __remove_currency(self, interaction: Interaction, member: discord.Member, value: int) -> list:
+        try:
+            member_data = await self.bot.db.get(DBTable.CURRENCY,
+                condition=f'guild_id={interaction.guild.id} AND user_id={member.id}')
 
-        embed = discord.Embed(
-            title=text['ECONOMY_BUY_SUCCESS'],
-            description=f"{interaction.user.mention} {text['ECONOMY_BUY_SUCCESS_EMBED'][0]} {item['name']} {text['ECONOMY_BUY_SUCCESS_EMBED'][1]} {item['price']}{text['ECONOMY_CURR_ICON']}",
-            color=GREEN)
-        embed.set_footer(text=f"{text['ECONOMY_BANK']}")
+            member_wallet = member_data[0][2]
 
-        await respond(interaction, message=embed)
+            if member_wallet < int(value):
+                return [False, member_wallet]
 
-    # Removes currency from a user
-    async def remove_currency(self, interaction: Interaction, member: discord.Member, value) -> list:
-        await self.update_store()
+            member_wallet -= int(value)
 
-        economy = await self.bot.db.get("currency")
-        customer = economy[str(interaction.guild.id)][str(member.id)]
+            await self.bot.db.update(
+                DBTable.CURRENCY, {'wallet': member_wallet},
+                condition=f'guild_id={interaction.guild.id} AND user_id={member.id}')
 
-        if customer["wallet"] < int(value):
-            return [False, customer]
-
-        economy[str(interaction.guild.id)][str(member.id)]["wallet"] -= value
-
-        await self.bot.db.update("currency", economy)
-
-        return [True, customer]
-
-    # Exchanges currency between users
-    async def move_currency(self, interaction: Interaction, sender: discord.Member, receiver: discord.Member,
-                            value) -> discord.Embed:
-        await self.update_store()
-
-        economy = await self.bot.db.get("currency")
-        sender_data = economy[str(interaction.guild.id)][str(sender.id)]
-
-        if sender_data["wallet"] < int(value):
-            embed = discord.Embed(
-                title=text['ECONOMY_ERROR_NOT_ENOUGH'],
-                description=f"{text['ECONOMY_CURR_BALANCE'][0]} {sender_data['wallet']}{text['ECONOMY_CURR_BALANCE'][1]}",
-                color=RED)
-        else:
-            economy[str(interaction.guild.id)][str(sender.id)]["wallet"] -= int(value)
-            economy[str(interaction.guild.id)][str(receiver.id)]["wallet"] += int(value)
-
-            embed = discord.Embed(
-                title=text['ECONOMY_TRANSFER_SUCCESS'],
-                description=f"{sender.mention} {text['ECONOMY_TRANSFER_EMBED'][0]} {value}{text['ECONOMY_TRANSFER_EMBED'][1]} {receiver.mention}.",
-                color=GREEN)
-
-        embed.set_footer(text=text['ECONOMY_BANK'])
-
-        await self.bot.db.update("currency", economy)
-
-        return embed
+            return [True, member_wallet]
+        except Exception as e:
+            log_exception(e)
 
 # SETUP
 async def setup(bot: RinBot):

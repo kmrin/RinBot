@@ -25,9 +25,6 @@
  `/warnings show` Shows a user's warnings
  `/warnings add` Adds a warning to a user
  `/warnings remove` Removes a warning from a user by it's warn ID
- `/ban` Bans a member from the guild
- `/kick` Kicks a member from the guild
- `/nick` Changes the nickname of a guild member
 
 ### Owner
  `/shutdown`  Shuts the bot down.
@@ -36,6 +33,7 @@
  `/extension load` Loads a bot extension
  `/extension unload` Unloads a bot extension
  `/extension reload` Reloads a bot extension
+ `/reload-event-handler` Reloads the event handler cog
 
 ### Fun
  `/cat` Shows a random picture or gif of a cat
@@ -61,13 +59,14 @@
  `/nightcore` Toggles a nightcore effect on and off
  `/recommended` Toggles the autoplay of recommended tracks on and off
  `/shuffle` Shuffles the current queue
+ `/volume` Changes the player's volume from 0 to 100
  `/show_controls` Shows the multimedia controls view
 
 ### Economy
  `/orange rank`  Shows the top 10 members with the most oranges
  `/orange transfer`  Transfer oranges between users
  `/orange store`  Shows the items on the store
- `/orange new_role`  Adds a role item to be bought from the store
+ `/orange create-role`  Adds a role item to be bought from the store
  `/orange buy`  Buys an item from the store (by name)
 
 ### Fortnite

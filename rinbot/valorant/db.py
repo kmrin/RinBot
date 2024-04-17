@@ -5,11 +5,11 @@ from .auth import Auth
 from .cache import fetch_price
 from .useful import JSON
 from rinbot.base.logger import logger
-from rinbot.base.helpers import load_lang
+from rinbot.base.helpers import log_exception, get_lang
 
-text = load_lang()
+text = get_lang()
 
-def timestamp_utc() -> datetime:
+def timestamp_utc() -> float:
     return datetime.timestamp(datetime.utcnow())
 
 class DATABASE:
@@ -69,7 +69,7 @@ class DATABASE:
             db[str(user_id)] = data
             self.insert_user(db)
         except Exception as e:
-            logger.error(f"{text['VAL_DB_LOGIN_ERROR']} {e}")
+            log_exception(e)
         else:
             return {'auth': True, 'player': player_name}
     
@@ -81,7 +81,7 @@ class DATABASE:
         except KeyError:
             logger.error(f"{text['VAL_DB_LOGOUT_ERROR_KEY']}")
         except Exception as e:
-            logger.error(f"{text['VAL_DB_LOGOUT_ERROR']} {e}")
+            log_exception(e)
         else:
             return True
     
