@@ -53,6 +53,7 @@ async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) ->
             return batches
 
         async def send_batches_channel(channel: discord.TextChannel):
+            me = channel.guild.get_member(client.user.id) or await channel.guild.fetch_member(client.user.id)
             
             if not me.guild_permissions.send_messages:
                 logger.error(text['FN_DS_BATCH_NO_SEND_MESSAGES_PERM'].format(
