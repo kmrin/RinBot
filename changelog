@@ -5,3 +5,7 @@
     * Added TTS functionality
     * Bot now checks for connected voice states and properly disconnects from them before closing
     * Added permission checks to the fortnite daily shop
+
+> v5.1.1 'Aurora-1.1.1':
+	* Fixed 'TypeError' on the fortnite daily shop
+    * Fixed incorrect interpretation of data on the music player

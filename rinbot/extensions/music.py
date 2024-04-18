@@ -107,6 +107,11 @@ class Music(Cog, name="music"):
                 await player.home.send(embed=embed)
                 await player.disconnect()
                 
+                guild = player.home.guild.id
+            
+                if guild in self.bot.music_clients.keys():
+                    del self.bot.music_clients[guild]
+                
                 player.cleanup()
             elif len(player.queue) == 0 and payload.track.source == 'soundcloud' and player.autoplay.name == 'enabled':
                 embed = discord.Embed(
@@ -115,6 +120,11 @@ class Music(Cog, name="music"):
                 await asyncio.sleep(2)
                 await player.home.send(embed=embed)
                 await player.disconnect()
+                
+                guild = player.home.guild.id
+            
+                if guild in self.bot.music_clients.keys():
+                    del self.bot.music_clients[guild]
                 
                 player.cleanup()
         except Exception as e:
@@ -135,9 +145,6 @@ class Music(Cog, name="music"):
         try:
             if interaction.guild.id in self.bot.tts_clients.keys():
                 return await respond(interaction, Colour.RED, text['MUSIC_PLAY_TTS_ACTIVE'])
-            
-            if interaction.guild.id in self.bot.music_clients.keys():
-                return await respond(interaction, Colour.RED, text['MUSIC_PLAY_PLAYER_ACTIVE'])
             
             playables = []
             through_view = False

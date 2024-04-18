@@ -114,7 +114,7 @@ class FortniteAPI:
         except Exception as e:
             log_exception(e)
 
-    async def __shop_format(self, data) -> dict:
+    async def __shop_format(self, data) -> dict:        
         try:
             data = data["data"]
             shop = {"date": None, "count": 0, "entries": []}
@@ -238,7 +238,8 @@ class FortniteAPI:
                     if response.status != 200:
                         return None
 
-                    shop = self.__shop_format(await response.json())
+                    shop = await response.json()
+                    shop = await self.__shop_format(shop)
 
                 try:
                     await self.__shop_generate_images(shop["entries"])
