@@ -20,7 +20,7 @@ from rinbot.base.logger import logger
 text = get_lang()
 
 class FortniteAPI:
-    __types__ = ['outfit', 'pickaxe', 'backpack']
+    # __types__ = ['outfit', 'pickaxe', 'backpack']
     
     def __init__(self, language: str='en', api_key: str=None):
         self.language = language
@@ -106,6 +106,7 @@ class FortniteAPI:
             composites = []
 
             for i in items:
+                print(i)
                 downloads.append(self.__shop_get_image(i["image"], i["name"]))
                 composites.append(self.__shop_composite_image(i["name"], i["price"]))
 
@@ -116,33 +117,45 @@ class FortniteAPI:
 
     async def __shop_format(self, data) -> dict:        
         try:
-            data = data["data"]
-            shop = {"date": None, "count": 0, "entries": []}
-
-            date: datetime = datetime.strptime(data["date"], "%Y-%m-%dT%H:%M:%SZ")
-            shop["date"] = date.strftime("%d/%m/%y")
-
-            for entry in data["featured"]["entries"]:
-                # Skip unwanted items
-                if entry["bundle"]:
-                    continue
-                if entry["items"][0]["type"]["value"] not in self.__types__:
-                    continue
-
+            data = data['data']
+            shop = {
+                'date': None,
+                'count': len(data['featured']['entries']),
+                'entries': []
+            }
+            
+            date: datetime = datetime.strptime(data['date'], '%Y-%m-%dT%H:%M:%SZ')
+            shop['date'] = date.strftime('%d/%m/%y')
+            
+            for entry in data['featured']['entries']:
                 item = {}
-
+                
                 try:
-                    item = {
-                        "name": entry["items"][0]["name"],
-                        "price": entry["finalPrice"],
-                        "rarity": entry["items"][0]["rarity"]["value"],
-                        "image": entry["newDisplayAsset"]["materialInstances"][0]["images"]["Background"]}
-                except KeyError:
-                    item["image"] = entry["newDisplayAsset"]["materialInstances"][0]["images"]["OfferImage"]
-
-                shop["entries"].append(item)
-
-            shop["count"] = len(shop["entries"])
+                    if entry['bundle']:
+                        item['name'] = entry['bundle']['name']
+                        item['price'] = entry['finalPrice']
+                        item['rarity'] = None
+                        
+                        try:
+                            item['image'] = entry['newDisplayAsset']['materialInstances'][0]['images']['Background']
+                        except KeyError:
+                            item['image'] = entry['newDisplayAsset']['materialInstances'][0]['images']['OfferImage']
+                    elif entry['newDisplayAsset']:
+                        try:
+                            item['name'] = entry['items'][0]['name']
+                            item['price'] = entry['finalPrice']
+                            item['rarity'] = entry['items'][0]['rarity']['value']
+                            item['image'] = entry['newDisplayAsset']['materialInstances'][0]['images']['Background']
+                        except (TypeError, KeyError):
+                            try:
+                                item['image'] = entry['newDisplayAsset']['materialInstances'][0]['images']['OfferImage']
+                            except (TypeError, KeyError):
+                                continue
+                except (TypeError, KeyError):
+                    continue
+                
+                if item:
+                    shop['entries'].append(item)
 
             return shop
         except Exception as e:
@@ -240,7 +253,6 @@ class FortniteAPI:
 
                     shop = await response.json()
                     shop = await self.__shop_format(shop)
-
                 try:
                     await self.__shop_generate_images(shop["entries"])
                 except Exception as e:
