@@ -182,6 +182,35 @@ class DBManager:
         finally:
             await conn.close()
     
+    async def getone(self, table: DBTable, column: DBColumns, condition: str):
+        """
+        Retrieves individual data from the database with a given column.
+        
+        Args:
+            table (DBTable): The database table
+            column (DBColumns): The table column
+            condition (str): SQL query condition
+        
+        Returns:
+            The data requested from table
+        """
+
+        conn = await self.__connect()
+
+        try:
+            cursor: Cursor = await conn.cursor()
+
+            await cursor.execute(
+                f"SELECT {column.value} FROM {table.value} WHERE {condition}"
+            )
+
+            row = await cursor.fetchone()
+            return row[0]
+        except Exception as e:
+            log_exception(e)
+        finally:
+            await conn.close()
+    
     async def put(self, table: DBTable, data: Dict[str, Union[str, int]]) -> bool:
         """
         Puts data into the database
