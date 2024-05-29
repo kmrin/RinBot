@@ -38,6 +38,84 @@ class DBTable(Enum):
     WARNS = 'warns'
     WELCOME_CHANNELS = 'welcome_channels'
 
+class DBColumns(Enum):
+    class admins():
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+    
+    class blacklist():
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+
+    class bot():
+        TOKEN = "token"
+    
+    class currency():
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+        WALLET = "wallet"
+        MESSAGES = "messages"
+
+    class daily_shop_channels():
+        GUILD_ID = "guild_id"
+        FORTNITE_ACTIVE = "fortnite_active"
+        FORTNITE_CHANNEL_ID = "fortnite_channel_id"
+        VALORANT_ACTIVE = "valorant_active"
+        VALORANT_CHANNEL_ID = "valorant_channel_id"
+    
+    class guilds():
+        GUILD_ID = "guild_id"
+    
+    class history_guilds():
+        GUILD_ID = "guild_id"
+        TITLE = "title"
+        URL = "url"
+    
+    class history_individual():
+        USER_ID = "user_id"
+        TITLE = "title"
+        URL = "url"
+    
+    class owners():
+        USER_ID = "user_id"
+    
+    class sqlite_sequence():
+        NAME = "name"
+        SEQ = "seq"
+    
+    class store():
+        GUILD_ID = "guild_id"
+        ID = "id"
+        NAME = "name"
+        PRICE = "price"
+        TYPE = "type"
+    
+    class tts():
+        GUILD_ID = "guild_id"
+        ACTIVE = "active"
+        CHANNEL_ID = "channel_id"
+        SAY_USER = "say_user"
+        LANGUAGE = "language"
+
+    class valorant():
+        USER_ID = "user_id"
+        ACTIVE = "active"
+        TYPE = "type"
+        TARGET_GUILD = "target_guild"
+
+    class warns():
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+        MODERATOR_ID = "moderator_id"
+        WARN = "warn"
+        ID = "id"
+    
+    class welcome_channels():
+        GUILD_ID = "guild_id"
+        ACTIVE = "active"
+        CHANNEL_ID = "channel_id"
+        CUSTOM_MSG = "custom_msg"
+
 class DBManager:
     """
     Database Manager
