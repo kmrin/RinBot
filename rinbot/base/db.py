@@ -38,79 +38,79 @@ class DBTable(Enum):
     WARNS = 'warns'
     WELCOME_CHANNELS = 'welcome_channels'
 
-class DBColumns(Enum):
-    class admins():
+class DBColumns():
+    class admins(Enum):
         GUILD_ID = "guild_id"
         USER_ID = "user_id"
     
-    class blacklist():
+    class blacklist(Enum):
         GUILD_ID = "guild_id"
         USER_ID = "user_id"
 
-    class bot():
+    class bot(Enum):
         TOKEN = "token"
     
-    class currency():
+    class currency(Enum):
         GUILD_ID = "guild_id"
         USER_ID = "user_id"
         WALLET = "wallet"
         MESSAGES = "messages"
 
-    class daily_shop_channels():
+    class daily_shop_channels(Enum):
         GUILD_ID = "guild_id"
         FORTNITE_ACTIVE = "fortnite_active"
         FORTNITE_CHANNEL_ID = "fortnite_channel_id"
         VALORANT_ACTIVE = "valorant_active"
         VALORANT_CHANNEL_ID = "valorant_channel_id"
     
-    class guilds():
+    class guilds(Enum):
         GUILD_ID = "guild_id"
     
-    class history_guilds():
+    class history_guilds(Enum):
         GUILD_ID = "guild_id"
         TITLE = "title"
         URL = "url"
     
-    class history_individual():
+    class history_individual(Enum):
         USER_ID = "user_id"
         TITLE = "title"
         URL = "url"
     
-    class owners():
+    class owners(Enum):
         USER_ID = "user_id"
     
-    class sqlite_sequence():
+    class sqlite_sequence(Enum):
         NAME = "name"
         SEQ = "seq"
     
-    class store():
+    class store(Enum):
         GUILD_ID = "guild_id"
         ID = "id"
         NAME = "name"
         PRICE = "price"
         TYPE = "type"
     
-    class tts():
+    class tts(Enum):
         GUILD_ID = "guild_id"
         ACTIVE = "active"
         CHANNEL_ID = "channel_id"
         SAY_USER = "say_user"
         LANGUAGE = "language"
 
-    class valorant():
+    class valorant(Enum):
         USER_ID = "user_id"
         ACTIVE = "active"
         TYPE = "type"
         TARGET_GUILD = "target_guild"
 
-    class warns():
+    class warns(Enum):
         GUILD_ID = "guild_id"
         USER_ID = "user_id"
         MODERATOR_ID = "moderator_id"
         WARN = "warn"
         ID = "id"
     
-    class welcome_channels():
+    class welcome_channels(Enum):
         GUILD_ID = "guild_id"
         ACTIVE = "active"
         CHANNEL_ID = "channel_id"
