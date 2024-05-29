@@ -26,10 +26,17 @@ from rinbot.base import RinBot
 from rinbot.base import Colour
 from rinbot.base import conf
 from rinbot.base import text as tx
+from rinbot.base import DBTable
+from rinbot.base import DBColumns
 
 # from rinbot.base import is_admin
 # from rinbot.base import is_owner
 from rinbot.base import not_blacklisted
+
+# profile packages
+from PIL import Image, ImageDraw, ImageFont
+import requests
+from io import BytesIO
 
 class General(Cog, name='general'):
     def __init__(self, bot: RinBot) -> None:
@@ -174,6 +181,73 @@ class General(Cog, name='general'):
         await respond(interaction, Colour.YELLOW, tx['GENERAL_PING_EMBED'].format(
             latency=round(self.bot.latency * 1000)
         ), " 🏓  Pong!")
+
+    @app_commands.command(
+        name=tx['GENERAL_PROFILE_NAME'],
+        description=tx['GENERAL_PROFILE_DESC'])
+    # @is_owner()
+    # @is_admin()
+    @not_blacklisted()
+    @app_commands.choices(visibility=[
+        app_commands.Choice(name="Public", value="Public"),
+    ])
+
+    async def choose(self, interaction: discord.Interaction, visibility: app_commands.Choice[str] = "Private") -> None:
+        ephemeral = True if visibility == "Private" else False
+
+        avatar_url = interaction.user.avatar.url or interaction.user.default_avatar.url
+
+        response = requests.get(avatar_url)
+        response.raise_for_status()
+
+        # Initial images to layer on top of
+        image = Image.open("rinbot/assets/images/profile/background.jpg").convert("RGBA")
+        overlay = Image.open("rinbot/assets/images/profile/layer_1.png").convert("RGBA")
+
+        image.paste(overlay, (0, 0), overlay)
+
+        # Avatar image handling
+        avatar = Image.open(BytesIO(response.content)).convert("RGBA").resize((125, 125), Image.Resampling.LANCZOS)
+
+        width, height = avatar.size
+        x = (width - height) // 2
+        cropped_img = avatar.crop((x, 0, x + height, height))
+        mask = Image.new("L", cropped_img.size)
+        mask_draw = ImageDraw.Draw(mask)
+        width, height = cropped_img.size
+        mask_draw.ellipse((0, 0, width, height), fill = 255)
+
+        cropped_img.putalpha(mask)
+
+        image.paste(cropped_img, (131, 36), cropped_img)
+
+        # Adding text to the image.
+        picture = ImageDraw.Draw(image)
+
+        fonts_dir = "rinbot/assets/fonts"
+
+        regular = ImageFont.truetype(f"{fonts_dir}/gg-sans-regular.ttf", 15)
+        medium = ImageFont.truetype(f"{fonts_dir}/gg-sans-medium.ttf", 10)
+        bold = ImageFont.truetype(f"{fonts_dir}/gg-sans-bold.ttf", 20)
+        semi_bold = ImageFont.truetype(f"{fonts_dir}/gg-sans-semibold.ttf", 10)
+
+        currency = await self.bot.db.getone(
+            DBTable.CURRENCY, 
+            DBColumns.currency.WALLET, 
+            condition=f"""{DBColumns.currency.USER_ID} = {interaction.user.id} 
+            AND {DBColumns.currency.GUILD_ID} = {interaction.guild.id}"""
+            )
+
+        picture.text((266, 25), interaction.user.display_name.upper(), fill = (255, 255, 255), anchor = "lm", font = bold)
+        picture.text((287, 54), str(currency), fill = (255, 255, 255), anchor = "lm", font = regular)
+        picture.text((590, 30), str(interaction.user.id), fill = (255, 255, 255), anchor = "rm", font = semi_bold)
+        picture.text((590, 45), interaction.guild.name.upper(), fill = (255, 255, 255), anchor = "rm", font = semi_bold)
+
+        buffer = BytesIO()
+        image.save(buffer, format = "PNG")
+        buffer.seek(0)
+
+        await interaction.response.send_message(file=discord.File(buffer, filename = "image.png"), ephemeral = ephemeral)
 
 # SETUP
 async def setup(bot: RinBot):
