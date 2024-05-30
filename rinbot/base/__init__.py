@@ -5,7 +5,7 @@ RinBot 5 'Aurora' code base
 from .client import RinBot
 from .colours import Colour
 from .command_checks import is_admin, is_owner, not_blacklisted
-from .db import DBTable, DBManager
+from .db import DBTable, DBColumns, DBManager
 from .errors import Exceptions as E
 from .events import EventHandler
 from .exception_handler import log_exception

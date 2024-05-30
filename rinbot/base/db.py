@@ -38,6 +38,84 @@ class DBTable(Enum):
     WARNS = 'warns'
     WELCOME_CHANNELS = 'welcome_channels'
 
+class DBColumns():
+    class admins(Enum):
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+    
+    class blacklist(Enum):
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+
+    class bot(Enum):
+        TOKEN = "token"
+    
+    class currency(Enum):
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+        WALLET = "wallet"
+        MESSAGES = "messages"
+
+    class daily_shop_channels(Enum):
+        GUILD_ID = "guild_id"
+        FORTNITE_ACTIVE = "fortnite_active"
+        FORTNITE_CHANNEL_ID = "fortnite_channel_id"
+        VALORANT_ACTIVE = "valorant_active"
+        VALORANT_CHANNEL_ID = "valorant_channel_id"
+    
+    class guilds(Enum):
+        GUILD_ID = "guild_id"
+    
+    class history_guilds(Enum):
+        GUILD_ID = "guild_id"
+        TITLE = "title"
+        URL = "url"
+    
+    class history_individual(Enum):
+        USER_ID = "user_id"
+        TITLE = "title"
+        URL = "url"
+    
+    class owners(Enum):
+        USER_ID = "user_id"
+    
+    class sqlite_sequence(Enum):
+        NAME = "name"
+        SEQ = "seq"
+    
+    class store(Enum):
+        GUILD_ID = "guild_id"
+        ID = "id"
+        NAME = "name"
+        PRICE = "price"
+        TYPE = "type"
+    
+    class tts(Enum):
+        GUILD_ID = "guild_id"
+        ACTIVE = "active"
+        CHANNEL_ID = "channel_id"
+        SAY_USER = "say_user"
+        LANGUAGE = "language"
+
+    class valorant(Enum):
+        USER_ID = "user_id"
+        ACTIVE = "active"
+        TYPE = "type"
+        TARGET_GUILD = "target_guild"
+
+    class warns(Enum):
+        GUILD_ID = "guild_id"
+        USER_ID = "user_id"
+        MODERATOR_ID = "moderator_id"
+        WARN = "warn"
+        ID = "id"
+    
+    class welcome_channels(Enum):
+        GUILD_ID = "guild_id"
+        ACTIVE = "active"
+        CHANNEL_ID = "channel_id"
+        CUSTOM_MSG = "custom_msg"
+
 class DBManager:
     """
     Database Manager
@@ -99,6 +177,35 @@ class DBManager:
 
             rows = await cursor.fetchall()
             return rows
+        except Exception as e:
+            log_exception(e)
+        finally:
+            await conn.close()
+    
+    async def getone(self, table: DBTable, column: DBColumns, condition: str):
+        """
+        Retrieves individual data from the database with a given column.
+        
+        Args:
+            table (DBTable): The database table
+            column (DBColumns): The table column
+            condition (str): SQL query condition
+        
+        Returns:
+            The data requested from table
+        """
+
+        conn = await self.__connect()
+
+        try:
+            cursor: Cursor = await conn.cursor()
+
+            await cursor.execute(
+                f"SELECT {column.value} FROM {table.value} WHERE {condition}"
+            )
+
+            row = await cursor.fetchone()
+            return row[0]
         except Exception as e:
             log_exception(e)
         finally:

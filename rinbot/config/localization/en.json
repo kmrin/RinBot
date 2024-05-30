@@ -219,6 +219,8 @@
     "GENERAL_PING_NAME": "ping",
     "GENERAL_PING_DESC": "Pong! Checks if I'm alive",
     "GENERAL_PING_EMBED": "Latency: {latency}ms",
+    "GENERAL_PROFILE_NAME": "profile",
+    "GENERAL_PROFILE_DESC": "A neat lil' command to display a user's profile",
 
     "OWNER_EXTENSION_NAME": "extension",
     "OWNER_EXTENSION_DESC": "Extension manipulation commands",
