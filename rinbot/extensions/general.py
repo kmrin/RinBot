@@ -227,7 +227,7 @@ class General(Cog, name='general'):
         fonts_dir = "rinbot/assets/fonts"
 
         regular = ImageFont.truetype(f"{fonts_dir}/gg-sans-regular.ttf", 15)
-        medium = ImageFont.truetype(f"{fonts_dir}/gg-sans-medium.ttf", 10)
+        #medium = ImageFont.truetype(f"{fonts_dir}/gg-sans-medium.ttf", 10)
         bold = ImageFont.truetype(f"{fonts_dir}/gg-sans-bold.ttf", 20)
         semi_bold = ImageFont.truetype(f"{fonts_dir}/gg-sans-semibold.ttf", 10)
 
