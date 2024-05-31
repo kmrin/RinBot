@@ -16,6 +16,7 @@ from discord.ext.commands import Cog
 
 from rinbot.base import log_exception, is_hex, hex_to_int
 from rinbot.base import DBTable
+from rinbot.base import DBColumns
 from rinbot.base import respond
 from rinbot.base import RinBot
 from rinbot.base import Colour
