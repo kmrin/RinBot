@@ -26,6 +26,11 @@ from rinbot.base import text
 from rinbot.base import is_admin
 from rinbot.base import not_blacklisted
 
+# Store packages
+from PIL import Image
+from io import BytesIO
+import aiohttp
+
 class Economy(Cog, name='economy'):
     def __init__(self, bot: RinBot) -> None:
         self.bot = bot
