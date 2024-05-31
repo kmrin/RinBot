@@ -37,6 +37,7 @@ from rinbot.base import not_blacklisted
 from PIL import Image, ImageDraw, ImageFont
 import requests
 from io import BytesIO
+import unicodedata
 
 class General(Cog, name='general'):
     def __init__(self, bot: RinBot) -> None:
@@ -191,8 +192,7 @@ class General(Cog, name='general'):
     @app_commands.choices(visibility=[
         app_commands.Choice(name="Public", value="Public"),
     ])
-
-    async def choose(self, interaction: discord.Interaction, visibility: app_commands.Choice[str] = "Private") -> None:
+    async def _profile(self, interaction: discord.Interaction, visibility: app_commands.Choice[str] = "Private") -> None:
         ephemeral = True if visibility == "Private" else False
 
         avatar_url = interaction.user.avatar.url or interaction.user.default_avatar.url
@@ -220,6 +220,22 @@ class General(Cog, name='general'):
         cropped_img.putalpha(mask)
 
         image.paste(cropped_img, (131, 36), cropped_img)
+
+        # Adding currency emoji to image
+        currency_emoji = await self.bot.db.getone(
+            DBTable.GUILDS,
+            DBColumns.guilds.CURRENCY_EMOJI, 
+            condition=f"{DBColumns.guilds.GUILD_ID} = {interaction.guild.id}"
+            )
+
+        emoji_name = unicodedata.name(currency_emoji).lower().replace(" ", "_")
+
+        response = requests.get(f"https://emojiapi.dev/api/v1/{emoji_name}/32.png")
+        response.raise_for_status()
+
+        emoji = Image.open(BytesIO(response.content)).convert("RGBA")
+
+        image.paste(emoji, (260, 40), emoji)
 
         # Adding text to the image.
         picture = ImageDraw.Draw(image)
