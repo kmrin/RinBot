@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS "blacklist" (
 	"user_id"	INTEGER
 );
 CREATE TABLE IF NOT EXISTS "guilds" (
-	"guild_id"	INTEGER
+	"guild_id"	INTEGER,
+	"currency_emoji" TEXT
 );
 CREATE TABLE IF NOT EXISTS "currency" (
 	"guild_id"	INTEGER,

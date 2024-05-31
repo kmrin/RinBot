@@ -65,6 +65,7 @@ class DBColumns():
     
     class guilds(Enum):
         GUILD_ID = "guild_id"
+        CURRENCY_EMOJI = "currency_emoji"
     
     class history_guilds(Enum):
         GUILD_ID = "guild_id"
@@ -409,7 +410,7 @@ class DBManager:
             extra = db_joined - bot_joined
 
             for guild in missing:
-                await self.put(DBTable.GUILDS, {'guild_id': guild})
+                await self.put(DBTable.GUILDS, {'guild_id': guild, 'currency_emoji': ':tangerine:'})
             for guild in extra:
                 await self.delete(DBTable.GUILDS, condition=f'guild_id={guild}')
 
