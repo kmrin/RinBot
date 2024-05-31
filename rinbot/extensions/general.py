@@ -191,8 +191,7 @@ class General(Cog, name='general'):
     @app_commands.choices(visibility=[
         app_commands.Choice(name="Public", value="Public"),
     ])
-
-    async def choose(self, interaction: discord.Interaction, visibility: app_commands.Choice[str] = "Private") -> None:
+    async def _profile(self, interaction: discord.Interaction, visibility: app_commands.Choice[str] = "Private") -> None:
         ephemeral = True if visibility == "Private" else False
 
         avatar_url = interaction.user.avatar.url or interaction.user.default_avatar.url
