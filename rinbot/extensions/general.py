@@ -35,9 +35,9 @@ from rinbot.base import not_blacklisted
 
 # profile packages
 from PIL import Image, ImageDraw, ImageFont
-import requests
 from io import BytesIO
 import unicodedata
+import aiohttp
 
 class General(Cog, name='general'):
     def __init__(self, bot: RinBot) -> None:
@@ -197,8 +197,10 @@ class General(Cog, name='general'):
 
         avatar_url = interaction.user.avatar.url or interaction.user.default_avatar.url
 
-        response = requests.get(avatar_url)
-        response.raise_for_status()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(avatar_url) as response:
+                if response.status == 200:
+                    response = await response.read()
 
         # Initial images to layer on top of
         image = Image.open("rinbot/assets/images/profile/background.jpg").convert("RGBA")
@@ -207,7 +209,7 @@ class General(Cog, name='general'):
         image.paste(overlay, (0, 0), overlay)
 
         # Avatar image handling
-        avatar = Image.open(BytesIO(response.content)).convert("RGBA").resize((125, 125), Image.Resampling.LANCZOS)
+        avatar = Image.open(BytesIO(response)).convert("RGBA").resize((125, 125), Image.Resampling.LANCZOS)
 
         width, height = avatar.size
         x = (width - height) // 2
@@ -230,10 +232,12 @@ class General(Cog, name='general'):
 
         emoji_name = unicodedata.name(currency_emoji).lower().replace(" ", "_")
 
-        response = requests.get(f"https://emojiapi.dev/api/v1/{emoji_name}/32.png")
-        response.raise_for_status()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://emojiapi.dev/api/v1/{emoji_name}/32.png") as response:
+                if response.status == 200:
+                    response = await response.read()
 
-        emoji = Image.open(BytesIO(response.content)).convert("RGBA")
+        emoji = Image.open(BytesIO(response)).convert("RGBA")
 
         image.paste(emoji, (260, 40), emoji)
 

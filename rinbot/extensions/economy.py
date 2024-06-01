@@ -16,6 +16,7 @@ from discord.ext.commands import Cog
 
 from rinbot.base import log_exception, is_hex, hex_to_int
 from rinbot.base import DBTable
+from rinbot.base import DBColumns
 from rinbot.base import respond
 from rinbot.base import RinBot
 from rinbot.base import Colour
@@ -24,6 +25,11 @@ from rinbot.base import text
 # from rinbot.base import is_owner
 from rinbot.base import is_admin
 from rinbot.base import not_blacklisted
+
+# Store packages
+from PIL import Image
+from io import BytesIO
+import aiohttp
 
 class Economy(Cog, name='economy'):
     def __init__(self, bot: RinBot) -> None:
@@ -283,6 +289,103 @@ class Economy(Cog, name='economy'):
             return [True, member_wallet]
         except Exception as e:
             log_exception(e)
+
+    @orange.command(
+        name = text["ECONOMY_ADD_ITEM_NAME"],
+        description = text["ECONOMY_ADD_ITEM_DESC"])
+    @app_commands.choices(type = [
+        app_commands.Choice(name = text["ECONOMY_ADD_ITEM_CHOICE"], value = 0),
+    ])
+    @not_blacklisted()
+    @is_admin()
+    # @is_owner()
+    async def _add_item(self, interaction: Interaction, type: app_commands.Choice[int], name: str, price: int, link: str) -> None:
+        await interaction.response.defer(thinking = True)
+
+        async def fail_embed(desc):
+            embed = discord.Embed(
+                description = f"❌ {desc}", 
+                color = Colour.RED
+                )
+
+            await interaction.followup.send(embed = embed, ephemeral = True)
+
+        async def fetch_content(url):
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        return await response.read()
+                    else:
+                        return False
+
+        async def is_image_bytes(content):
+            try:
+                with Image.open(BytesIO(content)) as img:
+                    img.verify()  # Verify that it is an image
+                return True
+            except (IOError, SyntaxError) as e:
+                return False
+            
+        content = await fetch_content(link)
+
+        # Checks if there's a response
+        if content is False:
+            await fail_embed(f"The link you sent isn't valid!\n\nYou sent:\n{link}")
+            return
+        # Checks if the response contains an image
+        elif await is_image_bytes(content) is False:
+            await fail_embed(f"You didn't send a direct image!\n\nYou sent:\n{link}")
+            return
+        
+        # Opens the badge image in Pillow
+        badge = Image.open(BytesIO(content)).convert("RGBA")
+
+        # Checks if the image is a square
+        if badge.width != badge.height:
+            await fail_embed(f"{text['ECONOMY_ADD_ITEM_ERROR_SQUARE'][0]} {badge.width}{text['ECONOMY_ADD_ITEM_ERROR_SQUARE'][1]} {badge.height}{text['ECONOMY_ADD_ITEM_ERROR_SQUARE'][2]}")
+            return
+        
+        # Resizes the image to a 64x64
+        badge = badge.resize((64, 64), resample = Image.Resampling.LANCZOS)
+
+        # Getting image blob object
+        with BytesIO() as buffer:
+            badge.save(buffer, format = "PNG")
+            imagebytes = buffer.getvalue()
+
+        guild_badge_vault = self.bot.db.get(DBTable.STORE, f"{DBColumns.store.GUILD_ID.value} = {interaction.guild.id}")
+
+        # Counts how many items are in the store to set as ID and checks if the blob is already there or not.
+        counter = 0
+        for id in await guild_badge_vault:
+            counter =+ 1
+            if imagebytes == id[5]:
+                await fail_embed(f"The image you requested to add is already in the guild store!")
+                return
+
+        # Adds the badge to the guild store with the id set to max id number + 1
+        await self.bot.db.put(DBTable.STORE, {
+            "guild_id": interaction.guild.id,
+            "id": counter + 1,
+            "name": name,
+            "price": price,
+            "type": type.value,
+            "data": imagebytes
+        })
+
+        # Success message
+        embed = discord.Embed(
+            title = text["ECONOMY_ADD_ITEM_SUCCESS"], 
+            color = Colour.GREEN
+            )
+        
+        embed.add_field(name = text["ECONOMY_ADD_ITEM_EMBED_BADGE_NAME"], value = name, inline = True)
+        embed.add_field(name = text["ECONOMY_ADD_ITEM_EMBED_PRICE_NAME"], value = str(price), inline = True)
+        embed.add_field(name = text["ECONOMY_ADD_ITEM_EMBED_LINK_USED_NAME"], value = link, inline = False)
+        embed.set_image(url = link)
+        embed.set_footer(text = f"{interaction.guild.name.upper()} | {interaction.guild.id}")
+
+        await interaction.followup.send(embed = embed, ephemeral = True)
 
 # SETUP
 async def setup(bot: RinBot):

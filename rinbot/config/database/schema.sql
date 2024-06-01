@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS "store" (
 	"id"	INTEGER,
 	"name"	TEXT,
 	"price"	INTEGER,
-	"type"	INTEGER
+	"type"	INTEGER,
+	"data" BLOB
 );
 CREATE TABLE IF NOT EXISTS "history_guilds" (
     "guild_id" INTEGER,
