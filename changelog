@@ -12,3 +12,8 @@
 
 > v5.1.2 'Aurora-1.1.2':
 	* The fortnite daily shop now shows bundles and emotes
+
+> v5.2.0 'Aurora-1.2.0':
+    * New command: "/profile", displays a user profile using data from discord
+    * New command: "/set currency-emoji" so guilds can customize and have their own currency symbol
+    * New command: "/orange add-item" so guilds are able to add individual items to their store
