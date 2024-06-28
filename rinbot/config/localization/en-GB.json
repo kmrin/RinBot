@@ -110,7 +110,7 @@
     "GENERAL_INFO_NAME": "rininfo",
     "GENERAL_INFO_DESC": "Tells you about me :3",
     "GENERAL_INFO_TITLE": "🍊  RinBot Info.",
-    "GENERAL_INFO_CREATED": ["📅  Created in:", "10/08/23"],
+    "GENERAL_INFO_CREATED": ["📅  Created at:", "10/08/23"],
     "GENERAL_INFO_VERSION": "🔧  Version:",
     "GENERAL_INFO_CODER": ["👩‍💻  Programmer:", "km.rin 🏳️‍⚧️:flag_br:"],
     "GENERAL_INFO_BUG": ["🪳  Bug-finders:", "Fox :flag_br: Morgan :england:"],
