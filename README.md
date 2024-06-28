@@ -158,9 +158,9 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | - | - |
 | `/booru random` | Shows an image or gif from danbooru with your given tags |
 
-## NOTE: In order to use Danbooru, the user has to configure it properly through the .env file, by changing the "BOORU_ENABLE" flag from False to True, and adding their username and API key.
+## NOTE: In order to use Danbooru, the user has to configure it properly through the `/rinbot/config/client/rin.json` file, by adding your username and API key to the "BOORU_USERNAME" and "BOORU_KEY" keys.
 
-## NOTE 2: If you have a "Gold" danbooru account, make sure to change the "BOORU_IS_GOLD" flag inside .env from False to True, so you can take advantage of your 6 max tags search.
+## NOTE 2: If you have a "Gold" danbooru account, make sure to change the "BOORU_IS_GOLD" flag inside config file from false to true, so you can take advantage of your 6 max tags search.
 
 ### Rule34
 | Command | Description |
@@ -168,7 +168,7 @@ Users inside the **blacklisted** class are well... blacklisted from using ANY fu
 | `/rule34 random` | Shows an image or gif from rule34 with your given tags |
 | `/rule34 i-came` | Shows the top 10 characters on rule34's i came list |
 
-## NOTE: Due to the nature of Rule34 and Danbooru, their functionallity are disabled by default, in order to use them, an owner of the bot must change the "ENABLE_LEWD" flag inside the /rinbot/config/client/rin.json config file from False to True
+## NOTE: Due to the nature of Rule34 and Danbooru, their functionallity are disabled by default, in order to use them, an owner of the bot must change the "ENABLE_LEWD" flag inside the `/rinbot/config/client/rin.json` config file from False to True
 
 ## Ok, cool! How do I host my own instance of RinBot?
 #### It's easy:
