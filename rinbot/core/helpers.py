@@ -37,7 +37,7 @@ def get_localized_string(locale: str, key: str, *args, **kwargs) -> Optional[Uni
     if not text:
         logger.error(f"Locale code '{locale}' not present in locale list, defaulting to english")
         
-        locale = Locale.en_GB
+        text = get_locale(Locale.en_GB)
     
     try:
         verbose = text[key]
