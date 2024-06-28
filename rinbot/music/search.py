@@ -1,69 +1,41 @@
-import asyncio
-import discord
+from nextcord import Embed, Colour
+from typing import Union, List
+from youtubesearchpython.__future__ import VideosSearch, PlaylistsSearch
 
-from youtubesearchpython.__future__ import *
-from typing import Union, Dict, List
+from rinbot.core.types import Track, Playlist
+from rinbot.core.helpers import get_localized_string
 
-from rinbot.base.json_loader import get_lang
-from rinbot.base.colours import Colour
+def get_no_results_embed(locale: str, search: str) -> Embed:
+    return Embed(
+        description=get_localized_string(
+            locale, 'MUSIC_SEARCH_NO_RESULTS',
+            search=search
+        ),
+        colour=Colour.red()
+    )
 
-text = get_lang()
-
-async def search_video(search: str) -> Union[List[Dict[str, str]], discord.Embed]:
+async def search_video(locale: str, search: str) -> Union[List[Track], Embed]:
     query = await VideosSearch(search, limit=25).next()
-    data = []
-    
+    videos = []
+
     if not query['result']:
-        return discord.Embed(
-            description=text['MUSIC_SEARCH_NO_RESULTS'].format(
-                search=search
-            ),
-            colour=Colour.RED
-        )
+        return get_no_results_embed(locale, search)
     
     for v in query['result']:
-        data.append(
-            {
-                'url': v['link'],
-                'title': v['title'],
-                'duration': v['duration'],
-                'uploader': v['channel']['name']
-            }
-        )
+        video = Track(v['title'], v['link'], v['duration'], v['channel']['name'])
+        videos.append(video)
     
-    return data
-
-async def search_playlist(search: str) -> Union[List[Dict[str, str]], discord.Embed]:
+    return videos
+    
+async def search_playlist(locale: str, search: str) -> Union[List[Playlist], Embed]:
     query = await PlaylistsSearch(search, limit=25).next()
-    data = []
-    
+    playlists = []
+
     if not query['result']:
-        return discord.Embed(
-            description=text['MUSIC_SEARCH_NO_RESULTS'].format(
-                search=search
-            ),
-            colour=Colour.RED
-        )
+        return get_no_results_embed(locale, search)
     
     for p in query['result']:
-        data.append(
-            {
-                'url': p['link'],
-                'count': p['videoCount'],
-                'title': p['title']
-            }
-        )
+        playlist = Playlist(p['title'], p['link'], int(p['videoCount']), p['channel']['name'])
+        playlists.append(playlist)
     
-    return data
-
-async def __main():
-    search = await search_video("Hatsune Miku")
-    for v in search:
-        print(v)
-    
-    search = await search_playlist("Vocaloid")
-    for p in search:
-        print(p)
-
-if __name__ == '__main__':
-    asyncio.run(__main())
+    return playlists

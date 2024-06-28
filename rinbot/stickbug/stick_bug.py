@@ -1,25 +1,28 @@
 import os
-import numpy as np
 from typing import Union
+
+import numpy as np
 from PIL import Image, ImageDraw
 from moviepy import editor
 from pylsd.lsd import lsd
 
-pkg_path = f"{os.path.realpath(os.path.dirname(__file__))}"
-video_stick_bug = editor.VideoFileClip(pkg_path + '/../assets/stickbug/stick_bug.mp4')
+# static media files
+pkg_path = os.path.dirname(os.path.realpath(__file__))
+video_stick_bug = editor.VideoFileClip(os.path.join(pkg_path, '../assets/stickbug/stick_bug.mp4'))
 audio_notes = [
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note0.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note1.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note2.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note3.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note4.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note5.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note6.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note7.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note8.wav'),
-    editor.AudioFileClip(pkg_path + '/../assets/stickbug/note9.wav'),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note0.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note1.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note2.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note3.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note4.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note5.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note6.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note7.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note8.wav')),
+    editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/note9.wav')),
 ]
-audio_transform = editor.AudioFileClip(pkg_path + '/../assets/stickbug/transform.wav')
+audio_transform = editor.AudioFileClip(os.path.join(pkg_path, '../assets/stickbug/transform.wav'))
+
 
 class StickBug:
     def __init__(self, img: Union[Image.Image, str] = None, video_resolution=(720, 720), lsd_scale=0.8,

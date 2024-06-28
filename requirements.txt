@@ -5,11 +5,11 @@ beautifulsoup4
 bs4
 certifi
 contextvars
-discord
 gputil
 google-generativeai
 gtts
 moviepy
+nextcord
 numpy
 opencv-python
 pillow
@@ -22,13 +22,14 @@ requests
 translate
 urllib3
 websocket
-wavelink
+nextlink
 youtube-search-python
 yt_dlp
 
 # Local AI requirements
-# Comment these if you don't plan to use local language models with kobold
+# Uncomment these if you plan on using local AI
 
-langchain
-torch
-transformers
+# langchain
+# langchain-community
+# torch
+# transformers

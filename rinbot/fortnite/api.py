@@ -11,13 +11,12 @@ from PIL import ImageFont, ImageDraw, Image
 from typing import Union
 from datetime import datetime
 
-from rinbot.base.exception_handler import log_exception
-from rinbot.base.launch_checks import check_cache
-from rinbot.base.get_os_path import get_os_path
-from rinbot.base.helpers import get_lang
-from rinbot.base.logger import logger
+from rinbot.core.startup_checks import check_cache
 
-text = get_lang()
+from rinbot.core.loggers import Loggers, log_exception
+from rinbot.core.paths import get_os_path
+
+logger = Loggers.FORTNITE
 
 class FortniteAPI:
     # __types__ = ['outfit', 'pickaxe', 'backpack']
@@ -32,7 +31,7 @@ class FortniteAPI:
     
     @staticmethod
     async def __shop_get_image(url, item_name):
-        logger.info(text['FN_DS_IMG_GET'].format(name=item_name))
+        logger.info(f'Getting image for "{item_name}"')
         
         try:
             async with aiohttp.ClientSession() as session:
@@ -45,12 +44,12 @@ class FortniteAPI:
                     with open(get_os_path(f'../instance/cache/fortnite/downloads/{item_name}.webp'), 'wb') as f:
                         f.write(image_bytes)
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
     
     @staticmethod
     async def __shop_composite_image(item_name, item_price):
         try:
-            logger.info(text['FN_DS_IMG_GEN'].format(name=item_name))
+            logger.info(f'Generating composite for "{item_name}"')
 
             async def add_name(draw):
                 font_size = 30
@@ -98,7 +97,7 @@ class FortniteAPI:
             if os.path.isfile(path):
                 os.remove(path)
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
     
     async def __shop_generate_images(self, items):
         try:
@@ -113,9 +112,9 @@ class FortniteAPI:
             await asyncio.gather(*downloads)
             await asyncio.gather(*composites)
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
 
-    async def __shop_format(self, data) -> dict:        
+    def __shop_format(self, data) -> dict:        
         try:
             data = data['data']
             shop = {
@@ -159,9 +158,9 @@ class FortniteAPI:
 
             return shop
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
     
-    async def __stats_composite(self, data) -> Union[str, None]:
+    def __stats_composite(self, data) -> Union[str, None]:
         try:
             try:
                 template = Image.open(get_os_path(f'assets/images/fortnite/composite/stats-{self.language.lower()}.png'))
@@ -183,6 +182,8 @@ class FortniteAPI:
 
             font = ImageFont.truetype(get_os_path('assets/fonts/fortnite.ttf'), size=30)
 
+            positions = {key: 105 + 200 * i for i, key in enumerate(data["stats"].keys())}
+            
             positions = {
                 "games": 105,
                 "wins": 255,
@@ -199,6 +200,9 @@ class FortniteAPI:
                 "squad": 665}
 
             for item_type, info in data["stats"].items():
+                if item_type == 'ltm':
+                    continue
+                
                 for key, val in info.items():
                     draw.text((positions[key] + 2, heights[item_type] + 2), str(val), fill=(50, 50, 50), anchor="mm",
                               font=font)
@@ -211,38 +215,39 @@ class FortniteAPI:
 
             return img_path
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
             return None
     
-    async def __stats_format(self, stats) -> dict:
+    def __stats_format(self, stats) -> dict:
         try:
             data = stats["data"]
             formatted = {
                 "name": data["account"]["name"],
                 "level": data["battlePass"]["level"],
-                "stats": {"overall": {}, "solo": {}, "duo": {}, "squad": {}}}
+                "stats": {}
+            }
 
-            modes = ["overall", "solo", "duo", "squad"]
-            for mode in modes:
-                mode_data = data["stats"]["all"][mode]
-                formatted["stats"][mode]["games"] = mode_data["matches"]
-                formatted["stats"][mode]["wins"] = mode_data["wins"]
-                formatted["stats"][mode]["kills"] = mode_data["kills"]
-                formatted["stats"][mode]["deaths"] = mode_data["deaths"]
-                formatted["stats"][mode]["kpm"] = f'{mode_data["killsPerMatch"]:.2f}'
-                formatted["stats"][mode]["kd"] = f'{mode_data["kd"]:.2f}'
-                formatted["stats"][mode]["winrate"] = f'{mode_data["winRate"]:.2f}'
-                formatted["stats"][mode]["gametime"] = self.__format_playtime(mode_data["minutesPlayed"])
-
+            for mode, mode_data in data["stats"]["all"].items():
+                if mode_data is not None:
+                    formatted["stats"][mode] = {
+                        "games": mode_data["matches"],
+                        "wins": mode_data["wins"],
+                        "kills": mode_data["kills"],
+                        "deaths": mode_data["deaths"],
+                        "kpm": f'{mode_data["killsPerMatch"]:.2f}',
+                        "kd": f'{mode_data["kd"]:.2f}',
+                        "winrate": f'{mode_data["winRate"]:.2f}',
+                        "gametime": self.__format_playtime(mode_data["minutesPlayed"])
+                    }
             return formatted
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
     
     async def get_shop(self) -> Union[dict, None]:
         # Make sure cache exists
         check_cache()
 
-        logger.info(text['FN_DS_GETTING'])
+        logger.info('Getting daily shop')
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -252,9 +257,9 @@ class FortniteAPI:
                         return None
 
                     shop = await response.json()
-                    shop = await self.__shop_format(shop)
+                    shop = self.__shop_format(shop)
                 try:
-                    await self.__shop_generate_images(shop["entries"])
+                   await self.__shop_generate_images(shop["entries"])
                 except Exception as e:
                     img_dir = get_os_path(f'../instance/cache/fortnite/downloads')
 
@@ -264,11 +269,11 @@ class FortniteAPI:
                         if os.path.isfile(f_path):
                             os.remove(f_path)
 
-                    log_exception(e)
+                    log_exception(e, logger)
 
             return shop
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
             return None
 
     def get_stats(self, player: str=None, lifetime: bool=True) -> Union[dict, list]:
@@ -288,9 +293,10 @@ class FortniteAPI:
 
             data = response.json()
             stats = self.__stats_format(data)
+                        
             img_path = self.__stats_composite(stats)
 
             return [stats, img_path]
         except Exception as e:
-            log_exception(e)
+            log_exception(e, logger)
             return None

@@ -1,11 +1,11 @@
 """
-RinBot v5.0.0 'Aurora'
-
+RinBot v6.0.0 'Alvorada'
+development started on 11/06/2024
 made by rin (https://github.com/kmrin, km.rin on https://discord.gg)
 """
 
 import asyncio
-from rinbot.base import RinBot
+from rinbot.core import RinBot
 
 async def main() -> None:
     # Load client

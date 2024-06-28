@@ -14,8 +14,7 @@ CREATE TABLE IF NOT EXISTS "blacklist" (
 	"user_id"	INTEGER
 );
 CREATE TABLE IF NOT EXISTS "guilds" (
-	"guild_id"	INTEGER,
-	"currency_emoji" TEXT
+	"guild_id"	INTEGER
 );
 CREATE TABLE IF NOT EXISTS "currency" (
 	"guild_id"	INTEGER,
@@ -28,13 +27,26 @@ CREATE TABLE IF NOT EXISTS "store" (
 	"id"	INTEGER,
 	"name"	TEXT,
 	"price"	INTEGER,
-	"type"	INTEGER,
-	"data" BLOB
+	"type"	INTEGER
 );
 CREATE TABLE IF NOT EXISTS "history_guilds" (
     "guild_id" INTEGER,
 	"title"	TEXT,
 	"url"	TEXT
+);
+CREATE TABLE IF NOT EXISTS "fav_tracks" (
+	"user_id"	INTEGER,
+	"title"	TEXT,
+	"url"	TEXT,
+	"duration"	TEXT,
+	"uploader"	TEXT
+);
+CREATE TABLE IF NOT EXISTS "fav_playlists" (
+	"user_id"	INTEGER,
+	"title"	TEXT,
+	"url"	TEXT,
+	"count"	INTEGER,
+	"uploader"	TEXT
 );
 CREATE TABLE IF NOT EXISTS "warns" (
 	"guild_id"	INTEGER,
@@ -66,13 +78,9 @@ CREATE TABLE IF NOT EXISTS "welcome_channels" (
 	"guild_id"	INTEGER,
 	"active"	INTEGER DEFAULT 0,
 	"channel_id"	INTEGER,
-	"custom_msg"    TEXT
-);
-CREATE TABLE IF NOT EXISTS "tts" (
-	"guild_id"	INTEGER,
-	"active"	INTEGER DEFAULT 0,
-	"channel_id"	INTEGER,
-	"say_user"	INTEGER DEFAULT 0,
-	"language"	TEXT
+	"title"    TEXT,
+	"description"    TEXT,
+	"colour"    TEXT,
+	"show_pfp"	INTEGER DEFAULT 1
 );
 COMMIT;

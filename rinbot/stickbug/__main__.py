@@ -23,11 +23,12 @@ def main():
 
     args = parser.parse_args()
 
-    from rinbot.stickbug.stick_bug import StickBug
+    from stickbug.stick_bug import StickBug
 
     sb = StickBug(img=args.input, video_resolution=args.resolution, lsd_scale=args.lsd_scale,
                   img_bg_color=args.img_bg_color, line_color=args.line_color, line_bg_color=args.line_bg_color)
     sb.save_video(args.output)
+
 
 if __name__ == '__main__':
     main()

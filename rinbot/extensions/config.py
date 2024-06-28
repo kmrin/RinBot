@@ -1,226 +1,353 @@
 """
 RinBot's config command cog
 - Commands:
-    * /set welcome-channel `Sets what channel on the guild rinbot will use to greet new members`
-    * /set fortnite-daily-shop-channel `Sets what channel on the guild rinbot will use to show the daily fortnite shop`
-    * /set valorant-daily-shop-channel `Sets what channel on the guild rinbot will use to show the dialy valorant shop`
-    * /toggle welcome-channel `Toggles the welcome channel on and off`
-    * /toggle fortnite-daily-shop-channel `Toggles the fortnite daily shop channel on and off`
-    * /toggle valorant-daily-shop-channel `Toggles the valorant daily shop channel on and off`
+    * /set welcome-channel             - Configures a custom embed to be shown when a member enters the server
+    * /set daily-shop-channel fortnite - Sets in what channel rinbot should show the fortnite daily shop
+    * /toggle daily-shop fortnite      - Toggles the fortnite daily shop on and off
 """
 
-import discord
+import nextcord
 
-from discord import Interaction, app_commands
-from discord.ext.commands import Cog
+from nextcord import Interaction, ChannelType, Colour, Locale, SlashOption, slash_command
+from nextcord.ext.commands import Cog
+from nextcord.abc import GuildChannel
 
-from rinbot.base import respond
-from rinbot.base import DBTable
-from rinbot.base import DBColumns
-from rinbot.base import RinBot
-from rinbot.base import Colour
-from rinbot.base import text
+from rinbot.core import RinBot
+from rinbot.core import DBTable
+from rinbot.core import Loggers
+from rinbot.core import ResponseType
+from rinbot.core import SetWelcomeConfirmation
 
-# from rinbot.base import is_owner
-from rinbot.base import is_admin
-from rinbot.base import not_blacklisted
+from rinbot.core import get_interaction_locale, get_localized_string, get_timeout_embed
+from rinbot.core import hex_to_colour, is_hex_colour
+from rinbot.core import not_blacklisted, is_admin, is_guild
+from rinbot.core import respond
+
+logger = Loggers.EXTENSIONS
 
 class Config(Cog, name='config'):
     def __init__(self, bot: RinBot) -> None:
         self.bot = bot
+
+    # /set
+    @slash_command(
+        name=get_localized_string('en-GB', 'CONFIG_SET_ROOT_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_ROOT_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_SET_ROOT_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_ROOT_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _set_root(self, interaction: Interaction) -> None:
+        pass
     
-    set = app_commands.Group(name=text['CONFIG_SET_NAME'], description=text['CONFIG_SET_DESC'])
-    toggle = app_commands.Group(name=text['CONFIG_TOGGLE_NAME'], description=text['CONFIG_TOGGLE_DESC'])
-    
-    @set.command(
-        name=text['CONFIG_SET_WELCOME_CHANNEL_NAME'],
-        description=text['CONFIG_SET_WELCOME_CHANNEL_DESC'])
-    @app_commands.describe(custom_message=text['CONFIG_SET_WELCOME_CHANNEL_CM'])
-    @not_blacklisted()
+    # /set welcome-channel
+    @_set_root.subcommand(
+        name=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_DESC')
+        }
+    )
+    @is_guild()
     @is_admin()
-    # @is_owner()
-    async def _set_welcome(self, interaction: Interaction, channel: discord.TextChannel,
-                           custom_message: str=None) -> None:
-        data = {'active': 1, 'channel_id': channel.id}
-
-        if custom_message:
-            data['custom_msg'] = custom_message
-
-        await self.bot.db.update(DBTable.WELCOME_CHANNELS, data, f'guild_id={interaction.guild.id}')
-        await respond(interaction, Colour.GREEN, text['CONFIG_SET_WELCOME_CHANNEL_SET'])
-    
-    @set.command(
-        name=text['CONFIG_SET_DAILY_SHOP_NAME'],
-        description=text['CONFIG_SET_DAILY_SHOP_DESC'])
     @not_blacklisted()
-    @is_admin()
-    # @is_owner()
-    async def _set_fortnite_daily_shop(self, interaction: Interaction, channel: discord.TextChannel) -> None:
-        data = {'fortnite_active': 1, 'fortnite_channel_id': channel.id}
-
-        await self.bot.db.update(DBTable.DAILY_SHOP_CHANNELS, data, f'guild_id={interaction.guild.id}')
-        await respond(interaction, Colour.GREEN, text['CONFIG_SET_DAILY_SHOP_SET'])
-    
-    @set.command(
-        name=text['CONFIG_SET_VAL_DAILY_SHOP_NAME'],
-        description=text['CONFIG_SET_VAL_DAILY_SHOP_DESC'])
-    @not_blacklisted()
-    @is_admin()
-    # @is_owner()
-    async def _set_valorant_daily_shop(self, interaction: Interaction, channel: discord.TextChannel) -> None:
-        data = {'valorant_active': 1, 'valorant_channel_id': channel.id}
-
-        await self.bot.db.update(DBTable.DAILY_SHOP_CHANNELS, data, f'guild_id={interaction.guild.id}')
-        await respond(interaction, Colour.GREEN, text['CONFIG_SET_VAL_DAILY_SHOP_SET'])
-    
-    @toggle.command(
-        name=text['CONFIG_TOGGLE_WELCOME_CHANNEL_NAME'],
-        description=text['CONFIG_TOGGLE_WELCOME_CHANNEL_DESC'])
-    @not_blacklisted()
-    @is_admin()
-    # @is_owner()
-    async def _toggle_welcome(self, interaction: Interaction) -> None:
-        query = await self.bot.db.get(DBTable.WELCOME_CHANNELS, condition=f'guild_id={interaction.guild.id}')
-
-        new_state = 1 if query[0][1] == 0 else 0
-
-        await self.bot.db.update(DBTable.WELCOME_CHANNELS, {'active': new_state},
-                                 condition=f'guild_id={interaction.guild.id}')
-
-        await respond(
-            interaction, Colour.GREEN,
-            f'{text["CONFIG_TOGGLE_WELCOME_CHANNEL_TOGGLED"]} {text["ON"] if new_state == 1 else text["OFF"]}.')
-
-    @toggle.command(
-        name=text['CONFIG_TOGGLE_DAILY_CHANNEL_NAME'],
-        description=text['CONFIG_TOGGLE_DAILY_CHANNEL_DESC'])
-    @not_blacklisted()
-    @is_admin()
-    # @is_owner()
-    async def _toggle_fortnite_daily(self, interaction: Interaction) -> None:
-        query = await self.bot.db.get(DBTable.DAILY_SHOP_CHANNELS, condition=f'guild_id={interaction.guild.id}')
-
-        new_state = 1 if query[0][1] == 0 else 0
-
-        await self.bot.db.update(DBTable.DAILY_SHOP_CHANNELS, {'fortnite_active': new_state},
-                                 condition=f'guild_id={interaction.guild.id}')
-
-        await respond(interaction, Colour.GREEN,
-                      f'{text["CONFIG_TOGGLE_DAILY_CHANNEL_TOGGLED"]} {text["ON"] if new_state == True else text["OFF"]}.')
-
-    @toggle.command(
-        name=text['CONFIG_TOGGLE_VAL_CHANNEL_NAME'],
-        description=text['CONFIG_TOGGLE_VAL_CHANNEL_DESC'])
-    @not_blacklisted()
-    @is_admin()
-    # @is_owner()
-    async def _toggle_valid_channel(self, interaction: Interaction) -> None:
-        query = await self.bot.db.get(DBTable.DAILY_SHOP_CHANNELS, condition=f'guild_id={interaction.guild.id}')
-
-        new_state = 1 if query[0][3] == 0 else 0
-
-        await self.bot.db.update(DBTable.DAILY_SHOP_CHANNELS, {'valorant_active': new_state},
-                                 condition=f'guild_id={interaction.guild.id}')
-
-        await respond(interaction, Colour.GREEN,
-                      f'{text["CONFIG_TOGGLE_VAL_CHANNEL_TOGGLED"]} {text["ON"] if new_state == True else text["OFF"]}.')
-
-    @set.command(
-        name = text['CONFIG_SET_CURRENCY_EMOJI_NAME'],
-        description = text['CONFIG_SET_CURRENCY_EMOJI_DESC'])
-    @not_blacklisted()
-    @is_admin()
-    # @is_owner()
-    async def _set_currency_emoji(self, interaction: Interaction, emoji: str) -> None:
-        async def is_emoji(string: str) -> bool:
-            """
-            Checks if a string is an emoji.
-
-            Args:
-                string (str): the potential emoji
-
-            Returns:
-                bool: True or False if the string contains an emoji.
-            """
-
-            if len(string) != 1:
-                return False
-            
-            code_point = ord(string)
-            
-            # Define common emoji ranges based on Unicode standards
-            emoji_ranges = [
-                (0x1F600, 0x1F64F),  # Emoticons
-                (0x1F300, 0x1F5FF),  # Miscellaneous Symbols and Pictographs
-                (0x1F680, 0x1F6FF),  # Transport and Map Symbols
-                (0x1F700, 0x1F77F),  # Alchemical Symbols
-                (0x1F780, 0x1F7FF),  # Geometric Shapes Extended
-                (0x1F800, 0x1F8FF),  # Supplemental Arrows-C
-                (0x1F900, 0x1F9FF),  # Supplemental Symbols and Pictographs
-                (0x1FA00, 0x1FA6F),  # Chess Symbols
-                (0x1FA70, 0x1FAFF),  # Symbols and Pictographs Extended-A
-                (0x2600, 0x26FF),    # Miscellaneous Symbols
-                (0x2700, 0x27BF),    # Dingbats
-                (0xFE00, 0xFE0F),    # Variation Selectors
-                (0x1F1E6, 0x1F1FF),  # Regional Indicator Symbols
-                (0x1F900, 0x1F9FF),  # Supplemental Symbols and Pictographs
-            ]
-
-            for start, end in emoji_ranges:
-                if start <= code_point <= end:
-                    return True
-            
-            return False
-
-        async def currency_embed(description: str) -> discord.Embed:
-            """
-            Creates an error embed for currency setting.
-
-            Args:
-                description (str): The database table
-
-            Returns:
-                discord.Embed: Represents a Discord embed.
-            """
-            embed=discord.Embed(title = text["CONFIG_SET_CURRENCY_EMOJI_ERROR_EMBED_TITLE"],
-                                description = f"{description}\n/set {text['CONFIG_SET_CURRENCY_EMOJI_NAME']} emoji:{emoji}", 
-                                color = Colour.YELLOW)
-            
-            embed.set_author(name = self.bot.user.name.upper(), 
-                             icon_url = self.bot.user.avatar.url)
-            
-            embed.add_field(name = text["CONFIG_SET_CURRENCY_EMOJI_ERROR_FIELD_TITLE"],
-                            value = "/set currency-emoji emoji::wave:")
-            
-            embed.set_footer(text = f"{interaction.guild.name.upper()} | {interaction.guild.id}")
-            
-            return embed
-
-        if len(emoji) > 1: # If they're trying to add more than one emoji
-            await interaction.response.send_message(embed = await currency_embed(text["CONFIG_SET_CURRENCY_EMOJI_ERROR_MULTI"]), ephemeral = True)
-            return
-        elif await is_emoji(emoji) is False: # Checks if they're attempting to set an emoji
-            await interaction.response.send_message(embed = await currency_embed(text["CONFIG_SET_CURRENCY_EMOJI_ERROR_NO_EMOJI"]), ephemeral = True)
-            return
-
-        # Updating table with the emoji requested.
-        await self.bot.db.update(DBTable.GUILDS, data = {DBColumns.guilds.CURRENCY_EMOJI.value: emoji}, condition = f"{DBColumns.guilds.GUILD_ID} = {interaction.guild.id}")
-
-        # Completion embed
-        embed=discord.Embed(title = text["CONFIG_SET_CURRENCY_EMOJI_SUCCESS_EMBED_TITLE"],
-                                description = f"{text['CONFIG_SET_CURRENCY_EMOJI_SUCCESS_EMBED_DESC']} {emoji}", 
-                                color = Colour.YELLOW)
-            
-        embed.set_author(name = self.bot.user.name.upper(), 
-                            icon_url = self.bot.user.avatar.url)
+    async def _set_welcome(
+        self, interaction: Interaction,
+        channel: GuildChannel = SlashOption(
+            name=get_localized_string('en-GB', 'CONFIG_SET_CHANNEL_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_CHANNEL_NAME')
+            },
+            description=get_localized_string('en-GB', 'CONFIG_SET_CHANNEL_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_CHANNEL_DESC')
+            },
+            channel_types=[ChannelType.text],
+            required=True
+        ),
+        title: str = SlashOption(
+            name=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_EMBED_TITLE_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_EMBED_TITLE_NAME')
+            },
+            description=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_EMBED_TITLE_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_EMBED_TITLE_DESC')
+            },
+            min_length=1, max_length=256,
+            required=False
+        ),
+        description: str = SlashOption(
+            name=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_EMBED_DESC_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_EMBED_DESC_NAME')
+            },
+            description=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_EMBED_DESC_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_EMBED_DESC_DESC')
+            },
+            min_length=1, max_length=4096,
+            required=False
+        ),
+        colour: str = SlashOption(
+            name=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_EMBED_COLOUR_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_EMBED_COLOUR_NAME')
+            },
+            description=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_EMBED_COLOUR_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_EMBED_COLOUR_DESC')
+            },
+            default='#FFFFFF',
+            min_length=7, max_length=7,
+            required=False
+        ),
+        show_pfp: int = SlashOption(
+            name=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_PFP_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_PFP_NAME')
+            },
+            description=get_localized_string('en-GB', 'CONFIG_SET_WELCOME_PFP_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_WELCOME_PFP_DESC')
+            },
+            choices={
+                'Yes': 1,
+                'No': 0
+            },
+            choice_localizations={
+                'Yes': {
+                    Locale.pt_BR: 'Sim'
+                },
+                'No': {
+                    Locale.pt_BR: 'Não'
+                }
+            },
+            default=1,
+            required=False
+        )
+    ) -> None:
+        await interaction.response.defer()
+        locale = get_interaction_locale(interaction),
         
-        embed.add_field(name = text["CONFIG_SET_CURRENCY_EMOJI_SUCCESS_FIELD_TITLE"],
-                        value = f"/set currency-emoji emoji:{emoji}")
+        # If no options were given
+        if not title and not description:
+            return await respond(
+                interaction, Colour.red(), get_localized_string(locale, 'CONFIG_SET_WELCOME_NO_OPTIONS'),
+                resp_type=ResponseType.FOLLOWUP
+            )
+        
+        if not is_hex_colour(colour):
+            return await respond(
+                interaction, Colour.red(), get_localized_string(locale, 'CONFIG_SET_WELCOME_INVALID_COLOUR', c=colour),
+                resp_type=ResponseType.FOLLOWUP
+            )
+        
+        example = nextcord.Embed(
+            title=title,
+            description=description,
+            colour=hex_to_colour(colour)
+        )
+        
+        # Edit title if necessary
+        if title and '<username>' in title:
+            example.title = title.replace('<username>', interaction.user.display_name)
 
-        embed.set_footer(text = f"{interaction.guild.name.upper()} | {interaction.guild.id}")
+        # Edit description if necessary
+        if description and '<username>' in description:
+            example.description = description.replace('<username>', interaction.user.display_name)
+        if description and '<mention>' in description:
+            example.description = description.replace('<mention>', interaction.user.mention)
+        
+        # Show user PFP
+        if show_pfp == 1:
+            example.set_thumbnail(
+                interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url
+            )
+        
+        # Show example and wait for confirmation
+        confirm = SetWelcomeConfirmation(interaction)
+        
+        # Show example to user
+        await respond(
+            interaction, message=example, view=confirm, resp_type=ResponseType.FOLLOWUP,
+            outside_content=get_localized_string(locale, 'CONFIG_SET_WELCOME_INFO'))
+        
+        # If view times out
+        timeout = await confirm.wait()
+        if timeout:            
+            return await interaction.edit_original_message(
+                content=None,
+                embed=get_timeout_embed(locale),
+                view=None
+            )
+        
+        # Get value from view
+        aproved = confirm.response
+        if not aproved:
+            return
+        
+        # Create data for DB
+        data = {
+            'active': 1,
+            'channel_id': channel.id,
+            'show_pfp': show_pfp
+        }
+        
+        if title:
+            data['title'] = title
+        if description:
+            data['description'] = description
+        if colour:
+            data['colour'] = colour
+        
+        # Upload
+        await self.bot.db.update(
+            DBTable.WELCOME_CHANNELS, data, f'guild_id={interaction.guild.id}'
+        )
 
-        await interaction.response.send_message(embed = embed)
+    # /set daily-shop-channel
+    @_set_root.subcommand(
+        name=get_localized_string('en-GB', 'CONFIG_SET_DAILY_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_DAILY_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_SET_DAILY_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_DAILY_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _set_daily(self, interaction: Interaction) -> None:
+        pass
+
+    # /set daily-shop-channel fortnite
+    @_set_daily.subcommand(
+        name=get_localized_string('en-GB', 'CONFIG_SET_FORTNITE_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_FORTNITE_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_SET_FORTNITE_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_FORTNITE_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _set_daily_fortnite(
+        self, interaction: Interaction,
+        channel: GuildChannel = SlashOption(
+            name=get_localized_string('en-GB', 'CONFIG_SET_CHANNEL_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_CHANNEL_NAME')
+            },
+            description=get_localized_string('en-GB', 'CONFIG_SET_CHANNEL_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_CHANNEL_DESC')
+            },
+            channel_types=[ChannelType.text],
+            required=True
+        )
+    ) -> None:
+        locale = get_interaction_locale(interaction)
+        
+        data = {
+            'fortnite_active': 1,
+            'fortnite_channel_id': channel.id
+        }
+        
+        await self.bot.db.update(
+            DBTable.DAILY_SHOP_CHANNELS, data, f'guild_id={interaction.guild.id}'
+        )
+        
+        await respond(
+            interaction, Colour.green(),
+            get_localized_string(locale, 'CONFIG_SET_FORTNITE_SET', channel=channel.name)
+        )
+        
+
+    # /toggle
+    @slash_command(
+        name=get_localized_string('en-GB', 'CONFIG_TOGGLE_ROOT_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_ROOT_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_TOGGLE_ROOT_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_ROOT_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _toggle_root(self, interaction: Interaction) -> None:
+        pass
+    
+    # /toggle daily-shop
+    @_toggle_root.subcommand(
+        name=get_localized_string('en-GB', 'CONFIG_TOGGLE_DAILY_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_DAILY_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_TOGGLE_DAILY_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_DAILY_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _toggle_daily(self, interaction: Interaction) -> None:
+        pass
+    
+    # /toggle daily-shop fortnite
+    @_toggle_daily.subcommand(
+        name=get_localized_string('en-GB', 'CONFIG_TOGGLE_FORTNITE_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_FORTNITE_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_TOGGLE_FORTNITE_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_FORTNITE_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _toggle_daily_fortnite(self, interaction: Interaction) -> None:
+        locale = get_interaction_locale(interaction)
+        query = await self.bot.db.get(DBTable.DAILY_SHOP_CHANNELS, f'guild_id={interaction.guild.id}')
+        new_state = 1 if query[0][1] == 0 else 0
+        
+        await self.bot.db.update(
+            DBTable.DAILY_SHOP_CHANNELS, {
+                'fortnite_active': new_state
+            },
+            f'guild_id={interaction.guild.id}'
+        )
+        
+        await respond(
+            interaction, Colour.green(),
+            get_localized_string(
+                locale, 'CONFIG_TOGGLE_FORTNITE_TOGGLED',
+                state = get_localized_string(locale, 'ON')
+                        if new_state == 1 else 
+                        get_localized_string(locale, 'OFF')
+            )
+        )
 
 # SETUP
-async def setup(bot: RinBot):
-    await bot.add_cog(Config(bot))
+def setup(bot: RinBot) -> None:
+    bot.add_cog(Config(bot))

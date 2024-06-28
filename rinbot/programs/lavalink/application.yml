@@ -4,6 +4,39 @@ server: # REST and WS server
   http2:
     enabled: false # Whether to enable HTTP/2 support
 plugins:
+#  name: # Name of the plugin
+#    some_key: some_value # Some key-value pair for the plugin
+#    another_key: another_value
+  youtube:
+    enabled: true # Whether this source can be used.
+    allowSearch: true # Whether "ytsearch:" and "ytmsearch:" can be used.
+    allowDirectVideoIds: true # Whether just video IDs can match. If false, only complete URLs will be loaded.
+    allowDirectPlaylistIds: true # Whether just playlist IDs can match. If false, only complete URLs will be loaded.
+    # The clients to use for track loading. See below for a list of valid clients.
+    # Clients are queried in the order they are given (so the first client is queried first and so on...)
+    clients:
+      - MUSIC
+      - ANDROID
+      - WEB
+
+    # You can configure individual clients with the following.
+    # Any options or clients left unspecified will use their default values
+    # for those individual clients.
+    # Client configurations will ONLY take effect if the client is registered above,
+    # otherwise they are ignored.
+    # ---------------- WARNING ----------------
+    # This part of the config is for DEMONSTRATION PURPOSES ONLY!
+    # Do NOT use this config before understanding what the options do.
+    # You do NOT need to copy this config just because it is published here.
+    # ---------------- WARNING ----------------
+    WEB: # names are specified as they are written below under "Available Clients".
+      # This will disable using the WEB client for video playback.
+      playback: false
+    TVHTML5EMBEDDED:
+      # The below config disables everything except playback for this client.
+      playlistLoading: false # Disables loading of playlists and mixes for this client.
+      videoLoading: false # Disables loading of videos for this client (playback is still allowed).
+      searching: false # Disables the ability to search for videos for this client.
   lavasrc:
     providers: # Custom providers for track loading. This is the default
       # - "dzisrc:%ISRC%" # Deezer ISRC provider
@@ -17,10 +50,16 @@ plugins:
       deezer: false # Enable Deezer source
       yandexmusic: false # Enable Yandex Music source
       flowerytts: false # Enable Flowery TTS source
-      youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
+      youtube: false # Enable YouTube search source (https://github.com/topi314/LavaSearch)
+    lyrics-sources:
+      spotify: false # Enable Spotify lyrics source
+      deezer: false # Enable Deezer lyrics source
+      youtube: false # Enable YouTube lyrics source
+      yandexmusic: false # Enable Yandex Music lyrics source
     spotify:
       clientId: ""
       clientSecret: ""
+      # spDc: "your sp dc cookie" # the sp dc cookie used for accessing the spotify lyrics api
       countryCode: "US" # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
       playlistLoadLimit: 6 # The number of pages at 100 tracks each
       albumLoadLimit: 6 # The number of pages at 50 tracks each
@@ -40,29 +79,36 @@ plugins:
       masterDecryptionKey: "your master decryption key" # the master key used for decrypting the deezer tracks. (yes this is not here you need to get it from somewhere else)
     yandexmusic:
       accessToken: "your access token" # the token used for accessing the yandex music api. See https://github.com/TopiSenpai/LavaSrc#yandex-music
+      playlistLoadLimit: 1 # The number of pages at 100 tracks each
+      albumLoadLimit: 1 # The number of pages at 50 tracks each
+      artistLoadLimit: 1 # The number of pages at 10 tracks each
     flowerytts:
       voice: "default voice" # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
       translate: false # whether to translate the text to the native language of voice
       silence: 0 # the silence parameter is in milliseconds. Range is 0 to 10000. The default is 0.
       speed: 1.0 # the speed parameter is a float between 0.5 and 10. The default is 1.0. (0.5 is half speed, 2.0 is double speed, etc.)
       audioFormat: "mp3" # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
+    youtube:
+      countryCode: "US" # the country code you want to use for searching lyrics via ISRC. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
 lavalink:
   plugins:
 #    - dependency: "com.github.example:example-plugin:1.0.0" # required, the coordinates of your plugin
 #      repository: "https://maven.example.com/releases" # optional, defaults to the Lavalink releases repository by default
 #      snapshot: false # optional, defaults to false, used to tell Lavalink to use the snapshot repository instead of the release repository
-  pluginsDir: "./plugins" # optional, defaults to "./plugins"
+#  pluginsDir: "./plugins" # optional, defaults to "./plugins"
 #  defaultPluginRepository: "https://maven.lavalink.dev/releases" # optional, defaults to the Lavalink release repository
 #  defaultPluginSnapshotRepository: "https://maven.lavalink.dev/snapshots" # optional, defaults to the Lavalink snapshot repository
   server:
     password: "rinbot"
     sources:
-      youtube: true
-      bandcamp: false
+      # The default Youtube source is now deprecated and won't receive further updates. Please use https://github.com/lavalink-devs/youtube-source#plugin instead.
+      youtube: false
+      bandcamp: true
       soundcloud: true
-      twitch: false
-      vimeo: false
-      http: true
+      twitch: true
+      vimeo: true
+      nico: true
+      http: true # warning: keeping HTTP enabled without a proxy configured could expose your server's IP address.
       local: false
     filters: # All filters are enabled by default
       volume: true
@@ -115,7 +161,7 @@ sentry:
 
 logging:
   file:
-    path: ../../../instance/logs/lavalink
+    path: ./logs/
 
   level:
     root: INFO
@@ -133,4 +179,4 @@ logging:
   logback:
     rollingpolicy:
       max-file-size: 1GB
-      max-history: 25
+      max-history: 30

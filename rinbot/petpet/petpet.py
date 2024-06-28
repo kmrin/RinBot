@@ -24,7 +24,7 @@ def make_petpet(source, dest):
                                  (round(offsetX * resolution[0]), 
                                   round(offsetY * resolution[1])))
         pet = Image.open(resource_stream(
-            __name__, f"/../assets/images/pet/pet{i}.gif")).convert('RGBA').resize(resolution)
+            __name__, f"/../assets/pet/pet{i}.gif")).convert('RGBA').resize(resolution)
         canvas.paste(pet, mask=pet)
         images.append(canvas)
 

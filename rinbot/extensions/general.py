@@ -1,274 +1,297 @@
 """
 RinBot's general command cog
 - Commands:
-    * /help `Shows a help paginated embed with all commands`
-    * /translate `Translates a string to another language (Auto -> PT-BR by default)`
-    * /specs `Shows the system specs of the computer running the bot`
-    * /rininfo `Shows info about the bot`
-    * /ping `Sends back a ping-pong response with the bot's network latency`
+    * /rininfo        - Shows info about rinbot
+    * /help           - Shows a paginated embed with the list of all commands and what they do
+    * /translate      - Translates text from one language to another
+    * /list-languages - Shows a paginated embed with the list of all languages supported by the /translate command
+    * /specs          - Shows the system specs of the host running RinBot
 """
 
-import discord
+import nextcord
 import platform
 
-from discord import Interaction
-from discord import app_commands
-from discord.ext.commands import Cog
+from nextcord import Interaction, Colour, Locale, SlashOption, slash_command
+from nextcord.ext.commands import Cog
 
-from rinbot.base import get_specs
-from rinbot.base import translate
-from rinbot.base import remove_nl
-from rinbot.base import get_os_path
-from rinbot.base import log_exception
-from rinbot.base import Paginator
-from rinbot.base import respond
-from rinbot.base import RinBot
-from rinbot.base import Colour
-from rinbot.base import conf
-from rinbot.base import text as tx
-from rinbot.base import DBTable
-from rinbot.base import DBColumns
+from rinbot.core import RinBot
+from rinbot.core import Loggers
+from rinbot.core import Paginator
+from rinbot.core import ResponseType
+from rinbot.core import remove_nl_from_string_iterable
+from rinbot.core import get_localized_string, get_interaction_locale, get_conf, get_os_path, get_specs
+from rinbot.core import not_blacklisted
+from rinbot.core import respond
+from rinbot.core import translate
 
-# from rinbot.base import is_admin
-# from rinbot.base import is_owner
-from rinbot.base import not_blacklisted
-
-# profile packages
-from PIL import Image, ImageDraw, ImageFont
-from io import BytesIO
-import unicodedata
-import aiohttp
+logger = Loggers.EXTENSIONS
+conf = get_conf()
 
 class General(Cog, name='general'):
     def __init__(self, bot: RinBot) -> None:
         self.bot = bot
+        self.language_codes = [
+            'ab', 'aa', 'af', 'ak', 'sq', 'am', 'ar', 'an', 'hy', 'as', 'av', 'ae', 'ay', 'az', 
+            'bm', 'ba', 'eu', 'be', 'bn', 'bi', 'bs', 'br', 'bg', 'my', 'ca', 'ch', 'ce', 'ny', 
+            'zh', 'cu', 'cv', 'kw', 'co', 'cr', 'hr', 'cs', 'da', 'dv', 'nl', 'dz', 'en', 'eo', 
+            'et', 'ee', 'fo', 'fj', 'fi', 'fr', 'fy', 'ff', 'gd', 'gl', 'lg', 'ka', 'de', 'el', 
+            'kl', 'gn', 'gu', 'ht', 'ha', 'he', 'hz', 'hi', 'ho', 'hu', 'is', 'io', 'ig', 'id', 
+            'ia', 'ie', 'iu', 'ik', 'ga', 'it', 'ja', 'jv', 'kn', 'kr', 'ks', 'kk', 'km', 'ki', 
+            'rw', 'ky', 'kv', 'kg', 'ko', 'kj', 'ku', 'lo', 'la', 'lv', 'li', 'ln', 'lt', 'lu', 
+            'lb', 'mk', 'mg', 'ms', 'ml', 'mt', 'gv', 'mi', 'mr', 'mh', 'mn', 'na', 'nv', 'nd', 
+            'nr', 'ng', 'ne', 'no', 'nb', 'nn', 'ii', 'oc', 'oj', 'or', 'om', 'os', 'pi', 'ps', 
+            'fa', 'pl', 'pt', 'pt-br', 'pa', 'qu', 'ro', 'rm', 'rn', 'ru', 'se', 'sm', 'sg', 
+            'sa', 'sc', 'sr', 'sn', 'sd', 'si', 'sk', 'sl', 'so', 'st', 'es', 'su', 'sw', 'ss', 
+            'sv', 'tl', 'ty', 'tg', 'ta', 'tt', 'te', 'th', 'bo', 'ti', 'to', 'ts', 'tn', 'tr', 
+            'tk', 'tw', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'cy', 'wo', 'xh', 'yi', 
+            'yo', 'za', 'zu'
+        ]
     
-    @app_commands.command(
-        name=tx['GENERAL_HELP_NAME'],
-        description=tx['GENERAL_HELP_DESC'])
-    # @is_owner()
-    # @is_admin()
+    # /inforin
+    @slash_command(
+        name=get_localized_string('en-GB', 'GENERAL_INFO_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_INFO_NAME')
+        },
+        description=get_localized_string('en-GB', 'GENERAL_INFO_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_INFO_DESC')
+        }
+    )
+    @not_blacklisted()
+    async def _inforin(self, interaction: Interaction) -> None:
+        locale = get_interaction_locale(interaction)
+        embed = nextcord.Embed(
+            title=get_localized_string(locale, 'GENERAL_INFO_TITLE'),
+            colour=Colour.gold())
+
+        embed.add_field(
+            name=get_localized_string(locale, 'GENERAL_INFO_CREATED')[0],
+            value=get_localized_string(locale, 'GENERAL_INFO_CREATED')[1],
+            inline=True)
+        embed.add_field(
+            name=get_localized_string(locale, 'GENERAL_INFO_VERSION'),
+            value=f"{conf['VERSION']}",
+            inline=True)
+        embed.add_field(
+            name=get_localized_string(locale, 'GENERAL_INFO_CODER')[0],
+            value=get_localized_string(locale, 'GENERAL_INFO_CODER')[1],
+            inline=True)
+        embed.add_field(
+            name=get_localized_string(locale, 'GENERAL_INFO_BUG')[0],
+            value=get_localized_string(locale, 'GENERAL_INFO_BUG')[1],
+            inline=True)
+        embed.add_field(
+            name=get_localized_string(locale, 'GENERAL_INFO_PY'),
+            value=f"{platform.python_version()}",
+            inline=True)
+
+        embed.set_thumbnail(url=self.bot.user.avatar.url if self.bot.user.avatar else self.bot.user.default_avatar.url)
+
+        embed.set_footer(
+            text=get_localized_string(
+                locale, 'GENERAL_REQUESTED', user=interaction.user.name),
+            icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url
+        )
+        
+        await respond(interaction, message=embed)
+
+    # /help
+    @slash_command(
+        name=get_localized_string('en-GB', 'GENERAL_HELP_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_HELP_NAME')
+        },
+        description=get_localized_string('en-GB', 'GENERAL_HELP_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_HELP_DESC')
+        }
+    )
     @not_blacklisted()
     async def _help(self, interaction: Interaction) -> None:
+        locale = get_interaction_locale(interaction)
+        
         try:
-            with open(get_os_path(f'assets/text/help-{conf["LANGUAGE"]}.md'), 'r', encoding='utf-8') as f:
+            with open(get_os_path(f'assets/docs/help_{locale}.md'), 'r', encoding='utf-8') as f:
                 lines = f.readlines()
-                lines = '\n'.join(remove_nl(lines)).split('\n')
+                lines = '\n'.join(remove_nl_from_string_iterable(lines)).split('\n')
                 
                 chunks = [lines[i:i + 15] for i in range(0, len(lines), 15)]
-                                
-                embed = discord.Embed(
-                    title=tx['GENERAL_HELP_TITLE'],
-                    colour=Colour.YELLOW
+                
+                embed = nextcord.Embed(
+                    title=get_localized_string(locale, 'GENERAL_HELP_TITLE'),
+                    description='\n'.join(chunks[0]),
+                    colour=Colour.gold()
                 )
                 
-                embed.description = '\n'.join(chunks[0])
-                
                 view = Paginator(embed, chunks)
-
                 await respond(interaction, message=embed, view=view)
         except FileNotFoundError:
-            await respond(interaction, Colour.RED, tx['GENERAL_HELP_FILE_NOT_FOUND'])
-        except Exception as e:
-            log_exception(e)
-    
-    @app_commands.command(
-        name=tx['GENERAL_TRANSLATE_NAME'],
-        description=tx['GENERAL_TRANSLATE_DESC'])
-    @app_commands.describe(from_lang=tx['GENERAL_TRANSLATE_FROM'])
-    @app_commands.describe(to_lang=tx['GENERAL_TRANSLATE_TO'])
-    # @is_owner()
-    # @is_admin()
+            await respond(
+                interaction, Colour.red(),
+                get_localized_string(locale, 'GENERAL_HELP_NOT_FOUND')
+            )
+
+    # /translate
+    @slash_command(
+        name=get_localized_string('en-GB', 'GENERAL_TRANSLATE_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_NAME')
+        },
+        description=get_localized_string('en-GB', 'GENERAL_TRANSLATE_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_DESC')
+        }
+    )
     @not_blacklisted()
-    async def _translate(self, interaction: Interaction, text: str=None, from_lang: str=None, to_lang: str='pt-br') -> None:
-        if not text or not from_lang:
-            return await respond(interaction, Colour.RED, tx['GENERAL_TRANSLATE_NO_TEXT_OR_LANG'])
+    async def _translate(
+        self, interaction: Interaction,
+        text: str = SlashOption(
+            name=get_localized_string('en-GB', 'GENERAL_TRANSLATE_TEXT_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_TEXT_NAME')
+            },
+            description=get_localized_string('en-GB', 'GENERAL_TRANSLATE_TEXT_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_TEXT_DESC')
+            },
+            max_length=100,
+            required=True
+        ),
+        from_lang: str = SlashOption(
+            name=get_localized_string('en-GB', 'GENERAL_TRANSLATE_FROM_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_FROM_NAME')
+            },
+            description=get_localized_string('en-GB', 'GENERAL_TRANSLATE_FROM_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_FROM_DESC')
+            },
+            required=True,
+            default='en'
+        ),
+        to_lang: str = SlashOption(
+            name=get_localized_string('en-GB', 'GENERAL_TRANSLATE_LANG_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_LANG_NAME')
+            },
+            description=get_localized_string('en-GB', 'GENERAL_TRANSLATE_LANG_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_TRANSLATE_LANG_DESC')
+            },
+            required=False,
+            default='pt-br'
+        )
+    ) -> None:
+        locale = get_interaction_locale(interaction)
+        
+        # I know this can be an "or" expression
+        # But I need to be able to get the incorrect value separately
+        # There's probably a better way to do this but this just works
+        # also it's 4 AM, come on
+        if from_lang not in self.language_codes:
+            return await respond(
+                interaction, Colour.red(),
+                get_localized_string(locale, 'GENERAL_TRANSLATE_INVALID', lang=from_lang)
+            )
+        elif to_lang not in self.language_codes:
+            return await respond(
+                interaction, Colour.red(),
+                get_localized_string(locale, 'GENERAL_TRANSLATE_INVALID', lang=to_lang)
+            )
         
         await interaction.response.defer()
         
         text = translate(text, from_lang, to_lang)
         
-        await respond(interaction, Colour.YELLOW, text, response_type=1)
+        await respond(interaction, Colour.gold(), text, resp_type=ResponseType.FOLLOWUP)
+    
+    # /list-languages
+    @slash_command(
+        name=get_localized_string('en-GB', 'GENERAL_LANGUAGES_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_LANGUAGES_NAME')
+        },
+        description=get_localized_string('en-GB', 'GENERAL_LANGUAGES_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_LANGUAGES_DESC')
+        }
+    )
+    @not_blacklisted()
+    async def _translate_languages(self, interaction: Interaction) -> None:
+        locale = get_interaction_locale(interaction)
+        
+        try:
+            with open(get_os_path(f'assets/docs/languages.md'), 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                lines = '\n'.join(remove_nl_from_string_iterable(lines)).split('\n')
+                
+                chunks = [lines[i:i + 15] for i in range(0, len(lines), 15)]
+                
+                embed = nextcord.Embed(
+                    title=get_localized_string(locale, 'GENERAL_LANGUAGES_TITLE'),
+                    description='\n'.join(chunks[0]),
+                    colour=Colour.gold()
+                )
+                
+                view = Paginator(embed, chunks)
+                await respond(interaction, message=embed, view=view)
+        except FileNotFoundError:
+            await respond(
+                interaction, Colour.red(),
+                get_localized_string(locale, 'GENERAL_LANGUAGE_FILE_NOT_FOUND')
+            )
 
-    @app_commands.command(
-        name=tx['GENERAL_SPECS_NAME'],
-        description=tx['GENERAL_SPECS_DESC'])
-    # @is_owner()
-    # @is_admin()
+    # /specs
+    @slash_command(
+        name=get_localized_string('en-GB', 'GENERAL_SPECS_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_SPECS_NAME')
+        },
+        description=get_localized_string('en-GB', 'GENERAL_SPECS_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'GENERAL_SPECS_DESC')
+        }
+    )
     @not_blacklisted()
     async def _specs(self, interaction: Interaction) -> None:
+        locale = get_interaction_locale(interaction)
+        
         await interaction.response.defer()
-
+        
         specs = get_specs()
-        embed = discord.Embed(title=tx['GENERAL_SPECS_TITLE'], color=Colour.BLUE)
-
-        try:
-            embed.set_thumbnail(url=self.bot.user.avatar.url)
-        except AttributeError:
-            embed.set_thumbnail(url=self.bot.user.default_avatar.url)
-
-        embed.add_field(name=tx['GENERAL_SPECS_SYSTEM'], value=specs['os'], inline=False)
-        embed.add_field(name="CPU", value=specs['cpu'], inline=False)
-        embed.add_field(name="RAM", value=specs['ram'], inline=False)
-        embed.add_field(name="GPU", value=specs['gpu'], inline=False)
-        
-        try:
-            embed.set_footer(text=tx['GENERAL_REQUESTED_BY'].format(
-                user=interaction.user.global_name
-            ), icon_url=interaction.user.avatar.url)
-        except AttributeError:
-            embed.set_footer(text=tx['GENERAL_REQUESTED_BY'].format(
-                user=interaction.user.name
-            ), icon_url=interaction.user.default_avatar.url)
-        
-        await respond(interaction, message=embed, response_type=1)
-    
-    @app_commands.command(
-        name=tx['GENERAL_RININFO_NAME'],
-        description=tx['GENERAL_RININFO_DESC'])
-    # @is_owner()
-    # @is_admin()
-    @not_blacklisted()
-    async def _rininfo(self, interaction: Interaction) -> None:
-        embed = discord.Embed(
-            title=tx['GENERAL_RININFO_EMBED_TITLE'],
-            colour=Colour.YELLOW
+        embed = nextcord.Embed(
+            title=get_localized_string(locale, 'GENERAL_SPECS_TITLE'),
+            colour=Colour.gold()
         )
         
-        try:
-            embed.set_thumbnail(url=self.bot.user.avatar.url)
-        except AttributeError:
-            embed.set_thumbnail(url=self.bot.user.default_avatar.url)
+        embed.set_thumbnail(
+            url=self.bot.user.avatar.url if self.bot.user.avatar else self.bot.user.default_avatar.url
+        )
         
         embed.add_field(
-            name=tx['GENERAL_RININFO_CREATED_IN'][0],
-            value=tx['GENERAL_RININFO_CREATED_IN'][1]
-        )
-        embed.add_field(
-            name=tx['GENERAL_RININFO_VERSION'],
-            value=conf['VERSION']
-        )
-        embed.add_field(
-            name=tx['GENERAL_RININFO_PROGRAMMER'][0],
-            value=tx['GENERAL_RININFO_PROGRAMMER'][1]
-        )
-        embed.add_field(
-            name=tx['GENERAL_RININFO_BUGFINDER'][0],
-            value=tx['GENERAL_RININFO_BUGFINDER'][1]
-        )
-        embed.add_field(
-            name=tx['GENERAL_RININFO_PY_VER'],
-            value=platform.python_version()
+            name=get_localized_string(locale, 'GENERAL_SPECS_SYSTEM'),
+            value=specs.os, inline=False
         )
         
-        try:
-            embed.set_footer(text=tx['GENERAL_REQUESTED_BY'].format(
-                user=interaction.user.global_name
-            ), icon_url=interaction.user.avatar.url)
-        except AttributeError:
-            embed.set_footer(text=tx['GENERAL_REQUESTED_BY'].format(
-                user=interaction.user.name
-            ), icon_url=interaction.user.default_avatar.url)
+        embed.add_field(name=' 🧇  CPU:', value=specs.cpu, inline=False)
+        embed.add_field(name=' 💾  RAM:', value=specs.ram, inline=False)
         
-        await respond(interaction, message=embed)
-    
-    @app_commands.command(
-        name=tx['GENERAL_PING_NAME'],
-        description=tx['GENERAL_PING_DESC'])
-    # @is_owner()
-    # @is_admin()
-    @not_blacklisted()
-    async def _ping(self, interaction: Interaction) -> None:
-        await respond(interaction, Colour.YELLOW, tx['GENERAL_PING_EMBED'].format(
-            latency=round(self.bot.latency * 1000)
-        ), " 🏓  Pong!")
-
-    @app_commands.command(
-        name=tx['GENERAL_PROFILE_NAME'],
-        description=tx['GENERAL_PROFILE_DESC'])
-    # @is_owner()
-    # @is_admin()
-    @not_blacklisted()
-    @app_commands.choices(visibility=[
-        app_commands.Choice(name="Public", value="Public"),
-    ])
-    async def _profile(self, interaction: discord.Interaction, visibility: app_commands.Choice[str] = "Private") -> None:
-        ephemeral = True if visibility == "Private" else False
-
-        avatar_url = interaction.user.avatar.url or interaction.user.default_avatar.url
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(avatar_url) as response:
-                if response.status == 200:
-                    response = await response.read()
-
-        # Initial images to layer on top of
-        image = Image.open("rinbot/assets/images/profile/background.jpg").convert("RGBA")
-        overlay = Image.open("rinbot/assets/images/profile/layer_1.png").convert("RGBA")
-
-        image.paste(overlay, (0, 0), overlay)
-
-        # Avatar image handling
-        avatar = Image.open(BytesIO(response)).convert("RGBA").resize((125, 125), Image.Resampling.LANCZOS)
-
-        width, height = avatar.size
-        x = (width - height) // 2
-        cropped_img = avatar.crop((x, 0, x + height, height))
-        mask = Image.new("L", cropped_img.size)
-        mask_draw = ImageDraw.Draw(mask)
-        width, height = cropped_img.size
-        mask_draw.ellipse((0, 0, width, height), fill = 255)
-
-        cropped_img.putalpha(mask)
-
-        image.paste(cropped_img, (131, 36), cropped_img)
-
-        # Adding currency emoji to image
-        currency_emoji = await self.bot.db.getone(
-            DBTable.GUILDS,
-            DBColumns.guilds.CURRENCY_EMOJI, 
-            condition=f"{DBColumns.guilds.GUILD_ID} = {interaction.guild.id}"
-            )
-
-        emoji_name = unicodedata.name(currency_emoji).lower().replace(" ", "_")
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://emojiapi.dev/api/v1/{emoji_name}/32.png") as response:
-                if response.status == 200:
-                    response = await response.read()
-
-        emoji = Image.open(BytesIO(response)).convert("RGBA")
-
-        image.paste(emoji, (260, 40), emoji)
-
-        # Adding text to the image.
-        picture = ImageDraw.Draw(image)
-
-        fonts_dir = "rinbot/assets/fonts"
-
-        regular = ImageFont.truetype(f"{fonts_dir}/gg-sans-regular.ttf", 15)
-        #medium = ImageFont.truetype(f"{fonts_dir}/gg-sans-medium.ttf", 10)
-        bold = ImageFont.truetype(f"{fonts_dir}/gg-sans-bold.ttf", 20)
-        semi_bold = ImageFont.truetype(f"{fonts_dir}/gg-sans-semibold.ttf", 10)
-
-        currency = await self.bot.db.getone(
-            DBTable.CURRENCY, 
-            DBColumns.currency.WALLET, 
-            condition=f"""{DBColumns.currency.USER_ID} = {interaction.user.id} 
-            AND {DBColumns.currency.GUILD_ID} = {interaction.guild.id}"""
-            )
-
-        picture.text((266, 25), interaction.user.display_name.upper(), fill = (255, 255, 255), anchor = "lm", font = bold)
-        picture.text((287, 54), str(currency), fill = (255, 255, 255), anchor = "lm", font = regular)
-        picture.text((590, 30), str(interaction.user.id), fill = (255, 255, 255), anchor = "rm", font = semi_bold)
-        picture.text((590, 45), interaction.guild.name.upper(), fill = (255, 255, 255), anchor = "rm", font = semi_bold)
-
-        buffer = BytesIO()
-        image.save(buffer, format = "PNG")
-        buffer.seek(0)
-
-        await interaction.response.send_message(file=discord.File(buffer, filename = "image.png"), ephemeral = ephemeral)
+        embed.add_field(
+            name=' 🖼️  GPU:', value=specs.gpu if specs.gpu else get_localized_string(
+                locale, 'GENERAL_SPECS_NO_GPU'
+            ),
+            inline=False
+        )
+        
+        embed.set_footer(
+            text=get_localized_string(
+                locale, 'GENERAL_REQUESTED', user=interaction.user.name),
+            icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url
+        )
+        
+        await respond(interaction, message=embed, resp_type=ResponseType.FOLLOWUP)
 
 # SETUP
-async def setup(bot: RinBot):
-    await bot.add_cog(General(bot))
+def setup(bot: RinBot) -> None:
+    bot.add_cog(General(bot))

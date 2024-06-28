@@ -1,1 +1,1 @@
-["java", "-jar", "lavalink.jar", "application.yml"]
+["java", "-jar", "Lavalink.jar", "application.yml"]

@@ -1,70 +1,146 @@
 """
 RinBot's fortnite command cog
 - Commands:
-    * /fortnite daily-shop `Manually shows the fortnite daily shop on the channel`
-    * /fortnite stats `Shows the player's ingame stats as an image on the channel`
+    * /fortnite daily-shop - Manually shows the fortnite daily shop on the channel
+    * /fortnite stats      - Shows the player's ingame stats through their username
 """
 
-from discord import File, Interaction, app_commands
-from discord.ext.commands import Cog
-from discord.app_commands import Choice
+from nextcord import Interaction, Locale, Colour, File, SlashOption, slash_command
+from nextcord.ext.commands import Cog
 
 from rinbot.fortnite.daily_shop import show_fn_daily_shop
-from rinbot.base import respond
-from rinbot.base import RinBot
-from rinbot.base import Colour
-from rinbot.base import text
 
-# from rinbot.base import is_owner
-# from rinbot.base import is_admin
-from rinbot.base import not_blacklisted
+from rinbot.core import RinBot
+from rinbot.core import ResponseType
+from rinbot.core import get_interaction_locale, get_localized_string
+from rinbot.core import not_blacklisted
+from rinbot.core import respond
 
 class Fortnite(Cog, name='fortnite'):
-    def __init__(self, bot: RinBot):
+    def __init__(self, bot: RinBot) -> None:
         self.bot = bot
-
-    fortnite_group = app_commands.Group(name=text["FORTNITE_GROUP_NAME"], description=text["FORTNITE_GROUP_DESC"])
-
-    @fortnite_group.command(
-        name=text['FORTNITE_DAILY_SHOP_NAME'],
-        description=text['FORTNITE_DAILY_SHOP_DESC'])
+    
+    # /fortnite (root)
+    @slash_command(
+        name=get_localized_string('en-GB', 'FORTNITE_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_NAME')
+        },
+        description=get_localized_string('en-GB', 'FORTNITE_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_DESC')
+        }
+    )
     @not_blacklisted()
-    async def daily_shop(self, interaction: Interaction) -> None:
-        await interaction.response.defer(thinking=True)
+    async def _fortnite(self, interaction: Interaction) -> None:
+        pass
+    
+    # /fortnite daily-shop
+    @_fortnite.subcommand(
+        name=get_localized_string('en-GB', 'FORTNITE_DAILY_SHOP_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_DAILY_SHOP_NAME')
+        },
+        description=get_localized_string('en-GB', 'FORTNITE_DAILY_SHOP_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_DAILY_SHOP_DESC')
+        }
+    )
+    @not_blacklisted()
+    async def _fortnite_daily(self, interaction: Interaction) -> None:
+        await interaction.response.defer(with_message=True)
         await show_fn_daily_shop(self.bot, interaction)
     
-    @fortnite_group.command(
-        name=text['FORTNITE_STATS_NAME'],
-        description=text['FORTNITE_STATS_DESC'])
-    @app_commands.choices(
-        season=[
-            Choice(name=text['YES'], value=1)])
+    # /fortnite stats
+    @_fortnite.subcommand(
+        name=get_localized_string('en-GB', 'FORTNITE_STATS_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_STATS_NAME')
+        },
+        description=get_localized_string('en-GB', 'FORTNITE_STATS_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_STATS_DESC')
+        }
+    )
     @not_blacklisted()
-    async def stats(self, interaction: Interaction, player: str, season: Choice[int]=0) -> None:
-        await interaction.response.defer()
+    async def _fortnite_stats(
+        self, interaction: Interaction,
+        player: str = SlashOption(
+            name=get_localized_string('en-GB', 'FORTNITE_STATS_PLAYER_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_STATS_PLAYER_NAME')
+            },
+            description=get_localized_string('en-GB', 'FORTNITE_STATS_PLAYER_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_STATS_PLAYER_DESC')
+            },
+            required=True,
+            
+            # EPIC's username limits
+            min_length=3,
+            max_length=16
+        ),
+        season: int = SlashOption(
+            name=get_localized_string('en-GB', 'FORTNITE_STATS_SEASON_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_STATS_SEASON_NAME')
+            },
+            description=get_localized_string('en-GB', 'FORTNITE_STATS_SEASON_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'FORTNITE_STATS_SEASON_DESC')
+            },
+            required=False,
+            default=0,
+            choices={
+                'Yes': 1, 'No': 0
+            },
+            choice_localizations={
+                'Yes': {
+                    Locale.pt_BR: 'Sim'
+                },
+                'No': {
+                    Locale.pt_BR: 'Não'
+                }
+            }
+        )
+    ) -> None:
+        await interaction.response.defer(with_message=True)
         
-        data = await self.bot.fortnite_api.get_stats(player, True if season == 0 else False)
+        locale = get_interaction_locale(interaction)
+        data = self.bot.fortnite_api.get_stats(
+            player, True if season == 0 else False
+        )
+        
+        if 'error' in data:
+            errors = {
+                'no_api_key': get_localized_string(locale, 'FORTNITE_STATS_ERROR_401'),
+                404 : get_localized_string(locale, 'FORTNITE_STATS_ERROR_404', name=player)
+            }
+            
+            return await respond(
+                interaction, Colour.red(),
+                errors[data['error']],
+                resp_type=ResponseType.FOLLOWUP,
+                hidden=True
+            )
         
         stats = data[0]
         img_path = data[1]
         
-        if 'error' in stats.keys():
-            errors = {
-                401: text['FORTNITE_STATS_ERROR_401'],
-                404: text['FORTNITE_STATS_ERROR_404'].format(
-                    name=f'`{player}`'
-                )
-            }
-            
-            return await respond(interaction, Colour.RED, errors[stats['status']], response_type=1)
-        
         if not img_path:
-            return await respond(interaction, Colour.RED, text['FORTNITE_STATS_ERORR_IMG'], response_type=1)
+            return await respond(
+                interaction, Colour.red(),
+                get_localized_string(
+                    locale, 'FORTNITE_STATS_ERROR_IMG'
+                ),
+                resp_type=ResponseType.FOLLOWUP,
+                hidden=True
+            )
         
         img = File(img_path, filename=f'{player}.png')
         
         await interaction.followup.send(file=img)
 
 # SETUP
-async def setup(bot: RinBot):
-    await bot.add_cog(Fortnite(bot))
+def setup(bot: RinBot) -> None:
+    bot.add_cog(Fortnite(bot))

@@ -1,43 +1,45 @@
 import os
 import asyncio
-import discord
+import nextcord
 
-from discord import Interaction
+from nextcord import Interaction, Embed, Colour
 
-from rinbot.base.exception_handler import log_exception
-from rinbot.base.get_os_path import get_os_path
-from rinbot.base.db import DBTable
-from rinbot.base.logger import logger
-from rinbot.base.colours import Colour
-from rinbot.base.json_loader import get_lang
+from rinbot.core.loggers import Loggers, log_exception
+from rinbot.core.helpers import get_interaction_locale, get_localized_string
+from rinbot.core.paths import get_os_path
+from rinbot.core.db import DBTable
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from rinbot.base import RinBot
+    from rinbot.core.client import RinBot
 
-text = get_lang()
+logger = Loggers.FORTNITE
 
 async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) -> None:
+    locale = get_interaction_locale(interaction)
+    
     try:
         shop = await client.fortnite_api.get_shop()
 
         img_dir = get_os_path('../instance/cache/fortnite/composites')
         img_files = [f for f in os.listdir(img_dir) if f.endswith('.png')]
-
-        embed = discord.Embed(
-            title=text['FN_DS_SHOP_EMBED_TITLE'].format(
+        
+        embed = Embed(
+            title=get_localized_string(
+                locale, 'FN_DS_SHOP_EMBED_TITLE',
                 time=f'**{shop["date"]}**'
             ),
-            description=text['FN_DS_SHOP_EMBED_DESC'].format(
+            description=get_localized_string(
+                locale, 'FN_DS_SHOP_EMBED_DESC',
                 show=f'**{len(img_files)}**',
                 total=f'**{shop["count"]}**'
             ),
-            color=Colour.PURPLE
+            colour=Colour.purple()
         )
 
-        async def generate_file(img_name) -> discord.File:
+        async def generate_file(img_name) -> nextcord.File:
             path = os.path.join(img_dir, img_name)
-            return discord.File(path, filename=img_name)
+            return nextcord.File(path, filename=img_name)
 
         async def generate_batches(guild) -> list:
             batches = []
@@ -49,20 +51,16 @@ async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) ->
                 batch.extend(results)
                 batches.append(batch)
 
-            logger.info(f"{text['FN_DS_BATCH_GEN']} '{guild}'")
+            logger.info(f'Image batch generated for "{guild}"')
             return batches
 
-        async def send_batches_channel(channel: discord.TextChannel):
+        async def send_batches_channel(channel: nextcord.TextChannel):
             me = channel.guild.get_member(client.user.id) or await channel.guild.fetch_member(client.user.id)
             
             if not me.guild_permissions.send_messages:
-                logger.error(text['FN_DS_BATCH_NO_SEND_MESSAGES_PERM'].format(
-                    guild=channel.guild
-                ))
+                logger.error(f'No message sending permissions for "{channel.guild} (ID: {channel.guild.id})"')
             if not me.guild_permissions.attach_files:
-                logger.error(text['FN_DS_BATCH_NO_ATTACH_FILES_PERM'].format(
-                    guild=channel.guild
-                ))
+                logger.error(f'No attach files permissions for "{channel.guild}" (ID: {channel.guild.id})')
             
             batches = await generate_batches(channel.guild.name)
 
@@ -71,21 +69,15 @@ async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) ->
             for i, batch in enumerate(batches):
                 await channel.send(files=batch)
 
-                logger.info(text['FN_DS_BATCH_SEND'].format(
-                    batch_no=i, ch=channel.id
-                ))
+                logger.info(f'Batch {i} sent to "{channel.name}" (ID: {channel.id})')
 
         async def send_batches_interaction(ctx: Interaction) -> None:
             me = ctx.guild.get_member(client.user.id) or await ctx.guild.fetch_member(client.user.id)
             
             if not me.guild_permissions.send_messages:
-                logger.error(text['FN_DS_BATCH_NO_SEND_MESSAGES_PERM'].format(
-                    guild=ctx.guild
-                ))
+                logger.error(f'No message sending permissions for "{ctx.guild} (ID: {ctx.guild.id})"')
             if not me.guild_permissions.attach_files:
-                logger.error(text['FN_DS_BATCH_NO_ATTACH_FILES_PERM'].format(
-                    guild=ctx.guild
-                ))
+                logger.error(f'No attach files permissions for "{ctx.guild}" (ID: {ctx.guild.id})')
             
             batches = await generate_batches(ctx.guild.name)
 
@@ -94,9 +86,7 @@ async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) ->
             for i, batch in enumerate(batches):
                 await ctx.channel.send(files=batch)
 
-                logger.info(text['FN_DS_BATCH_SEND'].format(
-                    batch_no=i, ch=ctx.channel.id
-                ))
+                logger.info(f'Batch {i} sent to "{ctx.channel.name}" (ID: {ctx.channel.id})')
 
         send_batch_tasks = []
 
@@ -116,6 +106,6 @@ async def show_fn_daily_shop(client: "RinBot", interaction: Interaction=None) ->
         for file in os.listdir(img_dir):
             os.remove(os.path.join(img_dir, file))
         
-        logger.info(text['FN_DS_UPDATED'])
+        logger.info('Daily shop shown')
     except Exception as e:
             log_exception(e)

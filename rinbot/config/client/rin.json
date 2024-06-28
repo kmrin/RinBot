@@ -1,0 +1,60 @@
+{
+    "VERSION": "v6.0.0 'Alvorada' (STABLE)",
+    "STATUS_LANG": "en-GB",
+    "LOG_STATUS_CHANGE": false,
+    "PREFIX": "!",
+    "STATUS_CHANGE_INTERVAL": 10,
+    "TESTING_GUILDS": [],
+
+    "AUTO_KICK_ENABLED": true,
+    "AUTO_KICK_WARN_LIMIT": 6,
+
+    "USE_BUILTIN_LAVALINK_SERVER": true,
+    "LAVALINK_ENDPOINT": "http://localhost:6969",
+    "LAVALINK_PASSWORD": "rinbot",
+
+    "GEMINI_KEY": null,
+
+    "ENABLE_LEWD": true,
+
+    "BOORU_USERNAME": null,
+    "BOORU_KEY": null,
+    "BOORU_IS_GOLD": false,
+
+    "FORTNITE_DAILY_SHOP_ENABLED": true,
+    "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:00:10",
+    "FORTNITE_DAILY_SHOP_LANG": "en-US",
+    "FORTNITE_KEY": null,
+
+    "USE_LOCAL_KOBOLD": false,
+    "USE_LOCAL_STABLEDIFFUSION": false,
+
+    "KOBOLD_ENDPOINT": null,
+    "KOBOLD_CHANNEL": null,
+    "KOBOLD_AI_NAME": "RinBot",
+    "STABLEDIFFUSION_ENDPOINT": null,
+
+    "EXTERNAL_PROGRAMS": [
+        "lavalink"
+    ],
+
+    "INTENTS": {
+        "dm_messages": true,
+        "dm_typing": true,
+        "guild_messages": true,
+        "guild_typing": true,
+        "guilds": true,
+        "integrations": true,
+        "voice_states": true,
+        "webhooks": true,
+        "members": true,
+        "message_content": true,
+        "moderation": true,
+        "presences": true,
+        "messages": true,
+        "typing": true,
+        "bans": true
+    },
+
+    "": ""
+}
