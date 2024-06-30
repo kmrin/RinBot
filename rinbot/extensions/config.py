@@ -411,7 +411,7 @@ class Config(Cog, name='config'):
     async def _toggle_daily_valorant(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         query = await self.bot.db.get(DBTable.DAILY_SHOP_CHANNELS, f'guild_id={interaction.guild.id}')
-        new_state = 1 if query[0][1] == 0 else 0
+        new_state = 1 if query[0][3] == 0 else 0
         
         await self.bot.db.update(
             DBTable.DAILY_SHOP_CHANNELS, {

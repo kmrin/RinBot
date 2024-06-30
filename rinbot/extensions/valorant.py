@@ -395,7 +395,7 @@ class Valorant(Cog, name='valorant'):
         
         if type == 1:
             dsc = await self.bot.db.get(
-                DBTable.WELCOME_CHANNELS,
+                DBTable.DAILY_SHOP_CHANNELS,
                 f'guild_id={interaction.guild.id}'
             )
             
@@ -406,7 +406,7 @@ class Valorant(Cog, name='valorant'):
                         locale, 'VALORANT_CONFIG_GUILD_MISCONFIG'
                     )
                 )
-                
+            
             channel = interaction.guild.get_channel(dsc[0][4]) or await interaction.guild.fetch_channel(dsc[0][4])
             
             if not channel:
