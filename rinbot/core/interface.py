@@ -1,13 +1,14 @@
 import random
 import nextcord
 
-from typing import Union, List, TYPE_CHECKING
+from typing import Union, Awaitable, List, TYPE_CHECKING
 from nextcord import Interaction, Embed, Colour, ButtonStyle, SelectOption
 from nextcord.ui import Button, button
 from nextlink.tracks import Playlist as Pl
 from nextlink import Playable, Queue
 
 from rinbot.music.player import Player
+from rinbot.valorant.db import DATABASE
 
 from .db import DBTable
 from .errors import InteractionTimedOut
@@ -889,3 +890,82 @@ class VideoSearchView(nextcord.ui.View):
         
         self.stop()
         await interaction.response.edit_message(content=None, embed=embed, view=None)
+
+class Valorant2FAView(nextcord.ui.Modal):
+    def __init__(
+        self, interaction: Interaction, locale: str, db: DATABASE, cookie: dict, message: str, label :str
+    ) -> None:
+        self.locale = locale
+        self.interaction = interaction
+        self.db = db
+        self.cookie = cookie
+        self.two2fa.placeholder = message
+        self.two2fa.label = label
+        
+        super().__init__(
+            get_localized_string(
+                locale, 'INTERFACE_VAL_2FA_TITLE'
+            ),
+            timeout=60
+        )
+    
+    two2fa = nextcord.ui.TextInput('', style=nextcord.TextInputStyle.short, max_length=6)
+    
+    async def on_timeout(self) -> None:
+        self.stop()
+        
+        raise InteractionTimedOut(self.interaction)
+            
+    async def callback(self, interaction: Interaction) -> None:
+        code = self.two2fa.value
+        
+        if code:
+            cookie = self.cookie
+            user_id = self.interaction.user.id
+            auth = self.db.auth
+            auth.locale_code = self.interaction.locale
+            
+            async def send_embed(content: str) -> Awaitable[None]:
+                embed = Embed(
+                    description=content, colour=Colour.purple()
+                )
+                
+                if interaction.response.is_done():
+                    return await interaction.followup.send(embed=embed, ephemeral=True)
+                
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+            
+            if not code.isdigit():
+                return await send_embed(
+                    get_localized_string(
+                        self.locale, "INTERFACE_VAL_2FA_INVALID",
+                        code=code
+                    )
+                )
+            
+            auth = await auth.give2facode(code, cookie)
+            
+            if auth['auth'] == 'response':
+                login = await self.db.login(user_id, auth)
+                if login['auth']:
+                    return await send_embed(
+                        get_localized_string(
+                            self.locale, 'INTERFACE_VAL_2FA_SUCCESS',
+                            player=login['player']
+                        )
+                    )
+                    
+                return await send_embed(login['error'])
+            
+            elif auth['auth'] == 'failed':
+                return await send_embed(
+                    get_localized_string(
+                        self.locale, 'INTERFACE_VAL_2FA_WRONG'
+                    )
+                )
+            else:
+                return await send_embed(
+                    get_localized_string(
+                        self.locale, 'INTERFACE_VAL_2FA_ERROR'
+                    )
+                )

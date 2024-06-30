@@ -9,7 +9,7 @@ from .paths import Path, get_os_path
 
 logger = Loggers.JSON
 
-def read(p: str, silent: bool = False) -> Optional[Union[List, Dict, None]]:
+def read(p: str, create: bool = False, silent: bool = False) -> Optional[Union[List, Dict, None]]:
     """
     Loads a JSON file from a path starting at 'rinbot/' and returns it
 
@@ -36,13 +36,18 @@ def read(p: str, silent: bool = False) -> Optional[Union[List, Dict, None]]:
 
         return None
     except FileNotFoundError:
+        if create:
+            logger.warning(f"Tried reading a file at: {p} but the file doesn't exist, creating it.")
+            write(p, {}, silent)
+            return read(p, silent=silent)
+        
         logger.error(f"Tried reading a file at: '{p}' but the file doesn't exist.")
 
         return None
     except Exception as e:
         log_exception(e, logger)
 
-def write(p: str, data: Union[List, Dict, None]) -> bool:
+def write(p: str, data: Union[List, Dict, None], silent: bool = False) -> bool:
     """
     Saves your data to a JSON file or creates a new one, path starts at 'rinbot/'
 
@@ -63,12 +68,14 @@ def write(p: str, data: Union[List, Dict, None]) -> bool:
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         
-        logger.info(f"Wrote file at: '{p}'")
+        if not silent:
+            logger.info(f"Wrote file at: '{p}'")
         
-        file = read(p)
+        file = read(p, silent=silent)
         
         if file == data:
-            logger.info('Writen file validated')
+            if not silent:
+                logger.info('Writen file validated')
             
             return True
         

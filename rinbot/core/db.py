@@ -29,6 +29,7 @@ class DBTable(Enum):
     OWNERS = 'owners'
     STORE = 'store'
     TTS = 'tts'
+    VALORANT = 'valorant'
     WARNS = 'warns'
     WELCOME_CHANNELS = 'welcome_channels'
 
@@ -383,8 +384,23 @@ class DBManager:
         
         logger.info('Checked daily shop')
     
+    async def check_valorant(self, bot: 'RinBot') -> None:
+        logger.info('Checking valorant')
+        
+        for guild in bot.guilds:
+            member_ids = [member.id for member in guild.members]
+            
+            for member_id in member_ids:
+                query = await self.get(DBTable.VALORANT, f'user_id={member_id}', silent=True)
+                
+                if not query:
+                    await self.put(DBTable.VALORANT, {'user_id': member_id}, silent=True)
+        
+        logger.info('Checked valorant')
+    
     async def check_all(self, bot: 'RinBot'):
         await self.check_guilds(bot)
         await self.check_welcome_channels(bot)
         await self.check_economy(bot)
         await self.check_daily_shop(bot)
+        await self.check_valorant(bot)

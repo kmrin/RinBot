@@ -34,7 +34,7 @@ from rinbot.core import Track, Playlist
 from rinbot.core import VideoSearchView, MediaControls, Paginator, QueueEditView, FavouritesEditView, FavouritesPlayView
 from rinbot.core import is_url, ms_to_str
 from rinbot.core import get_localized_string, get_interaction_locale
-from rinbot.core import not_blacklisted
+from rinbot.core import not_blacklisted, is_guild
 from rinbot.core import respond
 
 from rinbot.music.player import Player
@@ -151,6 +151,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _play(
         self, interaction: Interaction,
         track: str = SlashOption(
@@ -330,6 +331,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _queue(self, interaction: Interaction) -> None:
         pass
     
@@ -349,6 +351,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _queue_show(
         self, interaction: Interaction,
         urls: int = SlashOption(
@@ -457,6 +460,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _queue_clear(
         self, interaction: Interaction,
         total: int = SlashOption(
@@ -540,6 +544,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _queue_shuffle(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         
@@ -583,6 +588,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _recommend(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         
@@ -628,6 +634,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _nightcore(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         
@@ -680,6 +687,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _controls(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         
@@ -714,6 +722,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites(self, interaction: Interaction) -> None:
         pass
     
@@ -733,6 +742,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_tracks(self, interaction: Interaction) -> None:
         pass
     
@@ -752,6 +762,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_tracks_show(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         favourites = await self.bot.db.get(
@@ -810,6 +821,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_tracks_add(
         self, interaction: Interaction,
         url: str = SlashOption(
@@ -900,6 +912,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_tracks_edit(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         favourites = await self.bot.db.get(
@@ -933,6 +946,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_tracks_play(self, interaction: Interaction) -> None:
         await interaction.response.defer(with_message=True)
         
@@ -1035,6 +1049,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_pl(self, interaction: Interaction) -> None:
         pass
     
@@ -1054,6 +1069,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_pl_show(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         favourites = await self.bot.db.get(
@@ -1117,6 +1133,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_pl_add(
         self, interaction: Interaction,
         url: str = SlashOption(
@@ -1207,6 +1224,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_pl_edit(self, interaction: Interaction) -> None:
         locale = get_interaction_locale(interaction)
         favourites = await self.bot.db.get(
@@ -1240,6 +1258,7 @@ class Music(Cog, name='music'):
         }
     )
     @not_blacklisted()
+    @is_guild()
     async def _favourites_pl_play(self, interaction: Interaction) -> None:
         await interaction.response.defer(with_message=True)
         

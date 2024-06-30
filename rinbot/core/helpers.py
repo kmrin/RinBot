@@ -11,7 +11,7 @@ import urllib.parse
 from nextlink import Playable
 from nextcord import Interaction, Locale
 from typing import Optional, Union, Dict, List
-from datetime import datetime
+from datetime import datetime, UTC
 from translate import Translator
 
 from .loggers import Loggers
@@ -67,7 +67,7 @@ def get_random_string(lenght: int) -> str:
 def get_expiration_time(expiration_time: datetime, locale: str) -> str:
     text = get_locale(locale)
     
-    current_time = datetime.utcnow()
+    current_time = datetime.now(UTC)
     time_difference = expiration_time - current_time
     hours, remainder = divmod(time_difference.seconds, 3600)
     minutes, _ = divmod(remainder, 60)

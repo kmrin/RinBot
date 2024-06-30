@@ -1,5 +1,5 @@
 {
-    "VERSION": "v6.0.1 'Alvorada' (STABLE)",
+    "VERSION": "v6.1.0 'Alvorada' (STABLE)",
     "STATUS_LANG": "en-GB",
     "LOG_STATUS_CHANGE": false,
     "PREFIX": "!",
@@ -21,10 +21,14 @@
     "BOORU_KEY": null,
     "BOORU_IS_GOLD": false,
 
-    "FORTNITE_DAILY_SHOP_ENABLED": true,
+    "FORTNITE_DAILY_SHOP_ENABLED": false,
     "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:00:10",
-    "FORTNITE_DAILY_SHOP_LANG": "en-US",
+    "FORTNITE_DAILY_SHOP_LANG": "en",
     "FORTNITE_KEY": null,
+
+    "VALORANT_DAILY_SHOP_ENABLED": false,
+    "VALORANT_DAILY_SHOP_UPDATE_TIME": "00:00:05",
+    "VALORANT_DAILY_SHOP_LANG": "en-US",
 
     "USE_LOCAL_KOBOLD": false,
     "USE_LOCAL_STABLEDIFFUSION": false,

@@ -7,6 +7,8 @@ from typing import Dict, TYPE_CHECKING
 
 from rinbot.gemini.conversation import GeminiClient
 from rinbot.fortnite.api import FortniteAPI
+from rinbot.valorant.endpoint import API_ENDPOINT
+from rinbot.valorant.db import DATABASE
 
 from .commands import Core
 from .db import DBTable, DBManager
@@ -53,6 +55,9 @@ class RinBot(Bot):
             self.fn_lang = 'en'
         
         self.fortnite_api = FortniteAPI(self.fn_lang, self.fn_key)
+        
+        self.val_db = DATABASE()
+        self.val_endpoint = API_ENDPOINT()
         
         self.gemini: GeminiClient = None
         if conf['GEMINI_KEY']:

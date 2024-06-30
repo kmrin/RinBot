@@ -26,6 +26,7 @@ class Path:
     programs = get_os_path('programs')
     schema = get_os_path('config/database/schema.sql')
     tracebacks = get_os_path('../instance/logs/tracebacks')
+    valorant = get_os_path('../instance/cache/valorant')
     
     @classmethod
     def list(cls) -> List[str]:

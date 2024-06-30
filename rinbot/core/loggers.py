@@ -86,6 +86,7 @@ class Loggers:
     LOADER: logging.Logger          = logging.getLogger('Loader')
     JSON: logging.Logger            = logging.getLogger('Json')
     RESPONDER: logging.Logger       = logging.getLogger('Responder')
+    VALORANT: logging.Logger        = logging.getLogger('Valorant')
 
 for logger_name, logger in vars(Loggers).items():
     if isinstance(logger, logging.Logger) and logger_name != 'ROOT':

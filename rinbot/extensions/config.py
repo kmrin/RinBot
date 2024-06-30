@@ -3,7 +3,9 @@ RinBot's config command cog
 - Commands:
     * /set welcome-channel             - Configures a custom embed to be shown when a member enters the server
     * /set daily-shop-channel fortnite - Sets in what channel rinbot should show the fortnite daily shop
+    * /set daily-shop-channel valorant - Sets in what channel rinbot should show the valorant daily shop
     * /toggle daily-shop fortnite      - Toggles the fortnite daily shop on and off
+    * /toggle daily-shop valorant      - Toggles the valorant daily shop on and off
 """
 
 import nextcord
@@ -277,6 +279,50 @@ class Config(Cog, name='config'):
             get_localized_string(locale, 'CONFIG_SET_FORTNITE_SET', channel=channel.name)
         )
         
+    # /set daily-shop-channel valorant
+    @_set_daily.subcommand(
+        name=get_localized_string('en-GB', 'CONFIG_SET_VALORANT_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_VALORANT_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_SET_VALORANT_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_VALORANT_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _set_daily_valorant(
+        self, interaction: Interaction,
+        channel: GuildChannel = SlashOption(
+            name=get_localized_string('en-GB', 'CONFIG_SET_CHANNEL_NAME'),
+            name_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_CHANNEL_NAME')
+            },
+            description=get_localized_string('en-GB', 'CONFIG_SET_CHANNEL_DESC'),
+            description_localizations={
+                Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_SET_CHANNEL_DESC')
+            },
+            channel_types=[ChannelType.text],
+            required=True
+        )
+    ) -> None:
+        locale = get_interaction_locale(interaction)
+        
+        data = {
+            'valorant_active': 1,
+            'valorant_channel_id': channel.id
+        }
+        
+        await self.bot.db.update(
+            DBTable.DAILY_SHOP_CHANNELS, data, f'guild_id={interaction.guild.id}'
+        )
+        
+        await respond(
+            interaction, Colour.green(),
+            get_localized_string(locale, 'CONFIG_SET_VALORANT_SET', channel=channel.name)
+        )
 
     # /toggle
     @slash_command(
@@ -342,6 +388,42 @@ class Config(Cog, name='config'):
             interaction, Colour.green(),
             get_localized_string(
                 locale, 'CONFIG_TOGGLE_FORTNITE_TOGGLED',
+                state = get_localized_string(locale, 'ON')
+                        if new_state == 1 else 
+                        get_localized_string(locale, 'OFF')
+            )
+        )
+    
+    # /toggle daily-shop valorant
+    @_toggle_daily.subcommand(
+        name=get_localized_string('en-GB', 'CONFIG_TOGGLE_VALORANT_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_VALORANT_NAME')
+        },
+        description=get_localized_string('en-GB', 'CONFIG_TOGGLE_VALORANT_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'CONFIG_TOGGLE_VALORANT_DESC')
+        }
+    )
+    @is_guild()
+    @is_admin()
+    @not_blacklisted()
+    async def _toggle_daily_valorant(self, interaction: Interaction) -> None:
+        locale = get_interaction_locale(interaction)
+        query = await self.bot.db.get(DBTable.DAILY_SHOP_CHANNELS, f'guild_id={interaction.guild.id}')
+        new_state = 1 if query[0][1] == 0 else 0
+        
+        await self.bot.db.update(
+            DBTable.DAILY_SHOP_CHANNELS, {
+                'valorant_active': new_state
+            },
+            f'guild_id={interaction.guild.id}'
+        )
+        
+        await respond(
+            interaction, Colour.green(),
+            get_localized_string(
+                locale, 'CONFIG_TOGGLE_VALORANT_TOGGLED',
                 state = get_localized_string(locale, 'ON')
                         if new_state == 1 else 
                         get_localized_string(locale, 'OFF')
