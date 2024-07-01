@@ -1,5 +1,5 @@
 """
-RinBot v6.0.1 'Alvorada'
+RinBot v6.2.0 'Alvorada'
 development started on 11/06/2024
 made by rin (https://github.com/kmrin, km.rin on https://discord.gg)
 """

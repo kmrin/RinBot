@@ -54,6 +54,7 @@
 ### Music
  `/play`  Plays tracks from various sources on a voice channel
  `/queue show`  Shows the current song queue
+ `/queue skip`  Shows the current song queue and allows you to choose and skip to a specific track
  `/queue clear`  Clears tracks from the current song queue
  `/queue shuffle`  Shuffles the current queue
  `/recommend`  Toggles the autoplay of recommended tracks on and off

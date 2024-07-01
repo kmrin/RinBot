@@ -16,7 +16,7 @@ from .types import StoreItem
 from .loggers import Loggers
 from .helpers import get_localized_string, get_interaction_locale, is_hex_colour, hex_to_colour, url_to_playable, ms_to_str
 from .responder import respond
-from .types import Track, Playlist, VideoSearchViewMode
+from .types import Track, Playlist, VideoSearchViewMode, QueueEditViewMode
 
 if TYPE_CHECKING:
     from .client import RinBot
@@ -710,9 +710,10 @@ class FavouritesEditView(nextcord.ui.View):
         await interaction.response.edit_message(view=self)
 
 class QueueEditView(nextcord.ui.View):
-    def __init__(self, locale: str, player: Player) -> None:
+    def __init__(self, locale: str, player: Player, mode: QueueEditViewMode) -> None:
         super().__init__(timeout=60)
         
+        self.mode = mode
         self.locale = locale
         self.player = player
         self.current_page = 0
@@ -724,7 +725,7 @@ class QueueEditView(nextcord.ui.View):
         self.next_button.callback = self.callback_next
         
         self.select = self.create_select()
-        self.select.callback = self.callback_select
+        self.select.callback = self.callback_select if mode.value == 0 else self.callback_select_skip
         
         self.add_item(self.select)
         if len(self.queue_parts) > 1:
@@ -753,11 +754,11 @@ class QueueEditView(nextcord.ui.View):
         
         return nextcord.ui.Select(
             placeholder=get_localized_string(
-                self.locale, 'INTERFACE_QUEUE_EDIT_PLACEHOLDER'
+                self.locale, 'INTERFACE_QUEUE_EDIT_PLACEHOLDER' if self.mode.value == 0 else 'INTERFACE_QUEUE_EDIT_SKIP_PLACEHOLDER'
             ),
             options=options,
             min_values=1,
-            max_values=len(options)
+            max_values=len(options) if self.mode.value == 0 else 1
         )
     
     def update_buttons(self) -> None:
@@ -770,7 +771,7 @@ class QueueEditView(nextcord.ui.View):
                 label=track.title, value=str(i),
                 description=get_localized_string(
                     self.locale, 'INTERFACE_VIDEO_SEARCH_TRACK_DESC',
-                    uploader=track.author
+                    duration=ms_to_str(track.length), uploader=track.author
                 )
             )
             for i, track in enumerate(self.queue_parts[self.current_page])
@@ -789,6 +790,26 @@ class QueueEditView(nextcord.ui.View):
         embed = Embed(
             description=get_localized_string(
                 self.locale, 'INTERFACE_QUEUE_EDIT_REMOVED'
+            ),
+            colour=Colour.green()
+        )
+        
+        self.stop()
+        await interaction.response.edit_message(embed=embed, view=None)
+    
+    async def callback_select_skip(self, interaction: Interaction) -> None:
+        index = int(self.select.values[0])
+        selected_track = self.queue_parts[self.current_page][index]
+        to_remove = self.player.queue[:self.player.queue.index(selected_track)]
+        
+        for track in to_remove:
+            self.player.queue.remove(track)
+        
+        await self.player.skip(force=True)
+        
+        embed = Embed(
+            description=get_localized_string(
+                self.locale, 'INTERFACE_QUEUE_EDIT_SKIP_SKIPPED'
             ),
             colour=Colour.green()
         )

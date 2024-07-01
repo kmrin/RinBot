@@ -53,6 +53,7 @@
 ### Music
  `/tocar`  Toca músicas por URLs ou buscas
  `/fila mostrar`  Mostra a fila atual
+ `/fila pular`  Mostra a fila atual e permite que você pule para uma música específica
  `/fila limpar`  Limpa a fila inteira ou uma ou mais músicas específicas
  `/fila randomizar`  Randomiza a fila atual
  `/recomendar`  Alterna a funcionalidade de adicionar músicas na fila automaticamente

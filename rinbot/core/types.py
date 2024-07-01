@@ -10,6 +10,10 @@ class VideoSearchViewMode(Enum):
     TRACK_MODE = 0
     PLAYLIST_MODE = 1
 
+class QueueEditViewMode(Enum):
+    REMOVE = 0
+    SKIP = 1
+
 @dataclass
 class Track:
     title: str

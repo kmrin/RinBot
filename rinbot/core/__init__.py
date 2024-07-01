@@ -5,7 +5,7 @@ RinBot v6 'Aurora' codebase
 from .command_checks import is_owner, is_admin, is_guild, not_blacklisted
 from .client import RinBot
 from .db import DBTable, DBManager
-from .interface import Paginator, SetWelcomeConfirmation, StoreCreateRoleModal, HeadsOrTails, RockPaperScissorsView, MediaControls, VideoSearchView, QueueEditView, FavouritesEditView, FavouritesPlayView, Valorant2FAView, get_timeout_embed
+from .interface import Paginator, SetWelcomeConfirmation, StoreCreateRoleModal, HeadsOrTails, RockPaperScissorsView, MediaControls, VideoSearchView, QueueEditViewMode, QueueEditView, FavouritesEditView, FavouritesPlayView, Valorant2FAView, get_timeout_embed
 from .errors import RinBotInteractionError, UserNotOwner, UserNotAdmin, UserNotInGuild, UserBlacklisted, InteractionTimedOut
 from .helpers import get_localized_string, get_interaction_locale, remove_nl_from_string_iterable, ms_to_str, is_url, get_expiration_time
 from .helpers import translate, get_specs, is_hex_colour, hex_to_colour, hex_to_int

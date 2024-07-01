@@ -1,11 +1,15 @@
-> 6.0.0:
+* 6.0.0:
     * Initial release.
 
-> 6.0.1:
+* 6.0.1:
     * Fixed an issue where the bot wouldn't respond if the user's language was anything but pt-BR or en-GB / en-US.
 
-> 6.1.0:
+* 6.1.0:
     * Added back valorant daily shop functionality.
     * Modified config file so that the fortnite daily shop language isn't invalid.
     * Modified config file so that the daily shops are disabled by default.
     * Made sure all guild-exclusive commands have the is_guild() check on them.
+
+* 6.2.0:
+    * Added `/queue skip` command.
+    * Fixed incorrect text formatting on the *QueueEditView*.

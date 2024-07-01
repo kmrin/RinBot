@@ -3,6 +3,7 @@ RinBot's music command cog
 - Commands:
     * /play                      - Plays songs through URLs or search queries
     * /queue show                - Shows the current song queue
+    * /queue skip                - Shows the current song queue and allows you to choose and skip to a specific track
     * /queue clear               - Shows the current song queue and allows you to choose and remove tracks from it
     * /queue shuffle             - Shuffles the current song queue
     * /recommend                 - Toggles on and off the auto-filling of the song queue
@@ -27,7 +28,7 @@ from typing import List
 
 from rinbot.core import RinBot
 from rinbot.core import Loggers
-from rinbot.core import VideoSearchViewMode
+from rinbot.core import VideoSearchViewMode, QueueEditViewMode
 from rinbot.core import ResponseType
 from rinbot.core import DBTable
 from rinbot.core import Track, Playlist
@@ -444,6 +445,50 @@ class Music(Cog, name='music'):
         embed.description = message
         await respond(interaction, message=embed)
     
+    # /queue skip
+    @_queue.subcommand(
+        name=get_localized_string('en-GB', 'MUSIC_QUEUE_SKIP_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string(
+                'pt-BR', 'MUSIC_QUEUE_SKIP_NAME'
+            )
+        },
+        description=get_localized_string('en-GB', 'MUSIC_QUEUE_SKIP_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string(
+                'pt-BR', 'MUSIC_QUEUE_SKIP_DESC'
+            )
+        }
+    )
+    @not_blacklisted()
+    @is_guild()
+    async def _queue_skip(self, interaction: Interaction) -> None:
+        locale = get_interaction_locale(interaction)
+        
+        if interaction.guild.id not in self.bot.music_clients:
+            return await respond(
+                interaction, Colour.red(),
+                get_localized_string(
+                    locale, 'MUSIC_NO_PLAYERS'
+                ),
+                hidden=True
+            )
+        
+        player = self.bot.music_clients[interaction.guild.id]
+        queue = player.queue
+        
+        if len(queue) <= 0:
+            return await respond(
+                interaction, Colour.red(),
+                get_localized_string(
+                    locale, 'MUSIC_QUEUE_EMPTY'
+                ),
+                hidden=True
+            )
+        
+        view = QueueEditView(locale, player, QueueEditViewMode.SKIP)
+        await interaction.response.send_message(view=view)
+    
     # /queue clear
     @_queue.subcommand(
         name=get_localized_string('en-GB', 'MUSIC_QUEUE_CLEAR_NAME'),
@@ -525,7 +570,7 @@ class Music(Cog, name='music'):
                 )
             )
         
-        view = QueueEditView(locale, player)
+        view = QueueEditView(locale, player, QueueEditViewMode.REMOVE)
         await interaction.response.send_message(view=view)
     
     # /queue shuffle
