@@ -361,6 +361,8 @@
     "MUSIC_PLAY_PL_NAME": "search-for-playlist",
     "MUSIC_PLAY_PL_DESC": "Search for playlists instead of individual songs",
     "MUSIC_USER_NOT_IN_VOICE": " ❌  You're either not in a voice channel, or I don't have the necessary permissions to see you.",
+    "MUSIC_NO_CHANNEL_PERMS": " ❌  I don't have enough permissions to join your voice channel!\nI need the `connect` and `speak` permissions.",
+    "MUSIC_GET_PLAYER_ERROR": " ❌  Couldn't fetch existing or create new player X(",
     "MUSIC_PLAY_ADDED_FROM_PL": " ✅  Added `{count}` tracks from `{name}`!",
     "MUSIC_PLAY_SEARCH_RESULTS": " 🔍  Search results for `{track}`",
     "MUSIC_PLAY_TIMEOUT": " 🕑  Song selectiong timed out",

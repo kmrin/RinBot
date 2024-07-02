@@ -364,6 +364,8 @@
     "MUSIC_PLAY_PL_NAME": "buscar-por-playlists",
     "MUSIC_PLAY_PL_DESC": "Busca por playlists invés de músicas individuais",
     "MUSIC_USER_NOT_IN_VOICE": " ❌  Ou você não está em um canal de voz, ou eu não tenho permissões para vê-lo(a).",
+    "MUSIC_NO_CHANNEL_PERMS": " ❌  Eu não tenho permissões suficientes para entrar no seu canal de voz!\nEu preciso das permissões `conectar` e `falar`.",
+    "MUSIC_GET_PLAYER_ERROR": " ❌  Algo de errado ao definir ou criar o player X(",
     "MUSIC_PLAY_ADDED_FROM_PL": " ✅  `{count}` músicas de `{name}` adicionadas!",
     "MUSIC_PLAY_SEARCH_RESULTS": " 🔍  Resultados de busca para `{track}`",
     "MUSIC_PLAY_TIMEOUT": " 🕑  O tempo para selecionar os resultados acabou!",

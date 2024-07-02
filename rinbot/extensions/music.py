@@ -33,6 +33,7 @@ from rinbot.core import ResponseType
 from rinbot.core import DBTable
 from rinbot.core import Track, Playlist
 from rinbot.core import VideoSearchView, MediaControls, Paginator, QueueEditView, FavouritesEditView, FavouritesPlayView
+from rinbot.core import log_exception
 from rinbot.core import is_url, ms_to_str
 from rinbot.core import get_localized_string, get_interaction_locale
 from rinbot.core import not_blacklisted, is_guild
@@ -217,17 +218,51 @@ class Music(Cog, name='music'):
                 get_localized_string(
                     locale, 'MUSIC_USER_NOT_IN_VOICE'
                 ),
+                hidden=True,
                 resp_type=ResponseType.FOLLOWUP
             )
         
-        # Get player
+        # Permission check
+        voice_channel = interaction.user.voice.channel
+        permissions = voice_channel.permissions_for(interaction.guild.me)
+        
+        if not permissions.connect and not permissions.speak:
+            return await respond(
+                interaction, Colour.red(),
+                get_localized_string(
+                    locale, 'MUSIC_NO_CHANNEL_PERMS'
+                ),
+                hidden=True,
+                resp_type=ResponseType.FOLLOWUP
+            )
+        
+        """ # Get player
         if guild_id in self.bot.music_clients:
             player = self.bot.music_clients[guild_id]
         else:
             player = await interaction.user.voice.channel.connect(
                 cls=Player(self.bot, locale, interaction.channel)
             )
-            self.bot.music_clients[guild_id] = player
+            self.bot.music_clients[guild_id] = player """
+        
+        # Get player
+        try:
+            player = self.bot.music_clients.get(guild_id)
+            if not player:
+                player = await voice_channel.connect(
+                    cls=Player(self.bot, locale, interaction.channel)
+                )
+                self.bot.music_clients[guild_id] = player
+        except Exception as e:
+            log_exception(e, logger)
+            return await respond(
+                interaction, Colour.red(),
+                get_localized_string(
+                    locale, 'MUSIC_GET_PLAYER_ERROR'
+                ),
+                hidden=True,
+                resp_type=ResponseType.FOLLOWUP
+            )
         
         # If it's a URL
         if is_url(track):
