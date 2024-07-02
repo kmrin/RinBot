@@ -13,3 +13,7 @@
 * 6.2.0:
     * Added `/queue skip` command.
     * Fixed incorrect text formatting on the *QueueEditView*.
+
+* 6.2.1:
+	* Added permission check for voice channels on the /play command.
+	* Modified way of fetching player.
