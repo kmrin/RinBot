@@ -36,12 +36,12 @@ class TaskHandler:
     @tasks.loop(minutes=int(conf['STATUS_CHANGE_INTERVAL']))
     async def _status_loop(self) -> None:
         def _get_lang() -> None:
-            txt = read(get_os_path(f'{Path.locale}/en-GB.json'))
+            txt = read(get_os_path(f'{Path.locale}/en-GB.json'), silent=True)
             if not txt:
                 logger.error('huh? what?')
         
         status_lang = conf['STATUS_LANG']
-        txt = read(get_os_path(f'{Path.locale}/{status_lang}.json'))
+        txt = read(get_os_path(f'{Path.locale}/{status_lang}.json'), silent=True)
         if not txt:
             _get_lang()
         

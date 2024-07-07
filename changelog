@@ -17,3 +17,11 @@
 * 6.2.1:
 	* Added permission check for voice channels on the /play command.
 	* Modified way of fetching player.
+
+* 6.3.0:
+    * Added user count check for voice channels on the /play command.
+    * Fixed a problem where the bot would hang and not respond when given a private/deleted track/playlist link.
+    * Fixed a proglem where the bot would hand and not respond when no search results for a song query where found.
+    * The skip command now adds the skipped tracks to the player's history, so you can go back to them if you wish.
+    * Valorant daily shop now correctly pings the user.
+    * Finished Kobold integration.

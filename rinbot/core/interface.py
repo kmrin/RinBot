@@ -801,9 +801,13 @@ class QueueEditView(nextcord.ui.View):
         index = int(self.select.values[0])
         selected_track = self.queue_parts[self.current_page][index]
         to_remove = self.player.queue[:self.player.queue.index(selected_track)]
+        to_remove.reverse()
         
         for track in to_remove:
             self.player.queue.remove(track)
+            self.player.history.insert(-1, track)
+        
+        self.player.performed_skip = True
         
         await self.player.skip(force=True)
         

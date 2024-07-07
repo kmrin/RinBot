@@ -119,7 +119,11 @@ class Music(Cog, name='music'):
         await player.last_message.edit(embed=new_embed, view=None)
         
         if not player.from_previous_interaction:
-            player.history.append(payload.track)
+            if player.performed_skip:
+                player.history.insert(0, payload.track)
+                player.performed_skip = False
+            else:
+                player.history.append(payload.track)
         
         player.from_previous_interaction = False
         
@@ -236,6 +240,18 @@ class Music(Cog, name='music'):
                 resp_type=ResponseType.FOLLOWUP
             )
         
+        # Make sure there is space for me in there
+        if voice_channel.user_limit != 0:
+            if len(voice_channel.members) >= voice_channel.user_limit:
+                return await respond(
+                    interaction, Colour.red(),
+                    get_localized_string(
+                        locale, 'MUSIC_CHANNEL_FULL'
+                    ),
+                    hidden=True,
+                    resp_type=ResponseType.FOLLOWUP
+                )
+        
         """ # Get player
         if guild_id in self.bot.music_clients:
             player = self.bot.music_clients[guild_id]
@@ -281,8 +297,17 @@ class Music(Cog, name='music'):
                 )
             
             else:
-                if results:
-                    playables.append(results[0])
+                if not results:
+                    return await respond(
+                        interaction, Colour.red(),
+                        get_localized_string(
+                            locale, 'MUSIC_NO_RESULTS_FROM_URL'
+                        ),
+                        hidden=True,
+                        resp_type=ResponseType.FOLLOWUP
+                    )
+                
+                playables.append(results[0])
         
         # If it's a search query
         else:
@@ -325,7 +350,7 @@ class Music(Cog, name='music'):
                     colour=Colour.yellow()
                 )
                 
-                return await interaction.edit_original_message(embed=embed, view=None)
+                return await interaction.edit_original_message(content=None, embed=embed, view=None)
 
             
             for result in view.user_choices:

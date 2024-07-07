@@ -436,8 +436,10 @@
     "MUSIC_INVALID_URL": " ❌  The URL provided is invalid.",
     "MUSIC_LINK_IS_PLAYLIST": " ❌  The URL provided is for a playlist, not a individual track.",
     "MUSIC_LINK_IS_NOT_PLAYLIST": " ❌  The URL provided is not a playlist URL.",
-    "MUSIC_NO_RESULTS_FROM_URL": " ❌  Couldn't get any data from the provided URL.",
+    "MUSIC_NO_RESULTS_FROM_URL": " ❌  Couldn't get any data from the provided URL.\nThe track or playlist could've been privated or deleted.",
     "MUSIC_FAV_CHOOSE": " ⭐  Pick a favourite",
+    "MUSIC_CHANNEL_FULL": " ❌  The music channel is full, I can't join you!",
+    "MUSIC_SEARCH_NO_RESULTS": " ❌  No results for `{search}`",
 
     "BOORU_ROOT_NAME": "booru",
     "BOORU_ROOT_DESC": "Danbooru commands",
@@ -481,7 +483,7 @@
 
     "VALORANT_PROVIDE_BOTH": " ❌  Please provide both a username and password.",
     "VALORANT_NO_LOGIN": " ❌  No login for this user",
-    "VALORANT_USER_STORE": "**{player}'s daily shop!**\nExpires in: `{time}`",
+    "VALORANT_USER_STORE": "**{player}'s** daily shop!\nExpires in: `{time}`",
     "VALORANT_NAME": "valorant",
     "VALORANT_DESC": "Valorant commands",
     "VALORANT_LOGIN_NAME": "login",
@@ -514,6 +516,8 @@
     "VALORANT_CONFIG_GUILD_MISCONFIG_NO_CHANNEL": " ❌  Couldn't fetch the daily shop channel from this server, it probably got deleted. Use the DMs option.",
     "VALORANT_CONFIG_SET": " ✅  Valorant daily shop settings updated!",
     "VALORANT_DS_PRIVATE": " ⚠️  You are receiving this in your DMs because the server you configured disabled the functionality.",
+    "VALORANT_DS_CHANNEL": " ✌️  Hey, {player}!",
+    "VALORANT_LOGIN_2FA_NOT_SUPPORTED": " ❌  Sorry, but at the moment 2FA is not supported due to development issues.\nPlease wait for a future version of RinBot.",
 
     "": ""
 }

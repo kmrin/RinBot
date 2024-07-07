@@ -70,6 +70,7 @@ root_logger.addHandler(file_handler)
 
 class Loggers:
     ROOT: logging.Logger            = root_logger
+    AI: logging.Logger              = logging.getLogger('AI')
     COMMAND_CHECKS: logging.Logger  = logging.getLogger('Command Checks')
     CLIENT: logging.Logger          = logging.getLogger('Client')
     COMMANDS: logging.Logger        = logging.getLogger('Commands')

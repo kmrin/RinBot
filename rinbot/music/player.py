@@ -24,6 +24,7 @@ class Player(nextlink.Player):
         self.last_message: nextcord.Message = None
         self.playable_before_prev: Playable = None
         self.from_previous_interaction: bool = False
+        self.performed_skip: bool = False
     
     async def play_playable(self, playable: nextlink.Playable) -> None:
         await self.play(playable, replace=True, filters=self.filters)

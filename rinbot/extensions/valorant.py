@@ -77,6 +77,7 @@ class Valorant(Cog, name='valorant'):
     def __get_store_embeds(cls, player: str, offer: Dict, locale: str) -> List[Embed]:
         data = GetFormat.offer_format(offer, locale)
         
+        player = player.split('#')[0]
         duration = data.pop('duration')
         expires = get_expiration_time(datetime.now(UTC) + timedelta(seconds=duration), locale)
         description = get_localized_string(
@@ -177,7 +178,7 @@ class Valorant(Cog, name='valorant'):
             )
         
         elif authenticate['auth'] == '2fa':
-            cookies = authenticate['cookie']
+            """ cookies = authenticate['cookie']
             message = authenticate['message']
             label = authenticate['label']
             
@@ -185,7 +186,16 @@ class Valorant(Cog, name='valorant'):
                 interaction, locale, self.bot.val_db, cookies, message, label
             )
             
-            await interaction.response.send_modal(modal)
+            await interaction.response.send_modal(modal) """
+            
+            await respond(
+                interaction, Colour.red(),
+                get_localized_string(
+                    locale, 'VALORANT_LOGIN_2FA_NOT_SUPPORTED'
+                ),
+                hidden=True,
+                resp_type=ResponseType.FOLLOWUP
+            )
 
     # /valorant logout
     @_valorant.subcommand(

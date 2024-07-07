@@ -26,6 +26,7 @@ def _embed(skin: Dict) -> Embed:
     return embed
 
 def _gen_store_embeds(player: str, offer: Dict) -> List[Embed]:
+    player = player.split('#')[0]
     data = GetFormat.offer_format(offer, conf['VALORANT_DAILY_SHOP_LANG'])
     duration = data.pop('duration')
     expires = get_expiration_time(datetime.now(UTC) + timedelta(seconds=duration), conf['VALORANT_DAILY_SHOP_LANG'])

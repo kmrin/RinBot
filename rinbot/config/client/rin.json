@@ -1,5 +1,5 @@
 {
-    "VERSION": "v6.2.1 'Alvorada' (STABLE)",
+    "VERSION": "v6.3.0 'Alvorada' (STABLE)",
     "STATUS_LANG": "en-GB",
     "LOG_STATUS_CHANGE": false,
     "PREFIX": "!",
@@ -23,7 +23,7 @@
 
     "FORTNITE_DAILY_SHOP_ENABLED": false,
     "FORTNITE_DAILY_SHOP_UPDATE_TIME": "00:00:10",
-    "FORTNITE_DAILY_SHOP_LANG": "en",
+    "FORTNITE_DAILY_SHOP_LANG": "en-US",
     "FORTNITE_KEY": null,
 
     "VALORANT_DAILY_SHOP_ENABLED": false,
