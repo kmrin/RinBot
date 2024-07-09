@@ -57,7 +57,7 @@ class Valorant(Cog, name='valorant'):
                 return endpoint
             else:
                 await respond(
-                    interaction, Colour.red,
+                    interaction, Colour.red(),
                     get_localized_string(
                         locale_code, 'VALORANT_NO_LOGIN'
                     )
