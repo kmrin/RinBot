@@ -17,6 +17,7 @@ def get_os_path(p: str) -> str:
 
 class Path:
     # Paths
+    assets = get_os_path('assets/')
     config = get_os_path('config/client/rin.json')
     database = get_os_path('../instance/database/sqlite.db')
     extensions = get_os_path('extensions')

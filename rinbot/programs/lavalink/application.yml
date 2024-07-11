@@ -17,6 +17,7 @@ plugins:
     clients:
       - MUSIC
       - ANDROID
+      - TVHTML5EMBEDDED
       - WEB
 
     # You can configure individual clients with the following.
@@ -37,6 +38,7 @@ plugins:
       playlistLoading: false # Disables loading of playlists and mixes for this client.
       videoLoading: false # Disables loading of videos for this client (playback is still allowed).
       searching: false # Disables the ability to search for videos for this client.
+  
   lavasrc:
     providers: # Custom providers for track loading. This is the default
       # - "dzisrc:%ISRC%" # Deezer ISRC provider
@@ -57,8 +59,8 @@ plugins:
       youtube: false # Enable YouTube lyrics source
       yandexmusic: false # Enable Yandex Music lyrics source
     spotify:
-      clientId: ""
-      clientSecret: ""
+      clientId: "11f72108efb1461abfe18793cee86eef"
+      clientSecret: "afdf0bf9d7d84091833f57163acd5cae"
       # spDc: "your sp dc cookie" # the sp dc cookie used for accessing the spotify lyrics api
       countryCode: "US" # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
       playlistLoadLimit: 6 # The number of pages at 100 tracks each
@@ -90,6 +92,7 @@ plugins:
       audioFormat: "mp3" # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
     youtube:
       countryCode: "US" # the country code you want to use for searching lyrics via ISRC. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+
 lavalink:
   plugins:
 #    - dependency: "com.github.example:example-plugin:1.0.0" # required, the coordinates of your plugin

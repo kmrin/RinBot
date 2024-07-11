@@ -23,7 +23,7 @@ import nextcord
 
 from nextcord import Embed
 from nextcord.ext.commands import Cog
-from nextcord import Interaction, Colour, Locale, SlashOption, slash_command
+from nextcord import Interaction, File, Colour, Locale, SlashOption, slash_command
 from PIL import Image
 from io import BytesIO
 
@@ -98,6 +98,74 @@ class Fun(Cog, name='fun'):
         
         await interaction.edit_original_message(embed=embed, view=None, content=None)
     
+    # /farofa-pão
+    @slash_command(
+        name=get_localized_string('en-GB', 'FUN_FAROFA_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_FAROFA_NAME')
+        },
+        description=get_localized_string('en-GB', 'FUN_FAROFA_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_FAROFA_DESC')
+        }
+    )
+    @not_blacklisted()
+    async def _farofa(self, interaction: Interaction) -> None:
+        video_path = os.path.join(Path.assets, 'videos', 'farofa.mp4')
+        video_file = File(video_path)
+        await interaction.response.send_message(file=video_file)
+    
+    # /tricky
+    @slash_command(
+        name=get_localized_string('en-GB', 'FUN_TRICKY_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_TRICKY_NAME')
+        },
+        description=get_localized_string('en-GB', 'FUN_TRICKY_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_TRICKY_DESC')
+        }
+    )
+    @not_blacklisted()
+    async def _tricky(self, interaction: Interaction) -> None:
+        video_path = os.path.join(Path.assets, 'videos', 'tricky.mp4')
+        video_file = File(video_path)
+        await interaction.response.send_message(file=video_file)
+
+    # /british
+    @slash_command(
+        name=get_localized_string('en-GB', 'FUN_BRITISH_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_BRITISH_NAME')
+        },
+        description=get_localized_string('en-GB', 'FUN_BRITISH_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_BRITISH_DESC')
+        }
+    )
+    @not_blacklisted()
+    async def _british(self, interaction: Interaction) -> None:
+        video_path = os.path.join(Path.assets, 'videos', 'british.mp4')
+        video_file = File(video_path)
+        await interaction.response.send_message(file=video_file)
+
+    # /brazil
+    @slash_command(
+        name=get_localized_string('en-GB', 'FUN_BRAZIL_NAME'),
+        name_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_BRAZIL_NAME')
+        },
+        description=get_localized_string('en-GB', 'FUN_BRAZIL_DESC'),
+        description_localizations={
+            Locale.pt_BR: get_localized_string('pt-BR', 'FUN_BRAZIL_DESC')
+        }
+    )
+    @not_blacklisted()
+    async def _brazil(self, interaction: Interaction) -> None:
+        video_path = os.path.join(Path.assets, 'videos', 'brazil.mp4')
+        video_file = File(video_path)
+        await interaction.response.send_message(file=video_file)
+
     # /rock-paper-scissors
     @slash_command(
         name=get_localized_string('en-GB', 'FUN_RPS_NAME'),
